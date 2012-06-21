@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python 
 # programmer : zhuxp
 # usage:
 import sys
@@ -7,7 +7,16 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 def show_help():
-    print >>sys.stderr,"plotCausalGraph.py -m matrix"
+    print >>sys.stderr,"\n\nplotCausalGraph.py:  drawing causal graph from LiNGAM output equation matrix B"
+    print >>sys.stderr,"Library Dependence:  networkx , matplotlib\n\n"
+    print >>sys.stderr,"Usage: plotCausalGraph.py -m matrix -t threshold[default:0.5]"
+    print >>sys.stderr,"Options:"
+    print >>sys.stderr,"   --matrix,-m file.mat        B matrix file generated from LiNGAM"
+    print >>sys.stderr,"   --threshold,-t threshold    draw the line if the absolute value of line weight is bigger than threshold"
+    print >>sys.stderr,"Matrix File Example:"
+    print >>sys.stderr,"H3K9me3\t0"
+    print >>sys.stderr,"H3K4me3\t-1\t0"
+    print >>sys.stderr,"H3K4me1\t-0.3\t1\t0"
     exit(0)
 def Main():
     if len(sys.argv)==1: show_help()
