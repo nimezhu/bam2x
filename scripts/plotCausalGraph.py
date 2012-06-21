@@ -59,7 +59,7 @@ def Main():
             col[rank[a[0]]]+=1
         else:
             col[rank[a[0]]]=1
-        pos[a[0]]=(rank[a[0]],col[rank[a[0]]])
+        pos[a[0]]=(rank[a[0]],col[rank[a[0]]]+rank[a[0]]%2*0.5+rank[a[0]]*0.111)
         i+=1
 
 
