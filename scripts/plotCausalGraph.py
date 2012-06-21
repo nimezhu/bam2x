@@ -28,11 +28,14 @@ def Main():
         if o in ("-m","matrix"): M = a
         if o in ("-h","--help"): show_help()
         if o in ("-t","--threshold"): threshold=float(a)
+    if not 'M' in dir():
+        show_help()
     try:
         f=open(M)
     except:
         print >>sys.stderr,"Can't open file",M
         show_help()
+
     max=0
     nodes=[]
     edges=[]
@@ -76,10 +79,10 @@ def Main():
             x=float(x)
             if max<abs(x):max=abs(x)
             if x>threshold:
-                G.add_edge(nodes[i],nodes[j],weight=x)
+                G.add_edge(nodes[i],nodes[j])
                 edges_col.append(x)
             elif x<-threshold:
-                G.add_edge(nodes[i],nodes[j],weight=x)
+                G.add_edge(nodes[i],nodes[j])
                 edges_col.append(x)
         j+=1
 
