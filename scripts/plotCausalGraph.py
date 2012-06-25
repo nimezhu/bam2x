@@ -69,6 +69,7 @@ def Main():
  
     G=nx.DiGraph()
     G.add_nodes_from(nodes)
+    edges=[]
     for line in lines:
         line=line.strip()
         if line[0]=="#":continue
@@ -78,14 +79,20 @@ def Main():
             x=float(x)
             if max<abs(x):max=abs(x)
             if x>threshold:
-                G.add_edge(nodes[i],nodes[j])
-                edges_col.append(x)
+                edges.append((nodes[i],nodes[j],{'color':'green','weight':x}))
+        #        edges_col.append(x)
             elif x<-threshold:
-                G.add_edge(nodes[i],nodes[j])
-                edges_col.append(x)
+                edges.append((nodes[i],nodes[j],{'color':'red','weight':x}))
+        #        edges_col.append(x)
         j+=1
+    G.add_edges_from(edges)
+    e=G.edges()
+    for i in e:
+        edges_col.append(G[i[0]][i[1]]['weight'])
 
-    nx.draw(G,edge_cmap=plt.get_cmap("RdYlGn"),edge_color=edges_col,pos=pos,node_color="y",edge_vmin=-max,edge_vmax=max,linewidths=0,width=2)
+    nx.draw(G,edge_cmap=plt.get_cmap("RdYlGn"),edgelist=e,edge_color=edges_col,pos=pos,node_color="y",edge_vmin=-max,edge_vmax=max,linewidths=0,width=2)
+    #nx.draw(G,edge_cmap=plt.get_cmap("RdYlGn"),edge_list=edges,edge_color=edges_col,pos=pos,node_color="y",edge_vmin=-max,edge_vmax=max,linewidths=0,width=2)
+    #nx.draw(G,pos=pos,node_color="y",linewidths=0,width=2)
     plt.colorbar()
     plt.show()
 

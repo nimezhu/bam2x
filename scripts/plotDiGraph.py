@@ -1168,13 +1168,14 @@ def Main():
             x=float(x)
             if max<abs(x):max=abs(x)
             if x>threshold:
-                G.add_edge(nodes[i],nodes[j])
-                edges_col.append(x)
+                G.add_edge(nodes[i],nodes[j],{'weight':x})
             elif x<-threshold:
-                G.add_edge(nodes[i],nodes[j])
-                edges_col.append(x)
+                G.add_edge(nodes[i],nodes[j],{'weight':x})
         j+=1
     fig=plt.figure(figsize=(8,10))
+    e=G.edges()
+    for i in e:
+        edges_col.append(G[i[0]][i[1]]['weight'])
 
    # nx2.draw(G,edge_cmap=plt.get_cmap("RdYlGn"),edge_color=edges_col,pos=pos,node_color="y",edge_vmin=-max,edge_vmax=max,linewidth=0,width=2)
     draw(G,edge_cmap=plt.get_cmap("RdYlGn"),edge_color=edges_col,pos=pos,node_color="y",edge_vmin=-max,edge_vmax=max,linewidth=0,width=2)
