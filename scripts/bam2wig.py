@@ -98,13 +98,18 @@ def BamToWig(bamfilename,norm=1000000):
         total_bins_num+=bins
         hChr[chrs[i]]=[0 for row in range(bins)]
     i==0
+    no_map=0
     for s in samfile:
+        if s.tid<0:
+            no_map+=1
+            continue
         pos=s.pos+s.qlen/2
         hChr[chrs[s.tid]][pos/Binsize]+=1
         i+=1
         if i%100000==0: print >>sys.stderr,"\treading ",i,"reads now"
     print "# Bamfile: ",bamfilename
-    print "# Total Reads Number:",i
+    print "# Total Mapped Reads Number:",i
+    print "# Total Not Mapped Reads Number:",no_map
     total_reads_num=i
     l=float(i)/total_bins_num
     if not ifNormalize: 

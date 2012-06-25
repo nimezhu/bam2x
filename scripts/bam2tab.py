@@ -201,16 +201,23 @@ def readIntoTable(i,bamfile):
     a=chromeSizes
     samfile=pysam.Samfile(bamfile,"rb")
     j=0
+    no_map=0
     for sam in samfile:
         j+=1
         if j%1000000==0: 
             print >>sys.stderr," reading ",j,"reads","\r",
+        tid=sam.tid
+        if tid<0: 
+            no_map+=1
+            continue
         chrome=samfile.getrname(sam.tid)
         pos=sam.pos+len(sam.seq)/2
         bin_index=pos2bin(chrome,pos)
  #       print chrome,pos,bin_index
         Table[i][bin_index]+=1
         TotalReadsNumber[i]+=1
+    print >>sys.stderr," Mapping Reads:", TotalReadsNumber[i]
+    print >>sys.stderr," No Mapping Reads:", no_map
 def readBedIntoTable(i,bedfile):
     try:
         f=open(bedfile)
