@@ -50,7 +50,7 @@ def BamToRegionWig(bamfilename,region,norm=1000000):
     l=float(reads_number)/total_bins_num
 
     bins_number=(stop-start)/Binsize
-    if (stop-start)/Binsize!=0: bins_number+=1
+    if (stop-start)%Binsize!=0: bins_number+=1
     bins=[0 for row in range(bins_number)]
 
     sams=samfile.fetch(chr,start,stop)
