@@ -72,7 +72,7 @@ def Main():
         if e > maxcols: maxcols=e
     for e in pos.keys():
         a=pos[e]
-        pos[e]=(a[0],float(a[1]+0.05*rank[e]%3)/float(col[rank[e]]+1)*maxcols)
+        pos[e]=(a[0],float(a[1]+0.05*(rank[e]%3))/float(col[rank[e]]+1)*maxcols)
 
 
 
