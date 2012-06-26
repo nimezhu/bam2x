@@ -12,6 +12,7 @@ def show_help():
     print >>sys.stderr,"Options:"
     print >>sys.stderr,"   --matrix,-m file.mat        B matrix file generated from LiNGAM"
     print >>sys.stderr,"   --threshold,-t threshold    draw the line if the absolute value of line weight is bigger than threshold"
+    print >>sys.stderr,"   --direct,-d                 draw the arrow"
     print >>sys.stderr,"Matrix File Example:"
     print >>sys.stderr,"H3K9me3\t0"
     print >>sys.stderr,"H3K4me3\t-1\t0"
@@ -20,13 +21,15 @@ def show_help():
 def Main():
     if len(sys.argv)==1: show_help()
 
-    opts,restlist = getopt(sys.argv[1:],"m:oht:",\
-                        ["matrix=","threshold=","help"])
+    opts,restlist = getopt(sys.argv[1:],"m:oht:d",\
+                        ["matrix=","threshold=","help","direct"])
     threshold=0.5
+    direct=False
     for o, a in opts:
-        if o in ("-m","matrix"): M = a
+        if o in ("-m","--matrix"): M = a
         if o in ("-h","--help"): show_help()
         if o in ("-t","--threshold"): threshold=float(a)
+        if o in ("-d","--direct"): direct=True
     if not 'M' in dir():
         show_help()
     try:
@@ -45,6 +48,7 @@ def Main():
     rank={}
     lines=f.readlines()
     i=0
+    maxcols=0
     for line in lines:
         line=line.strip()
         if line[0]=="#":continue
@@ -61,8 +65,17 @@ def Main():
             col[rank[a[0]]]+=1
         else:
             col[rank[a[0]]]=1
-        pos[a[0]]=(rank[a[0]],col[rank[a[0]]]+rank[a[0]]%2*0.5+rank[a[0]]*0.111)
+        #pos[a[0]]=(rank[a[0]],col[rank[a[0]]]+rank[a[0]]%2*0.5+rank[a[0]]*0.111)
+        pos[a[0]]=(rank[a[0]],col[rank[a[0]]])
         i+=1
+    for e in col.values():
+        if e > maxcols: maxcols=e
+    for e in pos.keys():
+        a=pos[e]
+        pos[e]=(a[0],float(a[1]+0.05*rank[e]%3)/float(col[rank[e]]+1)*maxcols)
+
+
+
 
 
     j=0
@@ -90,7 +103,7 @@ def Main():
     for i in e:
         edges_col.append(G[i[0]][i[1]]['weight'])
 
-    nx.draw(G,edge_cmap=plt.get_cmap("RdYlGn"),edgelist=e,edge_color=edges_col,pos=pos,node_color="y",edge_vmin=-max,edge_vmax=max,linewidths=0,width=2)
+    nx.draw(G,edge_cmap=plt.get_cmap("RdYlGn"),edgelist=e,edge_color=edges_col,pos=pos,node_color="y",edge_vmin=-max,edge_vmax=max,linewidths=0,width=2,arrows=direct,node_size=100,font_size=10)
     #nx.draw(G,edge_cmap=plt.get_cmap("RdYlGn"),edge_list=edges,edge_color=edges_col,pos=pos,node_color="y",edge_vmin=-max,edge_vmax=max,linewidths=0,width=2)
     #nx.draw(G,pos=pos,node_color="y",linewidths=0,width=2)
     plt.colorbar()
