@@ -66,7 +66,7 @@ def normalize_table():
         total=FileTotalReads[BedList[bed_id]]
         for cid in range(len(Table[bed_id])):
             for bin_id in range(len(Table[bed_id][cid])):
-                Table[bed_id][cid][bin_id]*=10000000*1000/BinSize/total
+                Table[bed_id][cid][bin_id]*=10000000.0*1000/BinSize/total
                      
     
 def print_table():
@@ -75,6 +75,7 @@ def print_table():
         print "# File No.",bid,":",BedList[bid],"\t",FileTotalReads[BedList[bid]]
     for cid in range(len(Table[0])):
         for bin_id in range(len(Table[0][cid])):
+            print genomeSizes['chr'][cid],"\t",bin_id*BinSize,
             for bed_id in range(len(Table)):
                 if Normalize:
                     print "\t%.2f"%Table[bed_id][cid][bin_id],
@@ -91,7 +92,7 @@ def Main():
     BedList=[]
     Normalize=False
     if len(sys.argv)==1: show_help()
-    opts,restlist = getopt(sys.argv[1:],"b:ohgn",\
+    opts,restlist = getopt(sys.argv[1:],"b:ohg:n",\
                         ["bed=","genome=","help","bin=","normalize"])
     for o, a in opts:
         if o in ("-b","--bed"): 
