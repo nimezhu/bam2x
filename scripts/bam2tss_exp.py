@@ -410,7 +410,7 @@ def show_help():
     print >>sys.stderr,"bam2tss_exp.py:  count reads in TSS region (default: -1000,+1000) / Exon region"
     print >>sys.stderr,"Version:"+Version+"\n"
     print >>sys.stderr,"Library dependency: pysam\n\n"
-    print >>sys.stderr,"Usage: bam2tss_exp.py <options> --gene gene.tab file1.bam file2.bam --RNA RNAseq.bam > output.tab"
+    print >>sys.stderr,"Usage: bam2tss_exp.py <options> --gene gene.tab --RNAs RNA.bamlist file1.bam file2.bam  > output.tab"
     print >>sys.stderr,"       bam2tss_exp.py <options> --bed gene.bed --bam bamfiles > output.tab"
     print >>sys.stderr,"Example:  bam2tss_exp.py --gene hg19.refseq.tab -b binsize file.bam > output.tab"
     print >>sys.stderr,"          bam2tss_exp.py --bam bamlistfile --bed ncRNA.bed > output.tab"
