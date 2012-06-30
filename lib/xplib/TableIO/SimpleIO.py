@@ -1,10 +1,9 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 30 Jun 2012 00:59:46
-from xplib.Annotation import GeneBed
+# Last-modified: 30 Jun 2012 00:58:51
 import types
-def GeneBedIterator(handle):
+def SimpleIterator(handle):
     if type(handle)==type("s"):
         try:
             handle=open(handle,"r")
@@ -14,18 +13,24 @@ def GeneBedIterator(handle):
         line=line.strip()
         if line[0]=="#": continue
         x=line.split("\t")
-        b=GeneBed(x)
-        yield b
+        for i,y in enumerate(x):
+            try:
+              x[i]=float(x[i])
+              if x[i]==int(x[i]):
+                  x[i]==int(x[i])
+            except:
+              pass
+        yield x
     return
     
-def GeneBedWriter(handle,bed):
+def SimpleWriter(handle,x):
      if type(handle)==type("s"):
         try:
             handle=open(handle,"a")
         except:
             raise ValueError("Can't open file %s"%handle)
-        handle.write(bed+"\n")
-
-
-    
+        a=[]
+        for i in x:
+            a.append(str(i))
+        handle.write("\t".join(a)+"\n")
 

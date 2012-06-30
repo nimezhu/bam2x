@@ -1,12 +1,19 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 30 Jun 2012 00:14:07
+# Last-modified: 30 Jun 2012 00:49:29
 import BedIO
 import GeneBedIO
+import SimpleIO
 FormatToIterator = { "bed":BedIO.BedIterator,
-                     "genebed":GeneBedIO.GeneBedIterator
+                     "genebed":GeneBedIO.GeneBedIterator,
+                     "simple":SimpleIO.SimpleIterator
                      
+                   }
+FormatToWrite    = {  
+                     "bed":BedIO.BedWriter,
+                     "genebed":GeneBedIO.GeneBedWriter,
+                     "simple":SimpleIO.SimpleWriter
                    }
 def parse(handle,format):
     """
