@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 30 Jun 2012 01:15:52
+# Last-modified: 06-30-2012, 13:47:38 CDT
 import types
 
 def SimpleIterator(handle):
@@ -18,7 +18,7 @@ def SimpleIterator(handle):
             try:
               x[i]=float(x[i])
               if x[i]==int(x[i]):
-                  x[i]==int(x[i])
+                  x[i]=int(x[i])
             except:
               pass
         yield x
