@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 30 Jun 2012 00:59:33
+# Last-modified: 30 Jun 2012 01:15:18
 from xplib.Annotation import Bed
 import types
 def BedIterator(handle):
@@ -18,14 +18,3 @@ def BedIterator(handle):
         yield b
     return
     
-def BedWriter(handle,bed):
-     if type(handle)==type("s"):
-        try:
-            handle=open(handle,"a")
-        except:
-            raise ValueError("Can't open file %s"%handle)
-        handle.write(bed+"\n")
-
-
-    
-

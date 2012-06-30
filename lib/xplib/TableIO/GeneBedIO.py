@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 30 Jun 2012 00:59:46
+# Last-modified: 30 Jun 2012 01:15:45
 from xplib.Annotation import GeneBed
 import types
 def GeneBedIterator(handle):
@@ -18,14 +18,3 @@ def GeneBedIterator(handle):
         yield b
     return
     
-def GeneBedWriter(handle,bed):
-     if type(handle)==type("s"):
-        try:
-            handle=open(handle,"a")
-        except:
-            raise ValueError("Can't open file %s"%handle)
-        handle.write(bed+"\n")
-
-
-    
-

@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 30 Jun 2012 00:58:51
+# Last-modified: 30 Jun 2012 01:15:52
 import types
+
 def SimpleIterator(handle):
     if type(handle)==type("s"):
         try:
@@ -23,14 +24,3 @@ def SimpleIterator(handle):
         yield x
     return
     
-def SimpleWriter(handle,x):
-     if type(handle)==type("s"):
-        try:
-            handle=open(handle,"a")
-        except:
-            raise ValueError("Can't open file %s"%handle)
-        a=[]
-        for i in x:
-            a.append(str(i))
-        handle.write("\t".join(a)+"\n")
-
