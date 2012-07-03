@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-03-2012, 00:43:46 CDT
+# Last-modified: 07-03-2012, 01:13:20 CDT
 import os,sys,argparse,types
 from xplib.Annotation import Bed 
 from xplib import TableIO
@@ -81,6 +81,8 @@ def iterOverlapFeature(bed,data):
         for i in iterOverlapFeature(bed,data):
             print i
     '''
+    if type(bed)==type((1,2,3)) or type(bed)==([1,2,3]):
+        bed=Bed(bed[0:3])  # guess (chrome,start,stop)
     if not data.has_key(bed.chr):
          raise StopIteration 
     D=data[bed.chr]

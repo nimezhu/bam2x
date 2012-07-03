@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-03-2012, 00:35:11 CDT
+# Last-modified: 07-03-2012, 01:35:17 CDT
 import os,sys,argparse
 import pysam
 import xplib.Stats.prob as prob
 from xplib.Annotation.Utils import *
 from ghmm import *
+from xplib import TableIO
 '''
 
 '''
@@ -210,10 +211,10 @@ def ParseArg():
     p.add_argument('--pvalue','-p',type=float,dest='Pvalue',default=1e-05, help="p-value threshold  default: %(default)f")
     p.add_argument('--bin','-b',type=int,dest='Binsize',default=200, help="binsize default: %(default)d")
     p.add_argument('--near','-n',type=int,dest='near',default=5000, help="Promoter less than  %(default)d are counted as Nearby Promoter")
+    p.add_argument('--gene','-g',type=str,dest="genetab",help="Known Gene Tab (Download From UCSC genome browser )")
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
-
     return p.parse_args()
 
 
@@ -223,6 +224,8 @@ def ParseArg():
     
     
 def iterNearPromoter(chrom,start,stop):
+    if not pTable.has_key(chrom):
+        raise StopIteration
     near_start=start-args.near
     near_stop=stop+args.near
     if near_start<0:
@@ -241,6 +244,16 @@ def Main():
     global args,Table,pTable
     near=5000
     args=ParseArg()
+    if args.Output=="stdout":
+        out=sys.stdout
+    else:
+        try:
+          out=open(args.Output,"w")
+        except IOerror:
+          print >>sys.stderr,"can't write to %s",args.Output
+          out=sys.stdout
+    genes=readIntoBinIndex(TableIO.parse(args.genetab,'genebed'))
+    
     ebambin=BamBins(args.eBamfile,args.Binsize)
     ebambin.process(args.Pvalue)
     pbambin=BamBins(args.pBamfile,args.Binsize)
@@ -264,11 +277,20 @@ def Main():
                     minus+=1
                     minus_reads+=p[3]
                 t+=1
-        print "Transcipt_"+str(k),"\t",tab(i),"\tPromoter:[ "+str(t)+","+str(plus_reads)+"|"+str(plus)+">>>>"+str(minus_reads)+"|"+str(minus)+" ]"
+        print >>out,"Transcipt_"+str(k),"\t",tab(i),"\tPromoter:[ "+str(t)+","+str(plus_reads)+"|"+str(plus)+">>>>"+str(minus_reads)+"|"+str(minus)+" ]",
         
+        
+        gene=getOverlapFeatures(Bed([chrom,start,stop]),genes)
+        if len(gene)==0:
+            print >>out,"No_Overlap_Genes"
+        else:
+            print >>out,"Overlap_with_Genes"
+        for g in gene:
+            print >>out,"\t# Gene:",g
         for p in iterNearPromoter(chrom,start,stop):
 
-            print "\t# Promoter:",p
+            print >>out,"\t# Promoter:",p
+
 
     
 if __name__=="__main__":
