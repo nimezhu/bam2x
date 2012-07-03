@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-03-2012, 00:17:24 CDT
-import os,sys,argparse
+# Last-modified: 07-03-2012, 00:43:46 CDT
+import os,sys,argparse,types
 from xplib.Annotation import Bed 
 from xplib import TableIO
 binOffsets=(512+64+8+1,64+8+1,8+1,1,0)
@@ -22,11 +22,15 @@ def readIntoBinIndex(handle):
         data=readIntoBinIndex(bedlist)
     '''
     data={}
+    
     for i in handle:
-        if not data.has_key(i.chr):
-            data[i.chr]=[[] for row in range(4096+512+64+8+1)]
-        bin=binFromRangeStandard(i.start,i.stop)
-        data[i.chr][bin].append(i)
+        a=i
+        if type(i)==type([]) or type(i)==type((1,2,3)):
+            a=Bed(i)
+        if not data.has_key(a.chr):
+            data[a.chr]=[[] for row in range(4096+512+64+8+1)]
+        bin=binFromRangeStandard(a.start,a.stop)
+        data[a.chr][bin].append(i)
     return data
     
 def binFromRangeStandard(start,end):
