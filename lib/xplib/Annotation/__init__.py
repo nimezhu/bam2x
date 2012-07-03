@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 29 Jun 2012 23:46:56
+#Last-modified: 07-03-2012, 00:14:34 CDT
 
 # reader of any column file
-        
+__all__=['Utils','Bed','GeneBed']        
 
 class Bed:
     def __init__(self,x):
@@ -144,19 +144,6 @@ class Bed:
         else:
             rpos=tts-pos
         return rpos
-
-    
-
-
-        
-
-
-
-            
-        
-        
-
-
 
 
 class GeneBed(Bed):
@@ -508,3 +495,4 @@ class GeneBed(Bed):
 
                     
         
+
