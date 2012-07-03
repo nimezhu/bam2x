@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-03-2012, 15:52:31 CDT
+# Last-modified: 07-03-2012, 16:07:03 CDT
 import os,sys,argparse
 import pysam
 import xplib.Stats.prob as prob
@@ -253,7 +253,8 @@ def Main():
           print >>sys.stderr,"can't write to %s",args.Output
           out=sys.stdout
     
-    genes=readIntoBinIndex(TableIO.parse(args.genetab,'genebed'))
+    if args.genetab:
+        genes=readIntoBinIndex(TableIO.parse(args.genetab,'genebed'))
     other_filters=[]
     if args.filters:
         for i in args.filters:
@@ -298,7 +299,9 @@ def Main():
                     minus+=1
                     minus_reads+=p[3]
                 t+=1
-        gene=getOverlapFeatures(Bed([chrom,start,stop]),genes)
+        gene=[]
+        if args.genetab:
+            gene=getOverlapFeatures(Bed([chrom,start,stop]),genes)
         fs=[]
         if len(other_filters)>0:
             for f in other_filters:
