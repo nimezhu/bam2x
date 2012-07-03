@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Jul 2012 17:08:04
+# Last-modified: 07-02-2012, 22:40:50 CDT
 import os,sys,argparse
 import pysam
-import prob
+import xplib.Stats.prob as prob
 from ghmm import *
 '''
 
@@ -159,7 +159,12 @@ class BamBins:
                  yield (self.chrs[i],start*self.binsize,(stop+1)*self.binsize)
     def iterPeaks(self):
         self.peaks=[]
+        print >>sys.stderr,"Reading ",self.bamfilename," HMM Segments"
+        k=0
         for i in self.parse_segment():
+            k+=1
+            if k%10000==0 :
+                print >>sys.stderr,"parsed ",k," segments\r",
             (chr,start,stop)=i
         
             a=self.samfile.fetch(chr,start,stop)
@@ -191,6 +196,8 @@ class BamBins:
 
 
 
+        print >>sys.stderr,"Reading HMM Segments Done!                   " 
+
 
 
 
@@ -203,7 +210,7 @@ class BamBins:
 
 def ParseArg():
     ''' This Function Parse the Argument '''
-    p=argparse.ArgumentParser( description = 'Example: %(prog)s -i file.bam -o file.bed', epilog='Library dependency : pysam')
+    p=argparse.ArgumentParser( description = 'Example: %(prog)s -E H3K36me3.bam -P H3K4me3.bam -o output.tab', epilog='Library dependency : pysam')
     p.add_argument('-v','--version',action='version',version='%(prog)s 0.1')#
 #   p.add_argument('--input','-i',type=str,dest='Bamfile',help="the input alignment bamfile")
     p.add_argument('--elongation','-E',type=str,dest='eBamfile',help="the input alignment bamfile of H3K36me3")
@@ -256,7 +263,7 @@ def iterNearPromoter(chrom,start,stop):
         near_start=0
     for bin in rangeIterOverlapBins(near_start,near_stop):
         for p in pTable[chrom][bin]:
-                if (p[0] < stop and p[1] > start):
+                if p[1] < near_stop and p[2] > near_start: 
                     yield p
 
 def tab(a):
@@ -281,11 +288,38 @@ def Main():
         (chrom,start,stop,reads_num,pvalue,coverage,peak_pos,peak_i)=i
         b=binFromRangeStandard(start,stop)
         pTable[chrom][b].append(i)
+    k=0
     for i in ebambin.iterPeaks():
         (chrom,start,stop,reads_num,pvalue,coverage,peak_pos,peak_i)=i
-        print tab(i) 
+        #print "Transcript:",tab(i)
+        k+=1
+        t=0
+        plus=0
+        plus_reads=0
+        minus=0
+        minus_reads=0  
+        thres=500 # core promoter down 500bp? 
         for p in iterNearPromoter(chrom,start,stop):
-                print "\t",tab(p)
+                #print "\tPromoter: \t",tab(p)
+                if p[1]<start+thres: 
+                    plus+=1
+                    plus_reads+=p[3]
+                if p[2]>stop-thres: 
+                    minus+=1
+                    minus_reads+=p[3]
+                t+=1
+        print "Transcipt_"+str(k),"\t",tab(i),"\tPromoter:[ "+str(t)+","+str(plus_reads)+"|"+str(plus)+">>>>"+str(minus_reads)+"|"+str(minus)+" ]"
+        
+        for p in iterNearPromoter(chrom,start,stop):
+            print "\t# Promoter:",p
+
+            
+
+        
+
+
+
+
 
 
   
