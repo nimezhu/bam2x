@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-03-2012, 16:07:03 CDT
+# Last-modified: 09 Jul 2012 15:21:08
 import os,sys,argparse
 import pysam
 import xplib.Stats.prob as prob
@@ -309,10 +309,10 @@ def Main():
                     fs.append(o)
         if len(gene)==0 and len(fs)==0 and t>0:
             KorN="NV"
+        elif len(gene) > 0 or len(fs) > 0:
+            KorN="KN"
         elif t==0:
             KorN="NP"
-        else:
-            KorN="KN"
         print >>out,KorN,"\t",
         print >>out,"Transcript_"+str(k),"\t",tab(i),
         if t==0:
