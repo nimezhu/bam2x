@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 10 Jul 2012 00:35:22
+# Last-modified: 10 Jul 2012 00:43:36
 import os,sys,argparse
 import pysam
 import xplib.Stats.prob as prob
@@ -251,7 +251,7 @@ def Main():
         s+=reads_num
         peaks.append(i)
     f=float(s)/bambin.mapped*100.0
-    print  >>out,"# Reads in peak:",s,"\t%.2f%"%f
+    print  >>out,"# Reads in peak:",s,"\t%.2f"%f,"%"
     print >>out,"# chrom\tstart\tend\treads_num\tpvalue\tcoverage\tpeak_pos\tpeak_coverage"
     for i in peaks:
         print >>out,tab(i)
