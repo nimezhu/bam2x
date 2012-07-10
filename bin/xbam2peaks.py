@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-09-2012, 15:47:37 CDT
+# Last-modified: 10 Jul 2012 00:23:13
 import os,sys,argparse
 import pysam
 import xplib.Stats.prob as prob
@@ -238,9 +238,9 @@ def Main():
     
     bambin=BamBins(args.Bamfile,args.Binsize)
     bambin.process(args.Pvalue)
-    print >>out,"# Bamfile:",sys.Bamfile
-    print >>out,"# Binsize:",sys.Binsize
-    print >>out,"# Pvalue:",sys.Pvalue
+    print >>out,"# Bamfile:",args.Bamfile
+    print >>out,"# Binsize:",args.Binsize
+    print >>out,"# Pvalue:",args.Pvalue
     print >>out,"# Mapped Reads Nunmber:",bambin.mapped
     print >>out,"# Unmapped Reads Nunmber:",bambin.unmapped
     s=0
