@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 07-03-2012, 00:14:34 CDT
+#Last-modified: 24 Jul 2012 15:33:39
 
 # reader of any column file
-__all__=['Utils','Bed','GeneBed']        
+__all__=['Utils','Bed','GeneBed','TransUnit','Peak']        
 
 class Bed:
     def __init__(self,x):
@@ -496,3 +496,103 @@ class GeneBed(Bed):
                     
         
 
+class Peak(Bed):
+    '''
+    ChIP Seq Peak Class
+    extension Bed Class
+    inner variables: reads_num,pvalue,coverage,peak_pos,peak_coverage
+    '''
+    def __init__(self,x):
+        self.chr=x[0]
+        self.start=int(x[1])
+        self.end=int(x[2])
+        self.stop=int(x[2])   
+        self.reads_num=int(x[3])
+        self.pvalue=float(x[4])
+        self.coverage=float(x[5])
+        self.peak_pos=int(x[6])
+        self.peak_coverage=int(x[7])
+    def __str__(self):
+        s="("
+        s+=self.chr+","
+        s+=str(self.start)+","
+        s+=str(self.end)+","
+        s+=str(self.reads_num)+","
+        s+=str(self.pvalue)+","
+        s+=str(self.coverage)+","
+        s+=str(self.peak_pos)+","
+        s+=str(self.peak_coverage)+")"
+        return s
+class TransUnit(Bed):
+    def __init__(self,x=None):
+        self.genes=[]
+        self.feats=[]
+        self.promoters=[]
+        self.promoterInfo=""
+        if x:
+            if type(x)==type("s"):
+                x=x.split("\t")
+            self.processHeaer(x)
+    def processHeader(self,x):
+        if x[0]=="NV " or x[0]=="NP " or x[0]=="KN " or x[0]=="NV" or x[0]=="NP" or x[0]=="KN":
+            self.group=x[0]
+            x=x[1:]
+        self.name=x[0]
+        self.chr=x[1]
+        self.start=int(x[2])
+        self.end=int(x[3])
+        self.stop=int(x[3])   
+        self.reads_num=int(x[4])
+        self.pvalue=float(x[5])
+        self.coverage=float(x[6])
+        self.peak_pos=int(x[7])
+        self.peak_coverage=int(x[8])
+        self.guess_strand=x[9]
+    def __str__(self):
+        s=""
+        s+=self.header()+"\n"
+        s+=self.group+"\t"+"Promoter Info:\t"+self.promoterInfo+"\n"
+        for g in self.genes:
+            s+=self._str_gene(g)+"\n"
+        for f in self.feats:
+            s+=self._str_feat(f)+"\n"
+        for p in self.promoters:
+            s+=self._str_promoter(p)+"\n"
+        s+="//\n"
+        return s
+    def _str_gene(self,g):
+        return self.group+"\t"+"OverlapGene:\t"+str(g)
+    def _str_feat(self,f):
+        return self.group+"\tOverlapFeat:\t"+str(f)
+    def _str_promoter(self,p):
+        return self.group+"\tNearbyPromoter:\t"+str(p)
+
+
+    def header(self):
+        s=""
+        s+=self.group+"\t"
+        s+=self.name+"\t"
+        s+=self.chr+"\t"
+        s+=str(self.start)+"\t"
+        s+=str(self.end)+"\t"
+        s+=str(self.reads_num)+"\t"
+        s+=str(self.pvalue)+"\t"
+        s+=str(self.coverage)+"\t"
+        s+=str(self.peak_pos)+"\t"
+        s+=str(self.peak_coverage)+"\t"
+        s+=self.guess_strand
+        return s
+    def append_overlap_gene(self,gene):
+        self.genes.append(gene)
+    def append_overlap_feat(self,feat):
+        self.feats.append(feat)
+    def append_promoter(self,promoter):
+        if type(promoter)==type("s"):
+            s,strand=promoter.split(")")
+            s=s.replace("(","")
+            s=s.replace(",","\t")
+            x=s.split("\t")
+            self.promoters.append(Peak(x))
+        elif type(promoter)==type([1,2,3]):
+            self.promoters.append(Peak(promoter))
+        

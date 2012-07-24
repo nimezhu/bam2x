@@ -1,13 +1,15 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-02-2012, 23:23:12 CDT
+# Last-modified: 24 Jul 2012 14:56:22
 import BedIO
 import GeneBedIO
 import SimpleIO
+import TransIO
 FormatToIterator = { "bed":BedIO.BedIterator,
                      "genebed":GeneBedIO.GeneBedIterator,
-                     "simple":SimpleIO.SimpleIterator
+                     "simple":SimpleIO.SimpleIterator,
+                     "transunit":TransIO.TransUnitIterator
                      
                    }
 #FormatToWrite    = {  
