@@ -1,30 +1,13 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 24 Jul 2012 16:13:41
+# Last-modified: 24 Jul 2012 16:09:55
 
 import os,sys,argparse
 import pysam
 import random
 from math import log,sqrt
 
-def ParseArg():
-    ''' This Function Parse the Argument '''
-    p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : pysam')
-    p.add_argument('-v','--version',action='version',version='%(prog)s 0.1')
-    p.add_argument('--bamA',nargs='*',dest="bamA",action="store",default=[],help="add bam to list A")
-    p.add_argument('--bamB',nargs='*',dest="bamB",action="store",default=[],help="add bam to list B")
-    p.add_argument('--bamlistA',dest="bamlistA",action="store",default=None,type=str,help="add filename in file to list A")
-    p.add_argument('--bamlistB',dest="bamlistB",action="store",default=None,type=str,help="add filename in file to list B")
-    p.add_argument('--bin',dest="binsize",action="store",default=1000000,help="count binsize bp each time")
-    p.add_argument('-o','--out',dest="out",type=str,action="store",default="stdout",help="output file")
-    p.add_argument('--min_coverage',dest="min_coverage",type=int,action="store",default=10,help="not count the chi-square if either bam coverage is less than this value [%(default)i]")
-    p.add_argument('--min_minor_snp_cov',dest="min_snp",type=int,action="store",default=5,help="not count the chi-square if minor snp coverage (add coverage in two bam) is less than this value [%(default)i]")
-   
-    if len(sys.argv)==1:
-        print >>sys.stderr,p.print_help()
-        exit(0)
-    return p.parse_args()
 
 hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
@@ -44,10 +27,10 @@ def diff(pos,i0,i1):
     standard:
         1. coverage    >  10 (optional)
         2. two nucleid acid   
-        3. LogRatio
+        3. OddsRatio
     return :
         1. not a SNP
-        2. logRatio
+        2. OddsRatio
     '''
     a0=segments[i0][pos]
     a1=segments[i1][pos]
@@ -79,29 +62,18 @@ def diff(pos,i0,i1):
 
 
     
-def Main():
-    global args,chrom,offset,segments,binsize,out
-    
-    
-    args=ParseArg()
-    if args.out=="stdout":
-        out=sys.stdout
-    else:
-        try:
-            out=open(args.out,"w")
-        except IOError:
-            print >>sys.stderr,"can't open file",args.out,"to write, using stdout instead"
-            out=sys.stdout
-    binsize=args.binsize
+def bedToOddsRatio(bed,bamlistA,bamlistB):
     segments=[]
     for i in range(2):
-        segments.append([[0,0,0,0] for row in range(binsize)])
+        segments.append([[0,0,0,0] for row in range(bed.length)])
     Afiles=[]
     Bfiles=[]
-    for bamB in args.bamB:
-        Bfiles.append(pysam.Samfile(bamB,"rb"))
-    for bamA in args.bamA:
-        Afiles.append(pysam.Samfile(bamA,"rb"))
+    if type(bamB)==type"s":
+    elif type(bamB)==type([1,2]):
+    for bamB in bamlistB:
+        Afiles.append(pysam.Samfile(bamB,"rb"))
+    for bamA in bamlistA:
+        Bfiles.append(pysam.Samfile(bamA,"rb"))
     if args.bamlistA:
         f=open(args.bamlistA,"r")
         for line in f:
