@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 18 Jul 2012 21:09:26
+# Last-modified: 26 Jul 2012 12:28:15
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy
 import os,sys,argparse
@@ -51,7 +51,7 @@ def parseIterRegion(fn):
         t=x2_matrix
 
         CV=int(t[0])+int(t[1])+int(t[2])+int(t[3])
-        MR=float(t[1])+float(t[3])/CV
+        MR=(float(t[1])+float(t[3]))/CV
         if(CV>args.reads or MR<0.05):continue
 
         # end of filter
