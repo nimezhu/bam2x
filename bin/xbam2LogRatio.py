@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12 Jul 2012 11:00:34
+# Last-modified: 24 Jul 2012 16:26:21
 
 import os,sys,argparse
 import pysam
@@ -115,7 +115,7 @@ def Main():
         hChrToLength[x]=lengths[i]
 
     print >>out,"# Compare The SNP preferences between files:"
-    for f in args.bams[0:1]:
+    for f in args.bams[0:2]:
         print >>out,"#",f
     print >>out,"# Parameters:"
     print >>out,"# Minimal Coverage:          ",args.min_coverage

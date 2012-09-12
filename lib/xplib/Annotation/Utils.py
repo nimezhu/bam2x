@@ -1,15 +1,41 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-03-2012, 01:13:20 CDT
+# Last-modified: 10 Aug 2012 14:42:28
 import os,sys,argparse,types
 from xplib.Annotation import Bed 
 from xplib import TableIO
 binOffsets=(512+64+8+1,64+8+1,8+1,1,0)
 binFirstShift=17
 binNextShift=3
-def iterBinIndex(data):
+def appendIntoBinIndex(data,bed):
+    a=bed
+    bin=binFromRangeStandard(a.start,a.stop)
+    if not data.has_key(a.chr):
+        data[a.chr]=[[] for row in range(4096+512+64+8+1)]
+    data[a.chr][bin].append(a)
+
+def deleteFromBinIndex(data,bed):
+    a=bed
+    bin=binFromRangeStandard(a.start,a.stop)
+    for i,x in enumerate(data[a.chr][bin]):
+        if a.start==x.start and a.stop==x.stop and a.id==x.id:
+            del data[a.chr][bin][i]
+
+def mergeBinIndex(data):
     pass
+
+
+
+
+    
+def iterBinIndex(data):
+    chrs=data.keys()
+    chrs.sort()
+    for chr in chrs:
+        for binindex in range(4096+512+64+8+1):
+            for i in data[chr][binindex]:
+                yield i
 
 def readIntoBinIndex(handle):
     '''
@@ -27,10 +53,11 @@ def readIntoBinIndex(handle):
         a=i
         if type(i)==type([]) or type(i)==type((1,2,3)):
             a=Bed(i)
-        if not data.has_key(a.chr):
-            data[a.chr]=[[] for row in range(4096+512+64+8+1)]
-        bin=binFromRangeStandard(a.start,a.stop)
-        data[a.chr][bin].append(i)
+#        if not data.has_key(a.chr):
+#            data[a.chr]=[[] for row in range(4096+512+64+8+1)]
+#        bin=binFromRangeStandard(a.start,a.stop)
+#        data[a.chr][bin].append(i)
+        appendIntoBinIndex(data,a)
     return data
     
 def binFromRangeStandard(start,end):

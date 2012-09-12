@@ -1,16 +1,17 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 24 Jul 2012 14:56:22
+# Last-modified: 12 Sep 2012 10:38:10
 import BedIO
 import GeneBedIO
 import SimpleIO
 import TransIO
+import OddsRatioSNPIO
 FormatToIterator = { "bed":BedIO.BedIterator,
                      "genebed":GeneBedIO.GeneBedIterator,
                      "simple":SimpleIO.SimpleIterator,
-                     "transunit":TransIO.TransUnitIterator
-                     
+                     "transunit":TransIO.TransUnitIterator,
+                     "oddsratiosnp":OddsRatioSNPIO.OddsRatioSNPIterator
                    }
 #FormatToWrite    = {  
 #                     "bed":BedIO.BedWriter,
