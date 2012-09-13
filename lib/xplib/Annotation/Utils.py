@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 10 Aug 2012 14:42:28
+# Last-modified: 12 Sep 2012 15:07:57
 import os,sys,argparse,types
 from xplib.Annotation import Bed 
 from xplib import TableIO

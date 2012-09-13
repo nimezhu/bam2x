@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 12 Sep 2012 11:49:14
+#Last-modified: 12 Sep 2012 15:06:04
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak']        
@@ -605,7 +605,7 @@ class OddsRatioSNP(Bed):
     chr1    10086   A/G     3.75495232253   ( 21 1 14 6 )   [20, 1, 0, 2] vs [13, 0, 5, 1]
     '''
     def __init__(self,x):
-        self.chr=x[0]
+        self.chr=x[0].strip()
         self.start=int(x[1]) # 0-index for OddsRatio Table
         self.stop=int(x[1])+1
         a=x[2].split("/")
