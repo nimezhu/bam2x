@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12 Sep 2012 22:59:14
+# Last-modified: 13 Sep 2012 20:29:32
 
 import os,sys,argparse
 from xplib.Annotation import *
@@ -38,6 +38,8 @@ def Main():
     db_format=args.db_format
     if len(db_format)==0:
         db_format=["bed" for i in range(len(args.db))]
+    if len(db_format)==1:
+        db_format=[db_format[0] for i in range(len(args.db))]
     if len(db_format)!=len(args.db):
         print >>sys.stderr,"the number of annotation files is not same with the number of annotation formats"
         print >>sys.stderr,"db format",db_format
@@ -52,7 +54,7 @@ def Main():
         h[args.input]+=1
        
     for i,f in enumerate(args.db):
-        print "reading",f
+        print >>sys.stderr,"reading",f
         h[f]=0
         fi=TableIO.parse(f,db_format[i])
         '''
@@ -101,7 +103,7 @@ def Main():
         else:
             hcode[code]=1
         if args.m:
-            print >>out,""
+            print >>out,"\t","#"+code
         else:
             print >>out,"//"
     for i,f in enumerate(args.db):
