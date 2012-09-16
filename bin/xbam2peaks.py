@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 10 Jul 2012 00:43:36
+# Last-modified: 15 Sep 2012 15:20:28
 import os,sys,argparse
 import pysam
 import xplib.Stats.prob as prob
@@ -9,7 +9,8 @@ from xplib.Annotation.Utils import *
 from ghmm import *
 from xplib import TableIO
 '''
-
+this program call peaks from bamfile 
+it will ignore the high intensity bins in control file. 
 '''
 class BamBins:
     '''
@@ -65,7 +66,7 @@ class BamBins:
             bin_id=(s.pos+s.qlen/2)/self.binsize
             self.bins[s.tid][bin_id]+=1
         print >>sys.stderr,"\rreading ",self.bamfilename," done\t\t\t"
-    def callBinPeak(self,pvalue=1e-05):
+    def callBinPeak(self,pvalue=1e-05,control=None):
         self.pvalue=pvalue
         self.binpeak=[]
         threshold=1
@@ -80,6 +81,9 @@ class BamBins:
                # if prob.poisson_cdf(self.bins[i][j],self.lam,False)<pvalue:
                # if prob.poisson_cdf(self.bins[i][j],self.lam,False)<pvalue:
                     self.binpeak[i][j]=True
+                    if control!=None:
+                        if control.binpeak[i][j]:
+                            self.binpeak[i][j]=False
         print >>sys.stderr,"Call Bins Pvalue Done                         "
     def PrintBinPeak(self,output="stdout"):
          if output=="stdout":
@@ -130,8 +134,8 @@ class BamBins:
             print >>out,"chrom=",chr
             for j in range(len(self.bins[i])):
                 print >>out,j*self.binsize,self.bins[i][j],self.binpeak[i][j],self.hmm_states[i][j]
-    def process(self,pvalue=1e-05):
-        self.callBinPeak(pvalue)
+    def process(self,pvalue=1e-05,Control=None):
+        self.callBinPeak(pvalue,Control)
         self.trainHMM()
         self.decodeHMM()
     def parse_segment(self):
@@ -201,9 +205,10 @@ class BamBins:
 
 def ParseArg():
     ''' This Function Parse the Argument '''
-    p=argparse.ArgumentParser( description = 'Example: %(prog)s -bam file.bam -o output.tab', epilog='Library dependency : pysam ghmm')
+    p=argparse.ArgumentParser( description = 'Example: %(prog)s -bam file.bam -o output.tab', epilog='Library dependency : xplib pysam ghmm')
     p.add_argument('-v','--version',action='version',version='%(prog)s 0.1')
-    p.add_argument('--bam','-B',type=str,dest='Bamfile',required=True,help="the input alignment bamfile of H3K36me3")
+    p.add_argument('--bam','-B',type=str,dest='Bamfile',required=True,help="the case bamfile ")
+    p.add_argument('--control','-C',type=str,dest='ControlFile',default=None,help="the control bamfile")
     p.add_argument('--output','-o',type=str,dest='Output',default="stdout", help="the output bed file  default: %(default)s")
     p.add_argument('--pvalue','-p',type=float,dest='Pvalue',default=1e-05, help="p-value threshold  default: %(default)f")
     p.add_argument('--bin','-b',type=int,dest='Binsize',default=200, help="binsize default: %(default)d")
@@ -211,13 +216,6 @@ def ParseArg():
         print >>sys.stderr,p.print_help()
         exit(0)
     return p.parse_args()
-
-
-
-
-    
-    
-    
 
 def tab(a):
     s=str(a[0])
@@ -235,14 +233,23 @@ def Main():
         except IOerror:
           print >>sys.stderr,"can't write to %s",args.Output
           out=sys.stdout
-    
+    if args.ControlFile:
+        control_bambin=BamBins(args.ControlFile,args.Binsize)
+        control_bambin.callBinPeak(args.Pvalue)
+    else:
+        control_bambin=None
     bambin=BamBins(args.Bamfile,args.Binsize)
-    bambin.process(args.Pvalue)
+    bambin.process(args.Pvalue,control_bambin)
     print >>out,"# Bamfile:",args.Bamfile
     print >>out,"# Binsize:",args.Binsize
     print >>out,"# Pvalue:",args.Pvalue
     print >>out,"# Mapped Reads Nunmber:",bambin.mapped
     print >>out,"# Unmapped Reads Nunmber:",bambin.unmapped
+    if args.ControlFile:
+        print >>out,"# Control BamFile:",args.ControlFile
+        print >>out,"# Control Mapped Reads Number:",control_bambin.mapped
+        print >>out,"# Control UnMapped Reads Number:",control_bambin.unmapped
+
     s=0
     ss=""
     peaks=[]
