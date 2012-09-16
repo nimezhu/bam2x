@@ -1,12 +1,10 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12 Sep 2012 12:12:28
+# Last-modified: 14 Sep 2012 20:45:01
 
 import os,sys,argparse
-from xplib.Annotation import Bed
-from xplib.Annotation import OddsRatioSNP
-from xplib.Annotation import Utils
+from xplib.Annotation import *
 from xplib import TableIO
 def ParseArg():
     ''' This Function Parse the Argument '''
@@ -73,7 +71,7 @@ def Main():
             mark=0
             for feature in Utils.iterOverlapFeature(i,d):
                 mark+=1
-                s+=str(feature)+"\n"
+                s+=str(feature)
             if mark>0:
                 h[f]+=1
                 code+="1"
@@ -81,13 +79,13 @@ def Main():
                     print >>out,"OVERLAP FEATURES IN",f
                     print >>out,s
                 else:
-                    print >>out,"\t",1,"\t",s,
+                    print >>out,"\t",1,"\t",s
             else:
                 code+="0"
                 if not args.m:
                     print >>out,"NO OVERLAP FEATURES IN",f
                 else:
-                    print >>out,"\t",0,"\tNO_OVERLAP",
+                    print >>out,"\t",0,"\tNO_OVERLAP"
         if hcode.has_key(code):
             hcode[code]+=1
         else:
@@ -102,7 +100,4 @@ def Main():
     
 if __name__=="__main__":
     Main()
-
-
-
 
