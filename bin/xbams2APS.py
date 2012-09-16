@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09 Aug 2012 17:37:35
+# Last-modified: 15 Sep 2012 12:39:03
 
 import os,sys,argparse
 import pysam
@@ -20,6 +20,7 @@ def ParseArg():
     p.add_argument('-o','--out',dest="out",type=str,action="store",default="stdout",help="output file")
     p.add_argument('--min_coverage',dest="min_coverage",type=int,action="store",default=10,help="not count the chi-square if either bam coverage is less than this value [%(default)i]")
     p.add_argument('--min_minor_snp_cov',dest="min_snp",type=int,action="store",default=5,help="not count the chi-square if minor snp coverage (add coverage in two bam) is less than this value [%(default)i]")
+    p.add_argument('-r','--region',dest="region",type=str,action="store",default=None,help="only report region example: chr1:1-1000")
    
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
@@ -32,6 +33,14 @@ hNtToNum={'a':0,'A':0,
           't':3,'T':3
          }
 Nt=['A','C','G','T']
+def parse(region):
+    a=region.split(":")
+    chrom=a[0]
+    (start,stop)=a[1].split("-")
+    start=int(start)-1
+    stop=int(stop)
+    return (chrom,start,stop)
+    
 def processing():
     a=0
     for j in range(binsize):
@@ -81,8 +90,6 @@ def diff(pos,i0,i1):
     
 def Main():
     global args,chrom,offset,segments,binsize,out
-    
-    
     args=ParseArg()
     if args.out=="stdout":
         out=sys.stdout
@@ -94,6 +101,9 @@ def Main():
             out=sys.stdout
     binsize=args.binsize
     segments=[]
+    if args.region!=None:
+	(chrom,start,end)=parse(args.region)
+        binsize=end-start
     for i in range(2):
         segments.append([[0,0,0,0] for row in range(binsize)])
     Afiles=[]
@@ -161,57 +171,101 @@ def Main():
     print >>out,"# Parameters:"
     print >>out,"# Minimal Coverage:          ",args.min_coverage
     print >>out,"# Minimal Minor SNP Coverage:",args.min_snp
-    for i,chrom in enumerate(chrs):
-        for j in range(lengths[i]/binsize+1):
-            offset=j*binsize
-            start=offset
-            end=offset+binsize
-            for i0 in range(len(segments)):
-                for j0 in range(binsize):
-                    for k0 in range(4):
-                        segments[i0][j0][k0]=0
-            k=0
-            for f in Afiles:
-                try: 
-                    A=f.pileup(chrom,start,end)
-                except:
-                    continue
-                for pileupcolumn in A:
-                    i0=k
-                    j0=pileupcolumn.pos-offset
-                    if j0<0: continue
-                    if j0>=binsize: continue
-                    for pileupread in pileupcolumn.pileups:
-                        try:
-                            nt=pileupread.alignment.seq[pileupread.qpos]
-                            if hNtToNum.has_key(nt):
-                                k0=hNtToNum[nt]
-                                segments[i0][j0][k0]+=1
-                        except:
-                            pass
-            k=1 
-            for f in Bfiles:
-                try: 
-                    B=f.pileup(chrom,start,end)
-                except:
-                    continue
-                for pileupcolumn in B:
-                    i0=k
-                    j0=pileupcolumn.pos-offset
-                    if j0<0: continue
-                    if j0>=binsize: continue
-                    for pileupread in pileupcolumn.pileups:
-                        try:
-                            nt=pileupread.alignment.seq[pileupread.qpos]
-                            if hNtToNum.has_key(nt):
-                                k0=hNtToNum[nt]
-                                segments[i0][j0][k0]+=1
-                        except:
-                            pass
-            a=processing()
-            if start%100000==0:
-                print >>sys.stderr,chrom,"\t",start,"bp now                   \r",
-    
+    if args.region==None:
+        for i,chrom in enumerate(chrs):
+           for j in range(lengths[i]/binsize+1):
+               offset=j*binsize
+               start=offset
+               end=offset+binsize
+               for i0 in range(len(segments)):
+                   for j0 in range(binsize):
+                       for k0 in range(4):
+                           segments[i0][j0][k0]=0
+               k=0
+               for f in Afiles:
+                   try: 
+                       A=f.pileup(chrom,start,end)
+                   except:
+                       print >>sys.stderr,"can't pile up",chrom,start,end
+                       continue
+                   for pileupcolumn in A:
+                       i0=k
+                       j0=pileupcolumn.pos-offset
+                       if j0<0: continue
+                       if j0>=binsize: continue
+                       for pileupread in pileupcolumn.pileups:
+                           try:
+                               nt=pileupread.alignment.seq[pileupread.qpos]
+                               if hNtToNum.has_key(nt):
+                                   k0=hNtToNum[nt]
+                                   segments[i0][j0][k0]+=1
+                           except:
+                               pass
+               k=1 
+               for f in Bfiles:
+                   try: 
+                       B=f.pileup(chrom,start,end)
+                   except:
+                       print >>sys.stderr,"can't pile up",chrom,start,end
+                       continue
+                   for pileupcolumn in B:
+                       i0=k
+                       j0=pileupcolumn.pos-offset
+                       if j0<0: continue
+                       if j0>=binsize: continue
+                       for pileupread in pileupcolumn.pileups:
+                           try:
+                               nt=pileupread.alignment.seq[pileupread.qpos]
+                               if hNtToNum.has_key(nt):
+                                   k0=hNtToNum[nt]
+                                   segments[i0][j0][k0]+=1
+                           except:
+                               pass
+               a=processing()
+               if start%100000==0:
+                   print >>sys.stderr,chrom,"\t",start,"bp now                   \r",
+        
+    else:
+                   k=0
+                   offset=start
+	           for f in Afiles:
+	               try: 
+	                   A=f.pileup(chrom,start,end)
+	               except:
+	                   continue
+	               for pileupcolumn in A:
+	                   i0=k
+	                   j0=pileupcolumn.pos-offset
+	                   if j0<0: continue
+	                   if j0>=binsize: continue
+	                   for pileupread in pileupcolumn.pileups:
+	                       try:
+	                           nt=pileupread.alignment.seq[pileupread.qpos]
+	                           if hNtToNum.has_key(nt):
+	                               k0=hNtToNum[nt]
+	                               segments[i0][j0][k0]+=1
+	                       except:
+	                           pass
+	           k=1
+	           for f in Bfiles:
+	               try: 
+	                   B=f.pileup(chrom,start,end)
+	               except:
+	                   continue
+	               for pileupcolumn in B:
+	                   i0=k
+	                   j0=pileupcolumn.pos-offset
+	                   if j0<0: continue
+	                   if j0>=binsize: continue
+	                   for pileupread in pileupcolumn.pileups:
+	                       try:
+	                           nt=pileupread.alignment.seq[pileupread.qpos]
+	                           if hNtToNum.has_key(nt):
+	                               k0=hNtToNum[nt]
+	                               segments[i0][j0][k0]+=1
+	                       except:
+	                           pass
+	           a=processing()
     
 if __name__=="__main__":
     Main()
