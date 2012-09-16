@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 12 Sep 2012 15:06:04
+#Last-modified: 14 Sep 2012 12:56:23
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak']        
