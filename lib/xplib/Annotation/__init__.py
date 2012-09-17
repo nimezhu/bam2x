@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 14 Sep 2012 12:56:23
+#Last-modified: 17 Sep 2012 00:16:40
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak']        
@@ -503,7 +503,7 @@ class Peak(Bed):
     inner variables: reads_num,pvalue,coverage,peak_pos,peak_coverage
     '''
     def __init__(self,x):
-        self.chr=x[0]
+        self.chr=x[0].strip()
         self.chr=self.chr.replace("'","")
         self.start=int(x[1])
         self.end=int(x[2])
@@ -524,6 +524,17 @@ class Peak(Bed):
         s+=str(self.peak_pos)+","
         s+=str(self.peak_coverage)+")"
         return s
+    def tab(self):
+        s=self.chr+"\t"
+        s+=str(self.start)+"\t"
+        s+=str(self.end)+"\t"
+        s+=str(self.reads_num)+"\t"
+        s+=str(self.pvalue)+"\t"
+        s+=str(self.coverage)+"\t"
+        s+=str(self.peak_pos)+"\t"
+        s+=str(self.peak_coverage)
+        return s
+    
 class TransUnit(Bed):
     def __init__(self,x=None):
         self.genes=[]
