@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 25 Jul 2012 16:07:56
+# Last-modified: 16 Sep 2012 22:38:55
 
 import os,sys,argparse
 import pysam
@@ -75,11 +75,11 @@ def PosToChi2(disA,disB,pos,min_coverage=10,min_snp=5):
         if idx[i]==0: idx1=i
         if idx[i]==1: idx2=i
     if s[idx2]< min_snp: return None  # no SNP
-    (a11,a12,a21,a22)=(a0[idx1]+1,a0[idx2]+1,a1[idx1]+1,a1[idx2]+1)  # zero to one
-    ratio=(float(a11)/float(a12))/(float(a21)/float(a22))
+    (a11,a12,a21,a22)=(a0[idx1],a0[idx2],a1[idx1],a1[idx2])  # zero to one
+    ratio=(float(a11+0.5)/float(a12+0.5))/(float(a21+0.5)/float(a22+0.5))
     logratio=log(ratio)
-    sigma=sqrt(1.0/a11+1.0/a12+1.0/a21+1.0/a22)
-    x=(logratio/sigma)**2
+    sigma2=1.0/(a11+1)+1.0/(a12+1)+1.0/(a21+1)+1.0/(a22+1)
+    x=logratio*logratio/sigma2
     return x,(a11,a12,a21,a22),idx1,idx2
 
 def Bam2Dis(bed,bams):
