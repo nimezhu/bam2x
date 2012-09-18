@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 17 Sep 2012 00:16:40
+#Last-modified: 17 Sep 2012 19:24:50
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak']        
@@ -495,7 +495,7 @@ class GeneBed(Bed):
 
                    
         
-
+###################### Below is Private Format
 class Peak(Bed):
     '''
     ChIP Seq Peak Class
@@ -622,7 +622,8 @@ class OddsRatioSNP(Bed):
         a=x[2].split("/")
         self.major_allele=a[0]
         self.minor_allele=a[1]
-        self.odds_ratio=float(x[3])
+        self.odds_ratio=float(x[3]) #old format compatible
+        self.APS=float(x[3])
         x[4]=x[4].replace("( ","")
         x[4]=x[4].replace(" )","")
         self.odds_ratio_matrix=x[4].split(" ")
@@ -635,11 +636,40 @@ class OddsRatioSNP(Bed):
         self.B_nt_dis=a[1]
     def __str__(self):
         s=""
-        s+=self.chr+"\t"+str(self.start)+"\t"+self.major_allele+"/"+self.minor_allele+"\t"+str(self.odds_ratio)
+        s+=self.chr+"\t"+str(self.start)+"\t"+self.major_allele+"/"+self.minor_allele+"\t"+str(self.APS)
         s+="\t"+"( "
         for i in self.odds_ratio_matrix:
             s+=str(i)+" "
         s+=")\t"+str(self.A_nt_dis)+" vs "+str(self.B_nt_dis)
         return s
         
-        
+    def calculate_from_nt_dis(self):
+        from math import log
+        s=[0,0,0,0]
+        idx=[0,0,0,0]
+        Nt=['A','C','G','T']
+        a0=self.A_nt_dis
+        a1=self.B_nt_dis
+        for i in range(4):
+            s[i]=a0[i]+a1[i]
+        for i in range(4):
+            for j in range(i+1,4):
+                if s[i] < s[j]: idx[i]+=1
+                if s[i] >= s[j]: idx[j]+=1
+        for i in range(4):
+            if idx[i]==0: idx1=i
+            if idx[i]==1: idx2=i
+        (a11,a12,a21,a22)=(a0[idx1],a0[idx2],a1[idx1],a1[idx2])  # zero to one
+        if a11==0 or a12==0 or a21==0 or a22==0:
+            ratio=(float(a11+0.5)/float(a12+0.5))/(float(a21+0.5)/float(a22+0.5))
+            logratio=log(ratio)
+            sigma2=1.0/(a11+1)+1.0/(a12+1)+1.0/(a21+1)+1.0/(a22+1)
+        else:
+            ratio=(float(a11)/float(a12))/(float(a21)/float(a22))
+            logratio=log(ratio)
+            sigma2=1.0/a11+1.0/a12+1.0/a21+1.0/a22
+        x=logratio*logratio/sigma2
+        self.APS=x
+        self.major_allele=Nt[idx1]
+        self.minor_allele=Nt[idx2]
+        self.odds_ratio_matrix=(a11,a12,a21,a22)

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 15 Sep 2012 12:39:03
+# Last-modified: 17 Sep 2012 19:33:34
 
 import os,sys,argparse
 import pysam
@@ -78,10 +78,15 @@ def diff(pos,i0,i1):
     if s[idx2]<args.min_snp: return None  # no SNP
     (a11,a12,a21,a22)=(a0[idx1],a0[idx2],a1[idx1],a1[idx2])  # zero to one
     print >>out,chrom,"\t",offset+pos,"\t",Nt[idx1]+"/"+Nt[idx2],"\t",
-    ratio=(float(a11+0.5)/float(a12+0.5))/(float(a21+0.5)/float(a22+0.5))
-    logratio=log(ratio)
-    sigma=sqrt(1.0/(a11+1)+1.0/(a12+1)+1.0/(a21+1)+1.0/(a22+1))
-    x=(logratio/sigma)**2
+    if (a11==0 or a12==0 or a21==0 or a22==0):
+        ratio=(float(a11+0.5)/float(a12+0.5))/(float(a21+0.5)/float(a22+0.5))
+        logratio=log(ratio)
+        sigma2=1.0/(a11+1)+1.0/(a12+1)+1.0/(a21+1)+1.0/(a22+1)
+    else:
+        ratio=(float(a11)/float(a12))/(float(a21)/float(a22))
+        logratio=log(ratio)
+        sigma2=1.0/a11+1.0/a12+1.0/a21+1.0/a22
+    x=logratio*logratio/sigma2
     print >>out,x,"\t",
     print >>out,"(",a11,a12,a21,a22,")\t",a0,"vs",a1
     return x

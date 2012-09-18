@@ -1,8 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 26 Jul 2012 12:28:15
-from matplotlib.backends.backend_pdf import PdfPages
+# Last-modified: 17 Sep 2012 16:42:45
 import numpy
 import os,sys,argparse
 from xplib import TableIO
@@ -19,6 +18,7 @@ def ParseArg():
     p.add_argument('-p','--pvalue',dest="pvalue",type=float,default=1e-05,help="pvalue threshold")
     p.add_argument('--reads',dest="reads",type=int,default=10000,help="reads threshold (if reads number is bigger than this number, don't count. (PCR bias)")
     p.add_argument('--gap',dest="gap",type=int,default=1000000,help="gap threshold")
+    p.add_argument('-f','--fast',dest="fast",action="store_true",default=False,help="don't calculate big regions")
     
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
@@ -90,6 +90,9 @@ def Segment(p,offset=0,depth=0):
             if p[i][j]<p[mi][mj]:
                 mi=i
                 mj=j
+            if p[i][j]==p[mi][mj] and (j-i)<(mj-mi):
+                mi=i
+                mj=j
  #   print "Segment( depth:",depth,"offset:",offset,") yielding"
  #   print "yield (",mi+offset,mj+offset,")"
  #   print p
@@ -122,13 +125,29 @@ def Main():
         we are here to segments the snps into smaller region
         '''
         print >>sys.stderr,"BiGSEGMent",chrom,len(pos),pos[0],pos[-1]
+        if args.fast:
+            if len(pos)>1000:
+                SqOR=0.0
+                for k in range(len(pos)):
+                    SqOR+=x2s[k]
+                p=1.0-chi2.cdf(SqOR,len(pos))
+                print >>out,"BIGREGION\t",chrom,"\t",pos[0],"\t",pos[-1]+1,"\t",p
+
+                for i in range(len(pos)):
+                    print >>out,"SNP\t",chrom,pos[i],snps[i],x2s[i],matrix_x2[i]
+                print >>out,""
+                continue
+
+
+
+
         p=numpy.array([[1.0 for row in range(len(pos))] for col in range(len(pos))])
+
         for i in range(len(pos)):
+            SqOR=0.0
             print >>sys.stderr,i,"\r",
             for j in range(i,len(pos)):
-                SqOR=0.0
-                for k in range(i,j+1):
-                    SqOR+=x2s[k]
+                SqOR+=x2s[j]
                 p[i][j]=1.0-chi2.cdf(SqOR,j+1-i)
  #               print "PV",i,j,p[i][j],SqOR,j+1-i
         for (start,end) in Segment(p):
