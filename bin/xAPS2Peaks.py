@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 17 Sep 2012 16:42:45
+# Last-modified: 17 Sep 2012 21:28:51
 import numpy
 import os,sys,argparse
 from xplib import TableIO
@@ -90,7 +90,7 @@ def Segment(p,offset=0,depth=0):
             if p[i][j]<p[mi][mj]:
                 mi=i
                 mj=j
-            if p[i][j]==p[mi][mj] and (j-i)<(mj-mi):
+            if p[i][j]==p[mi][mj] and (j-i)>(mj-mi):
                 mi=i
                 mj=j
  #   print "Segment( depth:",depth,"offset:",offset,") yielding"
