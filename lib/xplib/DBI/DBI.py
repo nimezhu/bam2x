@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 19 Sep 2012 23:36:53
+# Last-modified: 20 Sep 2012 00:18:24
 
 import os,sys,argparse
 from xplib.Annotation import *
@@ -18,7 +18,8 @@ class DBI:
 class BinIndexI(DBI):
     def __init__(self,file,**dict):
         format=dict['format']
-        self.data=Utils.readIntoBinIndex(file,format)
+        f=TableIO.parse(file,format)
+        self.data=Utils.readIntoBinIndex(f)
     def query(self,x):
         for i in Utils.iterOverlapFeature(x,self.data):
             yield i
