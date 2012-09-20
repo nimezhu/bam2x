@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 19 Sep 2012 22:55:45
+# Last-modified: 19 Sep 2012 23:36:53
 
 import os,sys,argparse
 from xplib.Annotation import *
@@ -33,10 +33,10 @@ class TabixI(DBI):
 
     def query(self,x):
         try:
-            for item in self.data.fetch(chr,x.start,x.stop):
+            for item in self.data.fetch(x.chr,x.start,x.stop):
                 yield item
         except:
-            StopIteration
+           StopIteration
 
 class BamI(DBI):
     hNtToNum={'a':0,'A':0,

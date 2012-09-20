@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 19 Sep 2012 22:40:03
+# Last-modified: 19 Sep 2012 23:34:21
 __all__=['BamI','TabixI','DBI',"BinIndexI"]
 from DBI import *
 
@@ -17,6 +17,7 @@ FormatToDBI = {
 #                     "simple":SimpleIO.SimpleWriter
 #                   }
 def query(x,dbi):
+    print "IN Query"
     for i in dbi.query(x):
         yield i
         
