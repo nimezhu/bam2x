@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 20 Sep 2012 00:18:24
+# Last-modified: 20 Sep 2012 12:40:41
 
 import os,sys,argparse
 from xplib.Annotation import *
@@ -37,7 +37,7 @@ class TabixI(DBI):
             for item in self.data.fetch(x.chr,x.start,x.stop):
                 yield item
         except:
-           StopIteration
+           raise StopIteration
 
 class BamI(DBI):
     hNtToNum={'a':0,'A':0,
@@ -60,8 +60,7 @@ class BamI(DBI):
             A=self.bamfile.pileup(x.chr,x.start,x.stop)
         except:
             print >>sys.stderr,"Can't pile up",x.chr,x.start,x.stop
-            StopIteration
-            return 
+            raise StopIteration
         s=[[0,0,0,0] for row in range(x.stop-x.start)]
         for pileupcolumn in A:
             j=pileupcolumn.pos-x.start
@@ -79,7 +78,45 @@ class BamI(DBI):
 
 
 class BamsI(DBI):
-    pass
+    hNtToNum={'a':0,'A':0,
+          'c':1,'C':1,
+          'g':2,'G':2,
+          't':3,'T':3
+         }
+    Nt=['A','C','G','T']
+    
+    
+    def __init__(self,bamfiles,**dict):
+        self.bamfiles=[]
+        for bamfile in bamfiles:
+            if type(bamfile)==type("str"):
+                try:
+                    bamfile=pysam.Samfile(bamfile,"rb")
+                except:
+                    print >>sys.stderr,"WARNING: Can't init the bam file",bamfile
+            self.bamfiles.append(bamfile)
+
+    def query(self,x):
+        s=[[0,0,0,0] for row in range(x.stop-x.start)]
+        for bamfile in self.bamfiles:
+            try:
+                A=bamfile.pileup(x.chr,x.start,x.stop)
+            except:
+                print >>sys.stderr,"Can't pile up",x.chr,x.start,x.stop
+                raise StopIteration 
+            for pileupcolumn in A:
+                j=pileupcolumn.pos-x.start
+                if j<0: continue
+                for pileupread in pileupcolumn.pileups:
+                    try:
+                        nt=pileupread.alignment.seq[pileupread.qpos]
+                        if BamI.hNtToNum.has_key(nt):
+                            k=BamI.hNtToNum[nt]
+                            s[j][k]+=1
+                    except:
+                        pass
+        for i in s:
+            yield i
 
 
 
