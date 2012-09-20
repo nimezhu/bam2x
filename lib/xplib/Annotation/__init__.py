@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 17 Sep 2012 19:24:50
+#Last-modified: 20 Sep 2012 14:57:50
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak']        
@@ -524,6 +524,8 @@ class Peak(Bed):
         s+=str(self.peak_pos)+","
         s+=str(self.peak_coverage)+")"
         return s
+    def __cmp__(self,other):
+	return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) 
     def tab(self):
         s=self.chr+"\t"
         s+=str(self.start)+"\t"
@@ -534,7 +536,6 @@ class Peak(Bed):
         s+=str(self.peak_pos)+"\t"
         s+=str(self.peak_coverage)
         return s
-    
 class TransUnit(Bed):
     def __init__(self,x=None):
         self.genes=[]
@@ -579,6 +580,8 @@ class TransUnit(Bed):
     def _str_promoter(self,p):
         return self.group+"\tNearbyPromoter:\t"+str(p)
 
+    def __cmp__(self,other):
+	return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) 
 
     def header(self):
         s=""
@@ -643,6 +646,8 @@ class OddsRatioSNP(Bed):
         s+=")\t"+str(self.A_nt_dis)+" vs "+str(self.B_nt_dis)
         return s
         
+    def __cmp__(self,other):
+	return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) 
     def calculate_from_nt_dis(self):
         from math import log
         s=[0,0,0,0]

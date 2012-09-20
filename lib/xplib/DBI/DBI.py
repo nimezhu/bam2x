@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 20 Sep 2012 12:40:41
+# Last-modified: 20 Sep 2012 16:29:30
 
 import os,sys,argparse
 from xplib.Annotation import *
@@ -77,7 +77,7 @@ class BamI(DBI):
             yield i
 
 
-class BamsI(DBI):
+class BamlistI(DBI):
     hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
           'g':2,'G':2,
@@ -87,6 +87,11 @@ class BamsI(DBI):
     
     
     def __init__(self,bamfiles,**dict):
+        if type(bamfiles)==type("string"):
+            filename=bamfiles
+            bamfiles=[]
+            for i in TableIO.parse(filename,"simple"):
+                bamfiles.append(i[0])
         self.bamfiles=[]
         for bamfile in bamfiles:
             if type(bamfile)==type("str"):

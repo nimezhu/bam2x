@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 20 Sep 2012 02:09:39
+# Last-modified: 20 Sep 2012 16:33:43
 __all__=['BamI','TabixI','DBI',"BinIndexI"]
 from DBI import *
 
@@ -9,7 +9,8 @@ FormatToDBI = {
              "bed":BinIndexI,
              "genebed":BinIndexI,
              "bam":BamI,
-             "bams":BamsI,
+             "bams":BamlistI,
+             "bamlist":BamlistI,
              "tabix":TabixI,
              "oddsratiosnp":BinIndexI,
             }
