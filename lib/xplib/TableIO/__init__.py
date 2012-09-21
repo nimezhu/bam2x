@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 16 Sep 2012 13:47:27
+# Last-modified: 20 Sep 2012 22:31:45
 import BedIO
 import GeneBedIO
 import SimpleIO
@@ -22,7 +22,7 @@ FormatToIterator = { "bed":BedIO.BedIterator,
 #                     "genebed":GeneBedIO.GeneBedWriter,
 #                     "simple":SimpleIO.SimpleWriter
 #                   }
-def parse(handle,format):
+def parse(handle,format="simple",**dict):
     """
     - handle  - handle to the file, or the filename
     - format  - lower case string describing the file format
