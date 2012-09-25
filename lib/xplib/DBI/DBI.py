@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 20 Sep 2012 16:29:30
+# Last-modified: 25 Sep 2012 15:22:17
 
 import os,sys,argparse
 from xplib.Annotation import *
@@ -65,8 +65,11 @@ class BamI(DBI):
         for pileupcolumn in A:
             j=pileupcolumn.pos-x.start
             if j<0: continue
+            if j>x.stop-x.start: break
             for pileupread in pileupcolumn.pileups:
                 try:
+                    if pileupread.is_del: continue
+                    if pileupread.indel: continue
                     nt=pileupread.alignment.seq[pileupread.qpos]
                     if BamI.hNtToNum.has_key(nt):
                         k=BamI.hNtToNum[nt]
@@ -112,8 +115,11 @@ class BamlistI(DBI):
             for pileupcolumn in A:
                 j=pileupcolumn.pos-x.start
                 if j<0: continue
+                if j>x.stop-x.start: break
                 for pileupread in pileupcolumn.pileups:
                     try:
+                        if pileupread.is_del: continue
+                        if pileupread.indel: continue
                         nt=pileupread.alignment.seq[pileupread.qpos]
                         if BamI.hNtToNum.has_key(nt):
                             k=BamI.hNtToNum[nt]

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 17 Sep 2012 19:33:34
+# Last-modified: 25 Sep 2012 15:15:50
 
 import os,sys,argparse
 import pysam
@@ -197,9 +197,11 @@ def Main():
                        i0=k
                        j0=pileupcolumn.pos-offset
                        if j0<0: continue
-                       if j0>=binsize: continue
+                       if j0>=binsize: break
                        for pileupread in pileupcolumn.pileups:
                            try:
+                               if pileupread.is_del : continue
+                               if pileupread.indel : continue
                                nt=pileupread.alignment.seq[pileupread.qpos]
                                if hNtToNum.has_key(nt):
                                    k0=hNtToNum[nt]
@@ -217,9 +219,11 @@ def Main():
                        i0=k
                        j0=pileupcolumn.pos-offset
                        if j0<0: continue
-                       if j0>=binsize: continue
+                       if j0>=binsize: break
                        for pileupread in pileupcolumn.pileups:
                            try:
+                               if pileupread.is_del : continue
+                               if pileupread.indel : continue
                                nt=pileupread.alignment.seq[pileupread.qpos]
                                if hNtToNum.has_key(nt):
                                    k0=hNtToNum[nt]
@@ -242,9 +246,11 @@ def Main():
 	                   i0=k
 	                   j0=pileupcolumn.pos-offset
 	                   if j0<0: continue
-	                   if j0>=binsize: continue
+	                   if j0>=binsize: break
 	                   for pileupread in pileupcolumn.pileups:
 	                       try:
+                                   if pileupread.is_del : continue
+                                   if pileupread.indel : continue
 	                           nt=pileupread.alignment.seq[pileupread.qpos]
 	                           if hNtToNum.has_key(nt):
 	                               k0=hNtToNum[nt]
@@ -264,6 +270,8 @@ def Main():
 	                   if j0>=binsize: continue
 	                   for pileupread in pileupcolumn.pileups:
 	                       try:
+                                   if pileupread.is_del : continue
+                                   if pileupread.indel : continue
 	                           nt=pileupread.alignment.seq[pileupread.qpos]
 	                           if hNtToNum.has_key(nt):
 	                               k0=hNtToNum[nt]
