@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 20 Sep 2012 14:57:50
+#Last-modified: 20 Sep 2012 22:35:43
 
 # reader of any column file
-__all__=['Utils','Bed','GeneBed','TransUnit','Peak']        
+__all__=['Utils','Bed','GeneBed','TransUnit','Peak','OddsRatioSNP']        
 
 class Bed:
     def __init__(self,x):

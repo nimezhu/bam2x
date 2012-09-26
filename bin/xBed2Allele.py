@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 25 Sep 2012 14:57:33
+# Last-modified: 26 Sep 2012 09:55:15
 
 import os,sys,argparse
 import pysam
@@ -109,6 +109,7 @@ def Bam2Dis(bed,bams):
             for pileupread in pileupcolumn.pileups:
                 try:
                     if pileupread.is_del: continue
+                    if pileupread.indel!=0: continue
                     nt=pileupread.alignment.seq[pileupread.qpos]
                     if hNtToNum.has_key(nt):
                         k0=hNtToNum[nt]
