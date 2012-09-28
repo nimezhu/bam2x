@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 20 Sep 2012 16:33:43
+# Last-modified: 28 Sep 2012 10:07:22
 __all__=['BamI','TabixI','DBI',"BinIndexI"]
 from DBI import *
 
@@ -13,6 +13,7 @@ FormatToDBI = {
              "bamlist":BamlistI,
              "tabix":TabixI,
              "oddsratiosnp":BinIndexI,
+             "vcf":BinIndexI,
             }
 def query(x,dbi):
     for i in dbi.query(x):

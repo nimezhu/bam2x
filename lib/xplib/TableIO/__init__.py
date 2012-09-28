@@ -1,13 +1,14 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 20 Sep 2012 22:31:45
+# Last-modified: 28 Sep 2012 01:27:19
 import BedIO
 import GeneBedIO
 import SimpleIO
 import TransIO
 import OddsRatioSNPIO
 import BamIO
+import VCFIO
 FormatToIterator = { "bed":BedIO.BedIterator,
                      "genebed":GeneBedIO.GeneBedIterator,
                      "simple":SimpleIO.SimpleIterator,
@@ -15,7 +16,8 @@ FormatToIterator = { "bed":BedIO.BedIterator,
                      "oddsratiosnp":OddsRatioSNPIO.OddsRatioSNPIterator,
                      "bam":BamIO.BamIterator,
                      "sam":BamIO.SamIterator,
-                     "bam2bed":BamIO.BamToBedIterator
+                     "bam2bed":BamIO.BamToBedIterator,
+                     "vcf":VCFIO.VCFIterator
                    }
 #FormatToWrite    = {  
 #                     "bed":BedIO.BedWriter,

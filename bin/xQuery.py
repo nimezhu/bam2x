@@ -1,13 +1,15 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 27 Sep 2012 21:46:45
+# Last-modified: 28 Sep 2012 13:51:09
 
 import os,sys,argparse
 from xplib.Annotation import Bed
 from xplib import TableIO
 import pysam
 from xplib import DBI
+import signal
+signal.signal(signal.SIGPIPE,signal.SIG_DFL)
 
 def ParseArg():
     ''' This Function Parse the Argument '''

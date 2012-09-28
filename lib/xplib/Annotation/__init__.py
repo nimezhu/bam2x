@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 26 Sep 2012 21:27:43
+#Last-modified: 28 Sep 2012 17:29:24
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak','OddsRatioSNP']        
@@ -494,7 +494,47 @@ class GeneBed(Bed):
         return float(s)/cdna_len
 
                    
+class VCF(Bed):
+    def __init__(self,x,**kwargs):
+        self.chr=x[0]
+        self.chrom=self.chr
+        self.pos=int(x[1])
+        self.start=self.pos-1
+        self.stop=self.pos
+        self.id=x[2]
+        self.ref=x[3]
+        self.alt=x[4]
+        self.qual=float(x[5])
+        try:
+            self.filter=x[6]
+            self.info=x[7]
+            self.format=x[8]
+            self.others=x[9:]
+            self.infos={}
+            self._parse_infos()
+        except:
+            pass
+    def _parse_infos(self):
+        x=self.info.split(";")
+        for i in x:
+            a=i.split("=")
+            b=a[1].split(",")
+            for i,c in enumerate(b):
+                b[i]=float(c)
+            if len(b)==1:
+                self.infos[a[0]]=b[0]
+            else:
+                self.infos[a[0]]=b
+    def DP(self):
+        return int(self.infos["DP"])
+    def __str__(self):
+        s=""
+        s+=self.chr+"\t"+str(self.pos)+"\t"+self.id+"\t"+self.ref+"\t"+self.alt
+        s+="\t"+str(self.qual)
+        return s
         
+    def __cmp__(self,other):
+	return cmp(self.chr,other.chr) or cmp(self.start,other.start)
 ###################### Below is Private Format
 class Peak(Bed):
     '''
@@ -627,7 +667,7 @@ class OddsRatioSNP(Bed):
             self.minor_allele=None
             self.odds_ratio=None
             self.APS=None
-            self.odds_ratio_matrxi=None
+            self.odds_ratio_matrix=None
             self.A_nt_dis=None
             self.B_nt_dis=None
         else:
@@ -664,6 +704,8 @@ class OddsRatioSNP(Bed):
         if kwargs.has_key("start"):
             self.start=kwargs['start']
             self.stop=self.start+1
+        
+
     def __str__(self):
         s=""
         s+=self.chr+"\t"+str(self.start)+"\t"+self.major_allele+"/"+self.minor_allele+"\t"+str(self.APS)
