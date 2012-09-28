@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 20 Sep 2012 22:35:43
+#Last-modified: 26 Sep 2012 21:27:43
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak','OddsRatioSNP']        
 
 class Bed:
-    def __init__(self,x):
+    def __init__(self,x,**kwargs):
         
 	self.chr=x[0].strip()
 	self.start=int(x[1])
@@ -148,7 +148,7 @@ class Bed:
 
 class GeneBed(Bed):
     '''Gene Class'''
-    def __init__(self,x):
+    def __init__(self,x,**kwargs):
         # self.string="\t".join(x)
         try:
             self.bin=int(x[0])
@@ -502,7 +502,7 @@ class Peak(Bed):
     extension Bed Class
     inner variables: reads_num,pvalue,coverage,peak_pos,peak_coverage
     '''
-    def __init__(self,x):
+    def __init__(self,x,**kwargs):
         self.chr=x[0].strip()
         self.chr=self.chr.replace("'","")
         self.start=int(x[1])
@@ -618,25 +618,52 @@ class OddsRatioSNP(Bed):
     Example Format:
     chr1    10086   A/G     3.75495232253   ( 21 1 14 6 )   [20, 1, 0, 2] vs [13, 0, 5, 1]
     '''
-    def __init__(self,x):
-        self.chr=x[0].strip()
-        self.start=int(x[1]) # 0-index for OddsRatio Table
-        self.stop=int(x[1])+1
-        a=x[2].split("/")
-        self.major_allele=a[0]
-        self.minor_allele=a[1]
-        self.odds_ratio=float(x[3]) #old format compatible
-        self.APS=float(x[3])
-        x[4]=x[4].replace("( ","")
-        x[4]=x[4].replace(" )","")
-        self.odds_ratio_matrix=x[4].split(" ")
-        for i in range(4):
-            self.odds_ratio_matrix[i]=int(self.odds_ratio_matrix[i])
-        a=x[5].split("vs")
-        for i in range(2):
-           a[i]=eval(a[i])
-        self.A_nt_dis=a[0]
-        self.B_nt_dis=a[1]
+    def __init__(self,x=None,**kwargs):
+        if x is None:
+            self.chr=None
+            self.start=None
+            self.stop=None
+            self.major_allele=None
+            self.minor_allele=None
+            self.odds_ratio=None
+            self.APS=None
+            self.odds_ratio_matrxi=None
+            self.A_nt_dis=None
+            self.B_nt_dis=None
+        else:
+            self.chr=x[0].strip()
+            self.start=int(x[1]) # 0-index for OddsRatio Table
+            self.stop=int(x[1])+1
+            a=x[2].split("/")
+            self.major_allele=a[0].strip()
+            self.minor_allele=a[1].strip()
+            self.odds_ratio=float(x[3]) #old format compatible
+            self.APS=float(x[3])
+            x[4]=x[4].replace("( ","")
+            x[4]=x[4].replace(" )","")
+            self.odds_ratio_matrix=x[4].split(" ")
+            for i in range(4):
+                self.odds_ratio_matrix[i]=int(self.odds_ratio_matrix[i])
+            a=x[5].split("vs")
+            for i in range(2):
+                a[i]=eval(a[i])
+            self.A_nt_dis=a[0]
+            self.B_nt_dis=a[1]
+        binA=False
+        binB=False
+        if kwargs.has_key("A"):
+            self.A_nt_dis=kwargs['A']
+            binA=True
+        if kwargs.has_key('B'):
+            self.B_nt_dis=kwargs['B']
+            binB=True
+        if binA and binB:
+            self.calculate_from_nt_dis()
+        if kwargs.has_key("chr"):
+            self.chr=kwargs["chr"]
+        if kwargs.has_key("start"):
+            self.start=kwargs['start']
+            self.stop=self.start+1
     def __str__(self):
         s=""
         s+=self.chr+"\t"+str(self.start)+"\t"+self.major_allele+"/"+self.minor_allele+"\t"+str(self.APS)
@@ -678,3 +705,6 @@ class OddsRatioSNP(Bed):
         self.major_allele=Nt[idx1]
         self.minor_allele=Nt[idx2]
         self.odds_ratio_matrix=(a11,a12,a21,a22)
+        if logratio > 0: self.A_enrich=self.major_allele
+        elif logratio < 0: self.A_enrich=self.minor_allele
+        else: self.A_enrich=None
