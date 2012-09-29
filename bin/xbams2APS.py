@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 28 Sep 2012 18:33:32
+# Last-modified: 28 Sep 2012 23:24:59
 
 import os,sys,argparse
 import pysam
@@ -13,17 +13,19 @@ from xplib.Annotation import *
 def ParseArg():
     ''' This Function Parse the Argument '''
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : pysam')
-    p.add_argument('-v','--version',action='version',version='%(prog)s 0.2')
-    p.add_argument('--bamA',nargs='*',dest="bamA",action="store",default=[],help="add bam to list A")
-    p.add_argument('--bamB',nargs='*',dest="bamB",action="store",default=[],help="add bam to list B")
-    p.add_argument('--bamlistA',dest="bamlistA",action="store",default=None,type=str,help="add filename in file to list A")
-    p.add_argument('--bamlistB',dest="bamlistB",action="store",default=None,type=str,help="add filename in file to list B")
+    p.add_argument('-v','--version',action='version',version='%(prog)s 0.3')
+    p.add_argument('--bamA',"-H",nargs='*',dest="bamA",action="store",default=[],help="Case Bam Files ")
+    p.add_argument('--bamB',"-C",nargs='*',dest="bamB",action="store",default=[],help="Control Bam Files")
+    p.add_argument('--bamlistA',dest="bamlistA",action="store",default=None,type=str,help="case bam filenames file, if choose this option , --bamA are ignored")
+    p.add_argument('--bamlistB',dest="bamlistB",action="store",default=None,type=str,help="control bam filenames file, if choose this option, --bamB are ignored")
     p.add_argument('-o','--out',dest="out",type=str,action="store",default="stdout",help="output file")
     p.add_argument('--min_coverage',dest="min_coverage",type=int,action="store",default=10,help="not count the chi-square if either bam coverage is less than this value [%(default)i]")
     p.add_argument('--min_minor_cov',dest="min_minor",type=int,action="store",default=5,help="not count the chi-square if minor allele coverage (add coverage in two bam) is less than this value [%(default)i]")
-    p.add_argument('-r','--region',dest="region",type=str,action="store",default=None,help="only report region example: chr1:1-1000")
-    p.add_argument('-a','--bed',dest="beds",type=str,action="store",default=None,help="beds file")
+    p.add_argument('-r','--region',dest="region",type=str,action="store",default=None,help="Only report this region. example: chr1:1-1000. if choose this option, -a and -g are ignored")
+    p.add_argument('-a','--annotation',dest="annotations",type=str,action="store",default=None,help="Only Query Regions in This Annotation File, if choose this option, -g are ignored")
+    p.add_argument('-A','--annotation_format',dest="annotation_format",type=str,action="store",default="bed",help="Region Annotation File Format {bed,vcf,genebed}")
     p.add_argument('-g','--chromsize',dest="chromsize",type=str,action="store",default="/data/zhuxp/Data/hg19.chrom.25.sizes",help="get chromosome sizes")
+    p.add_argument('-n','--no_filter',dest="no_filter",action="store_true",default=False,help="No Filter, Report all the sites, ignore the coverage cutoff")
    
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
@@ -64,16 +66,18 @@ def print_header():
             print >>out,"#",line
         f.close()
     print >>out,"# Parameters:"
-    print >>out,"# Minimal Coverage:          ",args.min_coverage
-    print >>out,"# Minimal Minor SNP Coverage:",args.min_minor
+    if not args.no_filter:
+        print >>out,"# \tMinimal Coverage:          ",args.min_coverage
+        print >>out,"# \tMinimal Minor SNP Coverage:",args.min_minor
     if args.region:
-        print >>out,"# Report Region: ",args.region
-    elif args.beds:
-        print >>out,"# Report Regions in Bedfile:",args.beds
+        print >>out,"# \tReport Region: ",args.region
+    elif args.annotations:
+        print >>out,"# \tReport Regions in Annotation File:",args.annotations
     elif args.chromsize:
-        print >>out,"# Report Chromosome in ChrSizes File:",args.chromsize
+        print >>out,"# \tReport Chromosome in ChrSizes File:",args.chromsize
 
 def binaryFilter(aps):
+    if args.no_filter: return True
     A_coverage=sum(aps.A_nt_dis)
     B_coverage=sum(aps.B_nt_dis)
     minor_coverage=aps.A_nt_dis[hNtToNum[aps.minor_allele]]+aps.B_nt_dis[hNtToNum[aps.minor_allele]]
@@ -109,8 +113,8 @@ def Main():
         i=parseRegion(args.region)
         for aps in QueryBed(i,dbi_A,dbi_B):
                 print >>out,aps
-    elif args.beds:
-        for i in TableIO.parse(args.beds,"bed"):
+    elif args.annotations:
+        for i in TableIO.parse(args.annotations,args.annotation_format):
             for aps in QueryBed(i,dbi_A,dbi_B):
                 print >>out,aps
     elif args.chromsize:
