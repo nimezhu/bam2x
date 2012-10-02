@@ -1,10 +1,23 @@
 #!/usr/bin/python
 # Programmer : zhuxp
-# Date: 
-# Last-modified: 30 Jun 2012 01:15:18
+# Date:
+# Last-modified: 02 Oct 2012 10:47:20
 from xplib.Annotation import Bed
 import types
-def BedIterator(handle):
+def BedIterator(handle,**dict):
+    '''
+    Bed file iterator
+    Usage Example:
+        from xplib.TableIO.BedIO import BedIterator
+        for bed in BedIterator(file or filename):
+            print bed
+    Wrapper in TableIO.parse(file or filename,"bed")
+    Usage:
+        for i in TableIO.parse(file or filename,"bed"):
+            print bed
+        
+    Bed is xplib.Annotation.Bed object.
+    '''
     if type(handle)==type("s"):
         try:
             handle=open(handle,"r")
