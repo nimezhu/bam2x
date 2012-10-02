@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 28 Sep 2012 10:07:22
-__all__=['BamI','TabixI','DBI',"BinIndexI"]
+# Last-modified: 10-02-2012, 02:12:22 CDT
+__all__=['BamI','TabixI','DBI',"BinIndexI","BamlistI"]
 from DBI import *
 
 FormatToDBI = { 
