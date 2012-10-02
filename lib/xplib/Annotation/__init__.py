@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 28 Sep 2012 17:29:24
+#Last-modified: 28 Sep 2012 21:39:37
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak','OddsRatioSNP']        
@@ -535,6 +535,11 @@ class VCF(Bed):
         
     def __cmp__(self,other):
 	return cmp(self.chr,other.chr) or cmp(self.start,other.start)
+
+
+
+
+
 ###################### Below is Private Format
 class Peak(Bed):
     '''
