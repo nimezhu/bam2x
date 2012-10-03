@@ -1,11 +1,16 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Oct 2012 16:03:45
+# Last-modified: 03 Oct 2012 14:28:26
 import os,sys,argparse,types
 from xplib.Annotation import Bed 
 from xplib import TableIO
+
 '''
+obsoleted
+please using Struct.binindex instead.
+
+
 BinIndex Data Structure
 
 Data is hash table. 
