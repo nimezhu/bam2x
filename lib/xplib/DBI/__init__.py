@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Oct 2012 13:13:26
-__all__=['BamI','TabixI','DBI',"BinIndexI","BamlistI"]
-from DBI import *
+# Last-modified: 03 Oct 2012 13:29:11
+__all__=['BamI','TabixI','MetaDBI',"BinIndexI","BamlistI"]
+from DB import *
 
 FormatToDBI = { 
              "bed":BinIndexI,
