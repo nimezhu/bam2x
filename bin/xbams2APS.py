@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 10-02-2012, 16:58:24 CDT
+# Last-modified: 03 Oct 2012 16:53:41
 '''
 This program calculate the Allele Preference Score for Specific SNPs or Specific Regions or whole genome.
 

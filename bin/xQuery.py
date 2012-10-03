@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Oct 2012 17:24:12
+# Last-modified: 03 Oct 2012 16:54:44
 '''
 xQuery.py is an example program for using xplib.DBI interface
 it reports the overlap features or data from the query region.

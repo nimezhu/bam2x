@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Oct 2012 17:04:48
+# Last-modified: 03 Oct 2012 16:56:16
 '''
 This program convert bam format into bed format.
 it is a test program for TableIO.parse(file.bam,"bam2bed")

@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 17 Sep 2012 00:23:17
+# Last-modified: 03 Oct 2012 16:55:32
 import os,sys,argparse
 import pysam
 import xplib.Stats.prob as prob

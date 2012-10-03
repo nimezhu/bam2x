@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Oct 2012 17:14:41
+# Last-modified: 03 Oct 2012 16:54:17
 
 import os,sys,argparse
 from xplib.Annotation import *
