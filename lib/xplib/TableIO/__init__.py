@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Oct 2012 10:49:13
+# Last-modified: 03 Oct 2012 13:18:15
 import BedIO
 import GeneBedIO
 import SimpleIO
@@ -37,7 +37,4 @@ def parse(handle,format="simple",**dict):
         i=iterator_generator(handle,**dict)
     for r in i:
         yield r
-
-
-
 

@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Oct 2012 22:17:59
+# Last-modified: 03 Oct 2012 15:09:31
 import types
+import gzip
 
 def SimpleIterator(handle,**kwargs):
     '''
@@ -21,7 +22,13 @@ def SimpleIterator(handle,**kwargs):
     '''
     if type(handle)==type("s"):
         try:
-            handle=open(handle,"r")
+            handle=handle.strip()
+            x=handle.split(".")
+            if x[-1]=="gz":
+                handle=gzip.open(handle,"r")
+            else:
+                handle=open(handle,"r")
+            
         except:
             raise ValueError("Can't open file %s"%handle)
     sep="\t"

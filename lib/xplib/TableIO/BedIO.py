@@ -1,9 +1,11 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date:
-# Last-modified: 02 Oct 2012 10:47:20
+# Last-modified: 03 Oct 2012 15:29:38
 from xplib.Annotation import Bed
 import types
+import gzip
+import SimpleIO 
 def BedIterator(handle,**dict):
     '''
     Bed file iterator
@@ -18,16 +20,7 @@ def BedIterator(handle,**dict):
         
     Bed is xplib.Annotation.Bed object.
     '''
-    if type(handle)==type("s"):
-        try:
-            handle=open(handle,"r")
-        except:
-            raise ValueError("Can't open file %s"%handle)
-    for line in handle:
-        line=line.strip()
-        if line[0]=="#": continue
-        x=line.split("\t")
-        b=Bed(x)
-        yield b
-    return
+    for i in SimpleIO.SimpleIterator(handle,**dict):
+        yield Bed(i)
+
     

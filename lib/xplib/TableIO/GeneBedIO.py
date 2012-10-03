@@ -1,22 +1,14 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-02-2012, 23:20:31 CDT
+# Last-modified: 03 Oct 2012 15:30:40
 from xplib.Annotation import GeneBed
 import types
-def GeneBedIterator(handle):
+import SimpleIO
+def GeneBedIterator(handle,**kwargs):
     '''
     '''
-    if type(handle)==type("s"):
-        try:
-            handle=open(handle,"r")
-        except:
-            raise ValueError("Can't open file %s"%handle)
-    for line in handle:
-        line=line.strip()
-        if line[0]=="#": continue
-        x=line.split("\t")
+    for x in SimpleIO.SimpleIterator(handle,**kwargs):
         b=GeneBed(x)
         yield b
-    return
     

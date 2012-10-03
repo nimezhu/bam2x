@@ -1,9 +1,10 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Oct 2012 10:44:54
+# Last-modified: 03 Oct 2012 15:35:10
 from xplib.Annotation import VCF
 import types
+import SimpleIO
 def VCFIterator(handle,**kwargs):
     '''
     Wrapper in TableIO.parse(file or filename,"vcf")
@@ -12,16 +13,7 @@ def VCFIterator(handle,**kwargs):
             print i
         i is a Annotation.VCF class object.
     '''
-    if type(handle)==type("s"):
-        try:
-            handle=open(handle,"r")
-        except:
-            raise ValueError("Can't open file %s"%handle)
-    for line in handle:
-        line=line.strip()
-        if line[0]=="#": continue
-        x=line.split("\t")
+    for x in SimpleIO.SimpleIterator(handle,**kwargs):
         b=VCF(x)
         yield b
-    return
     
