@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Oct 2012 10:41:40
+# Last-modified: 02 Oct 2012 22:17:59
 import types
 
 def SimpleIterator(handle,**kwargs):
@@ -31,7 +31,7 @@ def SimpleIterator(handle,**kwargs):
         line=line.strip()
         if len(line)==0: continue
         if line[0]=="#": continue
-        x=line.split("\t")
+        x=line.split(sep)
         for i,y in enumerate(x):
             try:
               x[i]=float(x[i])
