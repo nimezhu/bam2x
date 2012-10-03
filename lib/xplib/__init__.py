@@ -1,2 +1,2 @@
-__all__=["TableIO","Annotation","Stats"]
+__all__=["TableIO","Annotation","Stats","DBI"]
 

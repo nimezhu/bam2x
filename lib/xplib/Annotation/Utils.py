@@ -1,14 +1,58 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12 Sep 2012 15:07:57
+# Last-modified: 02 Oct 2012 16:03:45
 import os,sys,argparse,types
 from xplib.Annotation import Bed 
 from xplib import TableIO
+'''
+BinIndex Data Structure
+
+Data is hash table. 
+Key is Chromosome
+Data["chr1"] is a list of feature list
+Data["chr"][bin_number] is a list of features that have bin index.
+
+The Most Useful Function is:
+
+Read features into a data structure:
+    Example:
+        f=TableIO.parse("filename","genebed")
+        data=readIntoBinIndex(f)
+    Example:
+        f=TableIO.parse("filename","vcf")
+        data=readIntoBinIndex(f)
+    Example:
+        data=readIntoBinIndex(bedlist)
+    
+
+Query the overlap features in the data structure:
+    Usage:
+        from xplib.Annotation.Utils import *
+        for i in iterOverlapFeature(bed,data):
+            print i
+
+This BinIndex Data Structure was wrapped into DBI.init() and DBI.query():
+    Usage Example:
+        dbi=DBI.init("file.bed","bed")
+        x=Bed(chr="chr1",start=1,stop=200)
+        for i in dbi.query(x):
+            print i
+TO DO:
+    Now BinIndex only have item inherent from Bed Class, which means it need to have at least three attributes, chr, start and stop. and start is 0-index.  
+    For mergeBinIndex()
+    it use the fourth attribute, id.
+    Need to improve to read any table that contain this information but not not in a pre defined format. 
+'''
 binOffsets=(512+64+8+1,64+8+1,8+1,1,0)
 binFirstShift=17
 binNextShift=3
 def appendIntoBinIndex(data,bed):
+    '''
+    data is a BinIndex Data Structure
+    bed is an anntation feature. ( bed vcf or genebed etc.)
+    append an annotation into data
+    '''
     a=bed
     bin=binFromRangeStandard(a.start,a.stop)
     if not data.has_key(a.chr):
@@ -16,20 +60,38 @@ def appendIntoBinIndex(data,bed):
     data[a.chr][bin].append(a)
 
 def deleteFromBinIndex(data,bed):
+    '''
+    delete bed entry from a BinIndex Data Structure data.
+    '''
     a=bed
     bin=binFromRangeStandard(a.start,a.stop)
     for i,x in enumerate(data[a.chr][bin]):
         if a.start==x.start and a.stop==x.stop and a.id==x.id:
             del data[a.chr][bin][i]
 
-def mergeBinIndex(data):
-    pass
-
-
-
+def mergeBinIndex(data,other):
+    '''
+    merge two binindex data structure
+    and only ratain one if duplicates.
+    '''
+    for i in iterBinIndex(other):
+        flag=1
+        for j in iterOverlapFeature(data):
+            if j.start==i.start and j.stop==i.stop and j.id==i.id:
+                flag=0
+        if flag:
+            appendIntoBinIndex(data,i)
 
     
 def iterBinIndex(data):
+    '''
+    iter all the features in binindex structure
+    Usase:
+        data is a binindex data structure
+
+        for i in iterBinIndex(data):
+            print i
+    '''
     chrs=data.keys()
     chrs.sort()
     for chr in chrs:
@@ -45,6 +107,9 @@ def readIntoBinIndex(handle):
         f=TableIO.parse("filename","genebed")
         data=readIntoBinIndex(f)
     Example:
+        f=TableIO.parse("filename","vcf")
+        data=readIntoBinIndex(f)
+    Example:
         data=readIntoBinIndex(bedlist)
     '''
     data={}
@@ -53,10 +118,6 @@ def readIntoBinIndex(handle):
         a=i
         if type(i)==type([]) or type(i)==type((1,2,3)):
             a=Bed(i)
-#        if not data.has_key(a.chr):
-#            data[a.chr]=[[] for row in range(4096+512+64+8+1)]
-#        bin=binFromRangeStandard(a.start,a.stop)
-#        data[a.chr][bin].append(i)
         appendIntoBinIndex(data,a)
     return data
     
@@ -84,6 +145,7 @@ def binFromRangeStandard(start,end):
 def iterRangeOverlapBins(start,end):
     '''
         Iterate the possible overlap bin index
+        the core function of query overlap features.
         Usage:
             for i in iterRangeOverlapBins(start,end):
                 for j in data[i]:
@@ -100,14 +162,17 @@ def iterRangeOverlapBins(start,end):
         startBin >>= binNextShift
         endBin >>= binNextShift
 
-def iterOverlapFeature(bed,data):
+def iterOverlapFeature(bed,data,**kwargs):
     '''
     iterator the bed overlap features in data
     Usage:
         from xplib.Annotation.Utils import *
         for i in iterOverlapFeature(bed,data):
             print i
+
+    **kwargs for further extension for annotation with no pre define format
     '''
+
     if type(bed)==type((1,2,3)) or type(bed)==([1,2,3]):
         bed=Bed(bed[0:3])  # guess (chrome,start,stop)
     if not data.has_key(bed.chr):

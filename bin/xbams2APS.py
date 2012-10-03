@@ -1,8 +1,38 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 28 Sep 2012 23:24:59
+# Last-modified: 10-02-2012, 16:58:24 CDT
+'''
+This program calculate the Allele Preference Score for Specific SNPs or Specific Regions or whole genome.
 
+Input: bams file or bamlist file
+       chromsizefile or bed region file or vcf file or aps file
+
+For whole genome:
+    xbams2APS.py --bamA Case.Rep1.bam Case.Rep2.bam--bamB Control.Rep1.bam Control.Rep2.bam -g chrom.sizes -o Case_Control.APS
+
+For a region: 
+    xbams2APS.py --bamA Case.Rep1.bam Case.Rep2.bam--bamB Control.Rep1.bam Control.Rep2.bam -r chr1:1-10000 -o Case_Control.APS [-n]
+    if choose -n , report all the sites
+    if not, report sites that have min_coverage in both case and control and have at least min_minor_cov minor allele in total samples.
+
+For some regions:
+    xbams2APS.py --bamA Case.Rep1.bam Case.Rep2.bam--bamB Control.Rep1.bam Control.Rep2.bam -a file.bed -A bed -o Case_Control.APS [-n]
+    
+    xbams2APS.py --bamA Case.Rep1.bam Case.Rep2.bam--bamB Control.Rep1.bam Control.Rep2.bam -a file.vcf -A vcf -o Case_Control.APS 
+    
+the output example:
+chr1    564514  T/G     2.75045262342   ( 10 1 332 5 )  [0, 0, 1, 10] vs       [4, 2, 5, 332]
+the six columns are:
+
+1. chromosome
+2. position or start(0-index) : the first base is 0
+3. major allele/minor allele
+4. APS score
+5. ( major in case, minor in case, major in control, minor in control)
+6. [A,C,G,T] in case vs [A,C,G,T] in control
+
+'''
 import os,sys,argparse
 import pysam
 import random
@@ -39,6 +69,11 @@ hNtToNum={'a':0,'A':0,
          }
 Nt=['A','C','G','T']
 def parseRegion(region):
+    '''
+    parse string like "chr1:222-444"
+    into 
+    Bed(chr="chr1",start=221,stop=444)
+    '''
     a=region.split(":")
     chrom=a[0]
     (start,stop)=a[1].split("-")
@@ -46,6 +81,9 @@ def parseRegion(region):
     stop=int(stop)
     return Bed([chrom,start,stop,".",".","."])
 def print_header():
+    '''
+    print the output header
+    '''
     print >>out,"# Compare The SNP preferences between files:"
     print >>out,"# Group A:"
     for f in args.bamA:
@@ -77,6 +115,9 @@ def print_header():
         print >>out,"# \tReport Chromosome in ChrSizes File:",args.chromsize
 
 def binaryFilter(aps):
+    '''
+    Filter the sites that have less coverage or have less minor allele coverage.
+    '''
     if args.no_filter: return True
     A_coverage=sum(aps.A_nt_dis)
     B_coverage=sum(aps.B_nt_dis)
@@ -109,15 +150,36 @@ def Main():
         dbi_B=DBI.init(args.bamB,"bamlist")
 
     print_header()
+    '''
+    Priority:
+    Region > Annotations > chromSize
+    '''
     if args.region:
+        '''
+        Query Only Region
+        '''
         i=parseRegion(args.region)
         for aps in QueryBed(i,dbi_A,dbi_B):
                 print >>out,aps
     elif args.annotations:
+        '''
+        Query Regions in Bed file or VCF file etc.
+        '''
         for i in TableIO.parse(args.annotations,args.annotation_format):
             for aps in QueryBed(i,dbi_A,dbi_B):
                 print >>out,aps
     elif args.chromsize:
+        '''
+        Query Whole Genome
+        Chromsize File Example:
+        chr1    249250621
+        chr2    243199373
+        chr3    198022430
+        .
+        .
+        .
+
+        '''
         for x in TableIO.parse(args.chromsize):
             (chr,size)=x
             binsize=1000000
@@ -129,12 +191,18 @@ def Main():
                 bed=Bed([chr,start,stop,".",".","."])
                 for aps in QueryBed(bed,dbi_A,dbi_B):
                     print >>out,aps
+    else:
+        print >>sys.stderr," at least one of the options -r,-g,-a are required"
+        exit(0)
 
 
         
 
 
 def QueryBed(i,dbi_A,dbi_B):
+    '''
+    Query the region nt distribution use DBI.query()
+    '''
     print >>sys.stderr,"Query Region:",i.chr,i.start,i.stop,"                                    \r",
     chr=i.chr
     offset=i.start

@@ -1,55 +1,74 @@
 #!/usr/bin/python
 # nimezhu@163.com
 import sys
-#Last-modified: 28 Sep 2012 17:29:24
+#Last-modified: 10-02-2012, 16:04:40 CDT
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak','OddsRatioSNP']        
 
-class Bed:
-    def __init__(self,x,**kwargs):
-        
-	self.chr=x[0].strip()
-	self.start=int(x[1])
-	self.stop=int(x[2])
-        try:
-	    self.id=x[3].strip()
-        except:
+class Bed(object):
+    '''
+    Genome Annotation Format.
+    using in UCSC genome browser
+    Reference : http://genome.ucsc.edu/FAQ/FAQformat.html
+    Bed 6
+    chrom   start   stop    id  score   strand
+
+    generator example:
+    
+    bed=Bed(["chr1",1,20,"id",0.0,"+"])
+    
+    bed=Bed("chr1\t1\t20\tid\t0.0\t+")
+
+    bed=Bed(chr="chr1",start=1,stop=20,id="id",score=0.0,strand="+")
+    '''
+    def __init__(self,x=None,**kwargs):
+        if x is not None:
+            if type(x)==type("str"):
+                x=x.split("\t")
+	    self.chr=x[0].strip()
+	    self.start=int(x[1])
+	    self.stop=int(x[2])
+            try:
+	        self.id=x[3].strip()
+            except:
+                self.id="NONAME"
+            try:
+                self.score=float(x[4])
+            except:
+                self.score=0
+	    try:
+	        self.strand=x[5].strip()
+	    except:
+	        self.strand="."
+        for key in kwargs.keys():
+            setattr(self,key,kwargs[key])
+        if self.id is None:
             self.id="NONAME"
-        try:
-            self.score=float(x[4])
-        except:
+        if self.score is None:
             self.score=0
-	try:
-	    self.strand=x[5].strip()
-	except:
-	    self.strand="."
+        if self.strand is None:
+            self.strand="."
+        
     def __str__(self):
+        '''
+        Return a standard bed 6 format string
+        chr start   stop    id  score   strand
+        Usage Example:
+            a=Bed(chr="chr1",start=1,stop=20)
+            print a
+        '''
 	string=self.chr+"\t"+str(self.start)+"\t"+str(self.stop)+"\t"+str(self.id)+"\t"+str(self.score)
-#	if(self.strand != "."):
-#	    string+="\t"+self.strand
 	string+="\t"+str(self.strand)
 	return string
     def length(self):
+        '''
+        return the length of the annotation
+        '''
         return self.stop-self.start
-    def overlap(A,B):
-	if(A.chr != B.chr) : return 0
-	if (A.stop <= B.start) : return 0
-	if (B.stop <= A.start) : return 0
-	return 1
-    overlap=staticmethod(overlap)
-    def distance(self,bed):
-        if(self.chr != bed.chr): return 10000000000 
-        if(Bed.overlap(self,bed)): return 0
-        a=[abs(self.start-bed.stop),abs(self.stop-bed.stop),abs(self.start-bed.start),abs(self.stop-bed.start)]
-        i=a[0]
-        for j in a[1:]:
-            if i>j:
-                i=j
-        return i
     def __cmp__(self,other):
 	return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) or cmp(self.strand,other.strand)
-    def upstream(self,bp):
+    def upstream(self,bp=1000):
         '''return the $bp bp upstream Bed Class Object'''
         chr=self.chr
         strand=self.strand
@@ -77,7 +96,7 @@ class Bed:
         if (start<0):start=0
         x=[chr,start,stop,id,0,strand]
         return Bed(x)
-    def downstream(self,bp):
+    def downstream(self,bp=1000):
         '''return the $bp bp downstream Bed Class Object'''
         chr=self.chr
         strand=self.strand
@@ -90,20 +109,8 @@ class Bed:
             stop=self.start
         x=[chr,start,stop,id,0,strand]
         return Bed(x)
-    def string_graph(self,scale=1):
-        n=self.length()*scale
-        n=int(n)
-        s=""
-        c="|"
-        if(self.strand == "+"):
-            c=">"
-        if(self.strand == "-"):
-            c="<"
-        if (n==0): n=1
-        for i in range(n): s+=c
-        return s
     def tss(self):
-        '''return the TSS class of transcription start site, name is geneid_tss'''
+        '''return the Bed Object that represent transcription start site, name is geneid_tss'''
         pos=self.stop
         if self.strand=="+":
             pos=self.start
@@ -111,45 +118,33 @@ class Bed:
             pos=self.stop-1  #should minus one or not?
         return Bed([self.chr,pos,pos+1,self.id+"_tss",self.strand,0])
     def tts(self):
+        '''return the Bed Object that represent transcription termination site, name is geneid_tss'''
         if self.strand=="+":
             pos= self.stop-1
         else:
             pos=self.start 
         return Bed([self.chr,pos,pos+1,self.id+"_tts",self.strand,0])
     def strand_cmp(self,bed):
-        if bed.strand == ".":
+        '''
+        return if the compare bed is in the same strand or different strand
+        "+" means in the same strand
+        "-" means in the CR strand
+        "." means unknown
+        '''
+        if bed.strand == "." or self.strand == ".":
             return "."
         if self.strand == bed.strand:
             return "+"
         else:
             return "-"
-    def distance_to_tss(self,bed):
-        if bed.chr != self.chr : 
-            return None
-        tss=self.tss().tss
-        pos=(bed.start+bed.stop)/2
-       # strand=self.strand_cmp(bed)
-        if(self.strand=="+"):
-            rpos=pos-tss
-        else:
-            rpos=tss-pos
-        return rpos
-    def distance_to_tts(self,bed):
-        if bed.chr != self.chr:
-            return None
-        tts=self.tts().tss
-        pos=(bed.start+bed.stop)/2
-        if(self.strand=="+"):
-            rpos=pos-tts
-        else:
-            rpos=tts-pos
-        return rpos
 
 
 class GeneBed(Bed):
-    '''Gene Class'''
+    '''
+    Gene Bed Class
+    Download gene annotation table from table browser of UCSC genome Browser
+    '''
     def __init__(self,x,**kwargs):
-        # self.string="\t".join(x)
         try:
             self.bin=int(x[0])
             if(self.bin < 10000):
@@ -188,6 +183,9 @@ class GeneBed(Bed):
             self.align_id=x[11]
         except:
             pass
+        for key in kwargs.keys():
+            setattr(self,key,kwargs[key])
+        
   #  def __str__(self):
   #      return self.string
     def _exon(self,i):
@@ -249,80 +247,11 @@ class GeneBed(Bed):
             return Bed([self.chr,self.cds_start,self.cds_start+3,self.id+"_stop_codon",0,self.strand])
         elif (self.strand=="+"):
             return Bed([self.chr,self.cds_stop-3,self.cds_stop,self.id+"_stop_coden",0,self.strand])
-    def plant_promoter(self):
-        if(self.strand == "+"):
-            return Bed([self.chr,self.cds_start,self.cds_start-2000,self.id+"_ATG",0,self.strand])
-        elif (self.strand=="-"):
-            return Bed([self.chr,self.cds_stop,self.cds_stop+2000,self.id+"_ATG",0,self.strand])
-    def getATGStart(self):
-        if(self.strand == "+"):
-            return self.cds_start
-        elif(self.strand == "-"):
-            return self.cds_stop
-    def getStopCodonPos(self):
-        if(self.strand == "-"):
-            return self.cds_start
-        elif(self.strand == "+"):
-            return self.cds_stop
-    def distance_to_atg(self,bed):
-        if bed.chr != self.chr : 
-            return None
-        atg=self.getATGStart()
-        pos=(bed.start+bed.stop)/2
-       # strand=self.strand_cmp(bed)
-        if(self.strand=="+"):
-            rpos=pos-atg
-        else:
-            rpos=atg-pos
-        return rpos
-    def distance_to_stop_codon(self,bed):
-        if bed.chr != self.chr : 
-            return None
-        scp=self.getStopCodonPos()
-        pos=(bed.start+bed.stop)/2
-       # strand=self.strand_cmp(bed)
-        if(self.strand=="+"):
-            rpos=pos-scp
-        else:
-            rpos=scp-pos
-        return rpos
-    def bed_in_gene_body_percent(self,bed):
-        if bed.chr != self.chr :
-            return None
-        pos=(bed.start+bed.stop)/2
-        length=self.length()
-        if(self.strand=="+"):
-            return (pos-self.start)*100/length
-        else:
-            return (self.stop-pos)*100/length
-    def bed_in_CDS_percent(self,bed):
-        if bed.chr != self.chr :
-            return None
-        pos=(bed.start+bed.stop)/2
-        length=self.cds_stop-self.cds_start
-        if(self.strand=="+"):
-            return (pos-self.cds_start)*100/length
-        else:
-            return (self.cds_stop-pos)*100/length
-    def bed_gene_report_V1(self,bed):
-        if(self.distance_to_atg(bed)<0):
-            return "UP",self.distance_to_atg(bed)
-        elif(self.distance_to_stop_codon(bed)>0):
-            return "DOWN",self.distance_to_stop_codon(bed)
-        else:
-            return "BODY",self.bed_in_CDS_percent(bed)
-        
-    def PrintString(self):
-        print self.chr,
-        print self.id,self.exon_starts,self.exon_stops
-    def cds(self):
-        return self.new_cds()
-    def utr5(self):
-        return self.new_utr5()
-    def utr3(self):
-        return self.new_utr3()
     
-    def new_cds(self): 
+    def cds(self):
+        '''
+        Return the CDS region as a GeneBed Object
+        '''
         id=self.id+"_"+"cds"
         chr=self.chr
         start=self.cds_start
@@ -342,7 +271,10 @@ class GeneBed(Bed):
         exon_stops+=str(cds_stop)+","
         return GeneBed([id,chr,strand,start,stop,cds_start,cds_stop,exon_count,exon_starts,exon_stops])
 
-    def new_utr5(self): 
+    def new_utr5(self):
+        '''
+        Return 5 UTR as a GeneBed Object
+        '''
         if(self.strand == "+"):
             if(self.cds_start==self.start):
                 return None
@@ -391,7 +323,10 @@ class GeneBed(Bed):
             if exon_start_count < exon_count:
                     exon_starts=str(self.cds_stop)+","+exon_starts
             return GeneBed([id,chr,strand,start,stop,cds_start,cds_stop,exon_count,exon_starts,exon_stops])
-    def new_utr3(self): 
+    def utr3(self):
+        '''
+        Return 3' UTR as a GeneBed Object
+        '''
         if(self.strand == "-"):
             if(self.cds_start==self.start):
                 return None
@@ -441,79 +376,38 @@ class GeneBed(Bed):
                     exon_starts=str(self.cds_stop)+","+exon_starts
             return GeneBed([id,chr,strand,start,stop,cds_start,cds_stop,exon_count,exon_starts,exon_stops])
 
-
-
-
-
-    def toBedString(self):
-        return Bed.__str__(self)
-     
-    def strand_cmp(self,bed):
-        if bed.strand == ".":
-            return "."
-        if self.strand == bed.strand:
-            return "+"
-        else:
-            return "-"
-    
-    def region_cmp(self,bed):
-        '''report Bed Object overlap with which exon and intron or don't overlap with gene'''
-        if not Bed.overlap(self,bed):
-            r="Non-overlap"
-            return r
-        r="Overlap: "
-        for i in range(self.exon_count):
-            start,stop=self._exon(i+1)
-            if(bed.start<stop and start<bed.stop):
-                r+="Exon_"+str(i+1)+","
-        for i in range(self.exon_count-1):
-            start,stop=self._intron(i+1)
-            if(bed.start < stop and start < bed.stop):
-                r+="Intron_"+str(i+1)+","
-        return r
-    def bed_mid_in_cDNA_percent(self,bed):
-        if(self.chr!=bed.chr): return -1
-        pos=(bed.start+bed.stop)/2
-        cdna_len=self.cdna_length()
-        s=0
-        for e in self.Exons():
-            if self.strand=="+":
-                if e.stop > pos:
-                    s=s+pos-e.start
-                    break
-                else:
-                    s=s+e.stop-e.start
-            if self.strand=="-":
-                if e.start < pos:
-                    s=s+e.stop-pos
-                    break
-                else:
-                    s=s+e.stop-e.start
-        if s<0: return None
-        if s>cdna_len: return None
-        return float(s)/cdna_len
 
                    
 class VCF(Bed):
+    '''
+    VCF OBJECT
+    Example:
+        for i in TableIO.parse(file,"vcf"):
+            print i
+    '''
     def __init__(self,x,**kwargs):
-        self.chr=x[0]
-        self.chrom=self.chr
-        self.pos=int(x[1])
-        self.start=self.pos-1
-        self.stop=self.pos
-        self.id=x[2]
-        self.ref=x[3]
-        self.alt=x[4]
-        self.qual=float(x[5])
-        try:
-            self.filter=x[6]
-            self.info=x[7]
-            self.format=x[8]
-            self.others=x[9:]
-            self.infos={}
-            self._parse_infos()
-        except:
-            pass
+        if x is not None:
+            self.chr=x[0]
+            self.chrom=self.chr
+            self.pos=int(x[1])
+            self.start=self.pos-1
+            self.stop=self.pos
+            self.id=x[2]
+            self.ref=x[3]
+            self.alt=x[4]
+            self.qual=float(x[5])
+            try:
+                self.filter=x[6]
+                self.info=x[7]
+                self.format=x[8]
+                self.others=x[9:]
+                self.infos={}
+                self._parse_infos()
+            except:
+                pass
+        for key in kwargs.keys():
+            setattr(self,key,kwargs[key])
+
     def _parse_infos(self):
         x=self.info.split(";")
         for i in x:
@@ -531,16 +425,33 @@ class VCF(Bed):
         s=""
         s+=self.chr+"\t"+str(self.pos)+"\t"+self.id+"\t"+self.ref+"\t"+self.alt
         s+="\t"+str(self.qual)
+        if self.filter is not None:
+            s+="\t"+str(self.filter)
+        if self.info is not None:
+            s+="\t"+str(self.info)
+        if self.format is not None:
+            s+="\t"+str(self.format)
+        try:
+            for i in self.others:
+                s+="\t"+str(i)
+        except:
+            pass
         return s
         
     def __cmp__(self,other):
 	return cmp(self.chr,other.chr) or cmp(self.start,other.start)
+
+
+
+
+
 ###################### Below is Private Format
 class Peak(Bed):
     '''
     ChIP Seq Peak Class
     extension Bed Class
-    inner variables: reads_num,pvalue,coverage,peak_pos,peak_coverage
+    Private Class
+    read the output of xbams2peak.py
     '''
     def __init__(self,x,**kwargs):
         self.chr=x[0].strip()
@@ -577,6 +488,20 @@ class Peak(Bed):
         s+=str(self.peak_coverage)
         return s
 class TransUnit(Bed):
+    '''
+    Private File Format
+    For parse the output of xbams2trans.py
+
+    Usage:
+        for i in TableIO.parse("File.Trans","trans"):
+            print i
+    Or  
+        for i in TableIO.parse("File.Trans","trans"):
+            a.append(i)
+        a.sort()
+        for i in a:
+            print i
+    '''
     def __init__(self,x=None):
         self.genes=[]
         self.feats=[]
@@ -653,12 +578,32 @@ class TransUnit(Bed):
         
 class OddsRatioSNP(Bed):
     '''
-    OddsRatio Table are generated by program xbams2LogRatio.py
+    OddsRatio Table are generated by program xbams2APS.py
     position are 0-index 
     Example Format:
     chr1    10086   A/G     3.75495232253   ( 21 1 14 6 )   [20, 1, 0, 2] vs [13, 0, 5, 1]
+    
+    chromosome  
+    position    
+    MajorAllele/MinorAllele 
+    APS Score       
+    (Major in Case,Minor in Case,Major in Control, Minor in Control)
+    [A,C,G,T] in Case vs [A,C,G,T] in Control
     '''
     def __init__(self,x=None,**kwargs):
+        '''
+        initialize object 
+        
+        Examples:
+            x=OddsRatioSNP([chr,start,stop,major_allele,.....])
+
+            x=OddsRatioSNP(chr="chr1",start=pos-1,A=[2,0,4,0],B=[4,0,1,0])
+        APS Score :
+            Allele Preference Score
+                Chi2 Value For Log Odds Ratio
+            Reference:
+                http://en.wikipedia.org/wiki/Odds_ratio
+        '''
         if x is None:
             self.chr=None
             self.start=None
@@ -671,6 +616,8 @@ class OddsRatioSNP(Bed):
             self.A_nt_dis=None
             self.B_nt_dis=None
         else:
+            if type(x)==type("str"):
+                x=x.split("\t")
             self.chr=x[0].strip()
             self.start=int(x[1]) # 0-index for OddsRatio Table
             self.stop=int(x[1])+1
@@ -707,6 +654,11 @@ class OddsRatioSNP(Bed):
         
 
     def __str__(self):
+        '''
+        return the standard format 
+        Usage:
+            print aps
+        '''
         s=""
         s+=self.chr+"\t"+str(self.start)+"\t"+self.major_allele+"/"+self.minor_allele+"\t"+str(self.APS)
         s+="\t"+"( "
@@ -718,6 +670,9 @@ class OddsRatioSNP(Bed):
     def __cmp__(self,other):
 	return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) 
     def calculate_from_nt_dis(self):
+        '''
+        calculate the aps score from nt distribution
+        '''
         from math import log
         s=[0,0,0,0]
         idx=[0,0,0,0]

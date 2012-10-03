@@ -1,14 +1,37 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 28 Sep 2012 22:26:23
+# Last-modified: 02 Oct 2012 17:14:41
 
 import os,sys,argparse
 from xplib.Annotation import *
 from xplib import TableIO
 from xplib import DBI
 
+'''
+this program Compare overlap features or data in the query regions.
+The query regions could be in the format below:
+    vcf,bed,genebed, [private format: aps] etc.  DEFAULT: bed
+The database or data file format could be:
+    tabix,bam,vcf,bed,genebed, [private format : aps], etc. DEFAULT: bed
 
+The Simple Example:
+    xCmp.py -i query.bed -a db.bed
+    or
+    xCmp.py -i query.bed -a db1.bed db2.bed
+    or 
+    xCmp.py -i query.bed -a db1.bed db2.bed -m
+    the result will be table format if -m option is chosen.
+    or
+    xCmp.py -i query.vcf -I vcf -a db1.vcf db2.vcf -A VCF
+    or
+    xCmp.py -i query.bed -a file1.bam file2.bam -A bam
+    or
+    cat query.bed | xCmp.py -a db.bed
+
+Most of these queries are dependent on xplib.DBI
+
+'''
 def ParseArg():
     ''' This Function Parse the Argument '''
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -i [query.bed|query.genebed|query.OddsRatio.out] --input-format [bed|genebed|oddsratiosnp] -a file1.genebed file2.genebed --db_format genebed', epilog='Library dependency : xplib')
@@ -17,7 +40,7 @@ def ParseArg():
     p.add_argument('-I','--input_format',dest="input_format",action="store",default="bed",help="input file format")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file")
     p.add_argument('-a','--annotations',dest="db",action="store",default=[],help="feature annotation files",nargs="+")
-    p.add_argument('-A','--annotations_format',dest="db_format",action="store",default=[],help="annotation files formati [bed|genebed|tabix|vcf]",nargs="+")
+    p.add_argument('-A','--annotations_format',dest="db_format",action="store",default=[],help="annotation files format [bed|genebed|tabix|vcf]",nargs="+")
     p.add_argument('-m',dest="m",action="store_true",default=False,help="print in table format")
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
@@ -66,7 +89,7 @@ def Main():
         code="@"
         for i,dbi in enumerate(dbis):
             flag=0
-            for hit in DBI.query(bed,dbi):
+            for hit in dbi.query(bed):
                 if not args.m:
                     print >>out,"\tDB"+str(i+1)+" HT\t",hit
                 flag=1

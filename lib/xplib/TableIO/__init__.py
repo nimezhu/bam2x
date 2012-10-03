@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 28 Sep 2012 01:27:19
+# Last-modified: 02 Oct 2012 10:49:13
 import BedIO
 import GeneBedIO
 import SimpleIO
@@ -14,21 +14,17 @@ FormatToIterator = { "bed":BedIO.BedIterator,
                      "simple":SimpleIO.SimpleIterator,
                      "transunit":TransIO.TransUnitIterator,
                      "oddsratiosnp":OddsRatioSNPIO.OddsRatioSNPIterator,
+                     "aps":OddsRatioSNPIO.OddsRatioSNPIterator,
                      "bam":BamIO.BamIterator,
                      "sam":BamIO.SamIterator,
                      "bam2bed":BamIO.BamToBedIterator,
                      "vcf":VCFIO.VCFIterator
                    }
-#FormatToWrite    = {  
-#                     "bed":BedIO.BedWriter,
-#                     "genebed":GeneBedIO.GeneBedWriter,
-#                     "simple":SimpleIO.SimpleWriter
-#                   }
 def parse(handle,format="simple",**dict):
     """
     - handle  - handle to the file, or the filename
     - format  - lower case string describing the file format
-                example 'bed' 'genebed' 'gtf'
+                example 'bed' 'genebed' 'bam' 'sam' 'vcf'
     Example:
         from xplib import TableIO
         for i in TableIO.parse(file or filename,"bed"):
@@ -38,12 +34,10 @@ def parse(handle,format="simple",**dict):
     mode='rU'
     if format in FormatToIterator:
         iterator_generator=FormatToIterator[format]
-        i=iterator_generator(handle)
+        i=iterator_generator(handle,**dict)
     for r in i:
         yield r
 
-def write(handle,format):
-    pass
 
 
 

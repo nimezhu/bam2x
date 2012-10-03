@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 24 Jul 2012 15:16:35
+# Last-modified: 02 Oct 2012 10:43:14
 from xplib.Annotation import Bed
 from xplib.Annotation import TransUnit
 import types
-def TransUnitIterator(handle):
+def TransUnitIterator(handle,**kwargs):
     if type(handle)==type("s"):
         try:
             handle=open(handle,"r")

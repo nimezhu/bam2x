@@ -1,8 +1,24 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 28 Sep 2012 13:51:09
+# Last-modified: 02 Oct 2012 17:24:12
+'''
+xQuery.py is an example program for using xplib.DBI interface
+it reports the overlap features or data from the query region.
 
+the query file format can be:
+bed,vcf,genebed etc.
+
+the database or data file can be:
+bam,tabix,vcf,bed,genebed etc.
+
+for tabix ant other genome annotation file ,
+    it yield the overlap annotations in this region
+for bam file
+    it yield the Nucleotides Distribution in each site of this region.
+Example:
+    xQuery.py -i file.bed -a file.bam
+'''
 import os,sys,argparse
 from xplib.Annotation import Bed
 from xplib import TableIO
@@ -47,12 +63,12 @@ def Main():
         print "QR\t",x
         hit=0
         query+=1
-        for j in DBI.query(x,dbi):
+        for j in dbi.query(x):
             print "HT\t",j
             hit=1
         if args.dbformat=="tabix":
             x.chr=x.chr.replace("chr","")
-            for j in DBI.query(x,dbi):
+            for j in dbi.query(x):
                 print "HT\t",j
                 hit=1
         hits+=hit
