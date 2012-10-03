@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 13:38:31
+# Last-modified: 03 Oct 2012 15:50:17
 import os,sys,argparse,types
 from xplib.Annotation import Bed 
 from xplib import TableIO
@@ -125,7 +125,10 @@ class binindex(object):
             else:
                 format="bed"
             if kwargs.has_key("file"):
-                self.read(TableIO.parse(kwargs["file"],format))
+                del kwargs["format"]
+                f=kwargs["file"]
+                del kwargs["file"]
+                self.read(TableIO.parse(f,format,**kwargs))
             
 	def append(self,bed):
 	    '''
