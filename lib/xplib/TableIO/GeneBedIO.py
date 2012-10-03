@@ -1,7 +1,6 @@
-#!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 15:30:40
+# Last-modified: 03 Oct 2012 16:49:30
 from xplib.Annotation import GeneBed
 import types
 import SimpleIO

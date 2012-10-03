@@ -1,7 +1,6 @@
-#!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 13:35:05
+# Last-modified: 03 Oct 2012 16:48:40
 
 import os,sys
 from xplib.Annotation import *

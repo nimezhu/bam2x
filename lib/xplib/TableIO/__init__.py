@@ -1,7 +1,6 @@
-#!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 13:18:15
+# Last-modified: 03 Oct 2012 16:49:26
 import BedIO
 import GeneBedIO
 import SimpleIO

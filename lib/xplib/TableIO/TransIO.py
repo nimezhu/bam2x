@@ -1,7 +1,6 @@
-#!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Oct 2012 10:43:14
+# Last-modified: 03 Oct 2012 16:49:45
 from xplib.Annotation import Bed
 from xplib.Annotation import TransUnit
 import types

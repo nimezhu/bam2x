@@ -1,7 +1,6 @@
-#!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 26 Sep 2012 14:53:05
+# Last-modified: 03 Oct 2012 16:50:07
 
 import os,sys,argparse
 import pysam

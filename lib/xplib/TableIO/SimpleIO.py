@@ -1,7 +1,6 @@
-#!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 15:09:31
+# Last-modified: 03 Oct 2012 16:49:40
 import types
 import gzip
 

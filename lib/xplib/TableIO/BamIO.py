@@ -1,7 +1,6 @@
-#!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02 Oct 2012 10:45:45
+# Last-modified: 03 Oct 2012 16:49:10
 import types
 import pysam
 from xplib.Annotation import Bed

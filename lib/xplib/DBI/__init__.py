@@ -1,7 +1,6 @@
-#!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 13:29:11
+# Last-modified: 03 Oct 2012 16:48:34
 __all__=['BamI','TabixI','MetaDBI',"BinIndexI","BamlistI"]
 from DB import *
 

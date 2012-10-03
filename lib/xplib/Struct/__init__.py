@@ -1,7 +1,6 @@
-#!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 15:50:17
+# Last-modified: 03 Oct 2012 16:48:12
 import os,sys,argparse,types
 from xplib.Annotation import Bed 
 from xplib import TableIO
@@ -122,10 +121,10 @@ class binindex(object):
             '''
             if kwargs.has_key("format"):
                 format=kwargs["format"]
+                del kwargs["format"]
             else:
                 format="bed"
             if kwargs.has_key("file"):
-                del kwargs["format"]
                 f=kwargs["file"]
                 del kwargs["file"]
                 self.read(TableIO.parse(f,format,**kwargs))

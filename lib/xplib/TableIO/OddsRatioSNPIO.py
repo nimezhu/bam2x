@@ -1,7 +1,6 @@
-#!/usr/bin/python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 15:34:38
+# Last-modified: 03 Oct 2012 16:49:36
 import types
 from xplib.Annotation import OddsRatioSNP
 import SimpleIO
