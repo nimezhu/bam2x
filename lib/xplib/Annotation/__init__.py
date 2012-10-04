@@ -1,6 +1,6 @@
 # nimezhu@163.com
 import sys
-#Last-modified: 04 Oct 2012 01:39:41
+#Last-modified: 10-04-2012, 11:57:46 CDT
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak','OddsRatioSNP']        
@@ -413,7 +413,10 @@ class VCF(Bed):
             a=i.split("=")
             b=a[1].split(",")
             for i,c in enumerate(b):
-                b[i]=float(c)
+                try:
+                    b[i]=float(c)
+                except:
+                    b[i]=c
             if len(b)==1:
                 self.infos[a[0]]=b[0]
             else:
