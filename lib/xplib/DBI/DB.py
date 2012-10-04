@@ -1,12 +1,14 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 16:48:40
+# Last-modified: 03 Oct 2012 21:43:42
 
 import os,sys
 from xplib.Annotation import *
 from xplib import TableIO
 from xplib.Struct import binindex
 import pysam
+
+from twobitreader import *
 '''
 BASIC QUERY FUNCTIONS
 '''
@@ -77,9 +79,16 @@ class TabixI(MetaDBI):
                 yield item
         except:
            raise StopIteration
-
     
-    
+class TwoBitI(MetaDBI): 
+    def __init__(self,File,**kwargs):
+        '''
+        query 2 bit genome
+        '''
+        self.data=TwoBitFile(File)
+    def query(self,x):
+        chr=self.data[x.chr]
+        return chr[x.start:x.stop]
 
 
 class BamlistI(MetaDBI):
