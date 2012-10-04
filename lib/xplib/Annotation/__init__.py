@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 04 Oct 2012 12:37:34
+#Last-modified: 04 Oct 2012 12:39:45
 # reader of any column file
 __all__=['Bed','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -398,7 +398,10 @@ class VCF(Bed):
             self.id=str(x[2])
             self.ref=str(x[3])
             self.alt=str(x[4])
-            self.qual=float(x[5])
+            try:
+                self.qual=float(x[5])
+            except:
+                self.qual=x[5]
             try:
                 self.filter=x[6]
                 self.info=x[7]
@@ -426,7 +429,7 @@ class VCF(Bed):
             else:
                 self.infos[a[0]]=b
     def getInfo(self,InfoID):
-        if self.infos.has_key[InfoID]:
+        if self.infos.has_key(InfoID):
             return self.infos[InfoID]
         else:
             return None

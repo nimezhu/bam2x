@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 16:54:44
+# Last-modified: 04 Oct 2012 13:46:33
 '''
 xQuery.py is an example program for using xplib.DBI interface
 it reports the overlap features or data from the query region.
@@ -59,20 +59,28 @@ def Main():
     else:
         input=args.input
 
+    query_length=0
+    hits_number=0
     for x in TableIO.parse(input,args.input_format):
         print "QR\t",x
         hit=0
         query+=1
+        query_length+=len(x)
         for j in dbi.query(x):
             print "HT\t",j
             hit=1
+            hits_number+=1
+
         if args.dbformat=="tabix":
             x.chr=x.chr.replace("chr","")
             for j in dbi.query(x):
                 print "HT\t",j
                 hit=1
+                hits_number+=1
         hits+=hit
-    print >>out,"# Query:",query,"\n# Hits:",hits
+    print >>out,"# Query Number:",query,"\n# Query Have Hits:",hits
+    print >>out,"# Query Length:",query_length
+    print >>out,"# Hits Number:",hits_number
         
 
 
