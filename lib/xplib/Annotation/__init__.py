@@ -1,10 +1,7 @@
-# nimezhu@163.com
+# programmer:  zhuxp
+# email: nimezhu@163.com
 import sys
-<<<<<<< HEAD
-#Last-modified: 04 Oct 2012 12:18:52
-=======
-#Last-modified: 10-04-2012, 12:04:41 CDT
->>>>>>> b4804b0f950550d90828c0b0829a417669fc6529
+#Last-modified: 04 Oct 2012 12:29:37
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak','OddsRatioSNP']        
