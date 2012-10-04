@@ -1,6 +1,10 @@
 # nimezhu@163.com
 import sys
+<<<<<<< HEAD
 #Last-modified: 04 Oct 2012 12:18:52
+=======
+#Last-modified: 10-04-2012, 12:04:41 CDT
+>>>>>>> b4804b0f950550d90828c0b0829a417669fc6529
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak','OddsRatioSNP']        
@@ -386,10 +390,13 @@ class VCF(Bed):
     '''
     def __init__(self,x,**kwargs):
         if x is not None:
+<<<<<<< HEAD
             sep="\t"
             if kwargs.has_key["sep"]: sep=kwargs["sep"]
             if type(x)==type("str"):
                 x=x.split(sep)
+=======
+>>>>>>> b4804b0f950550d90828c0b0829a417669fc6529
             self.chr=str(x[0])
             self.chrom=self.chr
             self.pos=int(x[1])
