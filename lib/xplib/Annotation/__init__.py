@@ -1,9 +1,9 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 04 Oct 2012 12:31:36
+#Last-modified: 04 Oct 2012 12:34:32
 # reader of any column file
-__all__=['Utils','Bed','GeneBed','TransUnit','Peak','OddsRatioSNP']        
+__all__=['Bed','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
 class Bed(object):
     '''
