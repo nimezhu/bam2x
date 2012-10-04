@@ -1,6 +1,6 @@
 # nimezhu@163.com
 import sys
-#Last-modified: 10-04-2012, 11:57:46 CDT
+#Last-modified: 10-04-2012, 12:04:41 CDT
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak','OddsRatioSNP']        
@@ -386,14 +386,14 @@ class VCF(Bed):
     '''
     def __init__(self,x,**kwargs):
         if x is not None:
-            self.chr=x[0]
+            self.chr=str(x[0])
             self.chrom=self.chr
             self.pos=int(x[1])
             self.start=self.pos-1
             self.stop=self.pos
-            self.id=x[2]
-            self.ref=x[3]
-            self.alt=x[4]
+            self.id=str(x[2])
+            self.ref=str(x[3])
+            self.alt=str(x[4])
             self.qual=float(x[5])
             try:
                 self.filter=x[6]
@@ -425,7 +425,7 @@ class VCF(Bed):
         return int(self.infos["DP"])
     def __str__(self):
         s=""
-        s+=self.chr+"\t"+str(self.pos)+"\t"+self.id+"\t"+self.ref+"\t"+self.alt
+        s+=str(self.chr)+"\t"+str(self.pos)+"\t"+self.id+"\t"+self.ref+"\t"+self.alt
         s+="\t"+str(self.qual)
         if self.filter is not None:
             s+="\t"+str(self.filter)
