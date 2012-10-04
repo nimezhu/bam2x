@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 04 Oct 2012 01:00:31
+# Last-modified: 04 Oct 2012 01:14:19
 
 hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
@@ -8,7 +8,6 @@ hNtToNum={'a':0,'A':0,
           't':3,'T':3
          }
 Nt=['A','C','G','T']
-
 
     
 def rc(seq):
@@ -22,3 +21,4 @@ def shuffle(seq):
    a=list(seq)
    random.shuffle(a)
    return "".join(a)
+

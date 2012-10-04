@@ -1,7 +1,7 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 21:39:31
-__all__=['BamI','TabixI','MetaDBI',"BinIndexI","BamlistI"]
+# Last-modified: 04 Oct 2012 01:29:44
+__all__=['BamI','TabixI','MetaDBI',"BinIndexI","BamlistI","TwoBitI","GenomeI"]
 from DB import *
 
 FormatToDBI = { 
@@ -14,7 +14,7 @@ FormatToDBI = {
              "oddsratiosnp":BinIndexI,
              "vcf":BinIndexI,
              "2bit":TwoBitI,
-             "genome":TwoBitI,
+             "genome":GenomeI,
             }
 def query(x,dbi):
     '''

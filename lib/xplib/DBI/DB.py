@@ -1,13 +1,13 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 21:43:42
+# Last-modified: 04 Oct 2012 01:41:20
 
 import os,sys
 from xplib.Annotation import *
 from xplib import TableIO
 from xplib.Struct import binindex
 import pysam
-
+from xplib.Tools import rc
 from twobitreader import *
 '''
 BASIC QUERY FUNCTIONS
@@ -89,8 +89,34 @@ class TwoBitI(MetaDBI):
     def query(self,x):
         chr=self.data[x.chr]
         return chr[x.start:x.stop]
-
-
+class GenomeI(TwoBitI):
+    '''
+    Wrapped for query sequence
+    Initialize genome 2bit file only once.
+    '''
+    def get_seq(self,bed):
+        seq=self.query(bed)
+        if bed.strand=="-":
+            seq=rc(seq)
+        return seq
+    def get_cdna_seq(self,genebed):
+        s=""
+        for i in genebed.Exons():
+            s+=self.get_seq(i)
+        return s
+    def get_cds_seq(self,genebed):
+        cds=genebed.cds()
+        if cds is None or len(cds)==0: return ""
+        return self.get_cdna_seq(cds)
+    def get_utr3_seq(self,genebed):
+        utr3=genebed.utr3()
+        if utr3 is None or len(utr3)==0: return ""
+        return self.get_cdna_seq(utr3)
+    def get_utr5_seq(self,genebed):
+        utr5=genebed.utr5()
+        if utr5 is None or len(utr5)==0: return ""
+        return self.get_cdna_seq(utr5)
+        
 class BamlistI(MetaDBI):
     '''
     A DBI for a list of bamfiles ( or a file contain bamfile names) 

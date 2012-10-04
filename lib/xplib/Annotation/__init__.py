@@ -1,6 +1,6 @@
 # nimezhu@163.com
 import sys
-#Last-modified: 03 Oct 2012 16:48:51
+#Last-modified: 04 Oct 2012 01:39:41
 
 # reader of any column file
 __all__=['Utils','Bed','GeneBed','TransUnit','Peak','OddsRatioSNP']        
@@ -60,7 +60,7 @@ class Bed(object):
 	string=self.chr+"\t"+str(self.start)+"\t"+str(self.stop)+"\t"+str(self.id)+"\t"+str(self.score)
 	string+="\t"+str(self.strand)
 	return string
-    def length(self):
+    def __len__(self):
         '''
         return the length of the annotation
         '''
