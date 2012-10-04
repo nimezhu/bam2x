@@ -1,15 +1,6 @@
 # Programmer : zhuxp
-# Date: 
-# Last-modified: 03 Oct 2012 16:50:07
-
-import os,sys,argparse
-import pysam
-import random
-from math import log,sqrt
-from xplib import TableIO
-from xplib.Annotation import *
-from scipy.stats import chi2
-
+# Date:  Sep 2012
+# Last-modified: 04 Oct 2012 01:00:31
 
 hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
@@ -18,11 +9,16 @@ hNtToNum={'a':0,'A':0,
          }
 Nt=['A','C','G','T']
 
-        
-def ntDisToChi2(disA,disB):
-    '''
-    return :
-       APS 
-    '''
-    x=OddsRatioSNP(A=disA,B=disB)
-    return x.APS
+
+    
+def rc(seq):
+   comps = {'A':"T", 'C':"G", 'G':"C", 'T':"A",
+           'B':"V", 'D':"H", 'H':"D", 'K':"M",
+           'M':"K", 'R':"Y", 'V':"B", 'Y':"R",
+           'W':'W', 'N':'N', 'S':'S'}
+   return ''.join([comps[x] for x in seq.upper()[::-1]])
+def shuffle(seq):
+   import random
+   a=list(seq)
+   random.shuffle(a)
+   return "".join(a)
