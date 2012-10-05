@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 10-04-2012, 22:34:08 CDT
+#Last-modified: 10-04-2012, 22:37:01 CDT
 # reader of any column file
 __all__=['Bed','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -35,6 +35,8 @@ class Bed(object):
 	        self.id=x[3].strip()
                 self.score=float(x[4])
 	        self.strand=x[5].strip()
+            except:
+                pass
         for key in kwargs.keys():
             setattr(self,key,kwargs[key])
     def __str__(self):
