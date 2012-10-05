@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 04 Oct 2012 12:39:45
+#Last-modified: 10-04-2012, 22:34:08 CDT
 # reader of any column file
 __all__=['Bed','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -22,6 +22,9 @@ class Bed(object):
     bed=Bed(chr="chr1",start=1,stop=20,id="id",score=0.0,strand="+")
     '''
     def __init__(self,x=None,**kwargs):
+        self.id="NONAME"
+        self.score=0
+        self.strand="."
         if x is not None:
             if type(x)==type("str"):
                 x=x.split("\t")
@@ -30,25 +33,10 @@ class Bed(object):
 	    self.stop=int(x[2])
             try:
 	        self.id=x[3].strip()
-            except:
-                self.id="NONAME"
-            try:
                 self.score=float(x[4])
-            except:
-                self.score=0
-	    try:
 	        self.strand=x[5].strip()
-	    except:
-	        self.strand="."
         for key in kwargs.keys():
             setattr(self,key,kwargs[key])
-        if self.id is None:
-            self.id="NONAME"
-        if self.score is None:
-            self.score=0
-        if self.strand is None:
-            self.strand="."
-        
     def __str__(self):
         '''
         Return a standard bed 6 format string
