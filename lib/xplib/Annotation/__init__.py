@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 10-04-2012, 22:37:01 CDT
+#Last-modified: 05 Oct 2012 20:58:04
 # reader of any column file
 __all__=['Bed','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -28,7 +28,7 @@ class Bed(object):
         if x is not None:
             if type(x)==type("str"):
                 x=x.split("\t")
-	    self.chr=x[0].strip()
+	    self.chr=str(x[0]).strip()
 	    self.start=int(x[1])
 	    self.stop=int(x[2])
             try:
