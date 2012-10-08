@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 05 Oct 2012 20:58:04
+#Last-modified: 08 Oct 2012 17:53:54
 # reader of any column file
 __all__=['Bed','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -442,6 +442,62 @@ class VCF(Bed):
         
     def __cmp__(self,other):
 	return cmp(self.chr,other.chr) or cmp(self.start,other.start)
+
+
+class Repeat(Bed):
+    def __init__(self,x=None,**kwargs):
+        sep="\t"
+        if kwargs.has_key("sep"):
+            sep=kwargs["sep"]
+        if type(x)==type(str):
+            x=x.split(sep)
+        if x is not None:
+            try:
+                self.bin=int(x[0])
+                self.swScore=int(x[1])
+                self.milliDiv=int(x[2])
+                self.milliDel=int(x[3])
+                self.millIns=int(x[4])
+                self.chr=str(x[5])
+                self.genoName=self.chr
+                self.start=int(x[6])
+                self.genoStart=self.start
+                self.stop=int(x[7])
+                self.genoEnd=self.stop
+                self.genoLeft=int(x[8])
+                self.strand=str(x[9])
+                self.repName=str(x[10])
+                self.repClass=str(x[11])
+                self.repFamily=str(x[12])
+                self.repStart=int(x[13])
+                self.repEnd=int(x[14])
+                self.repLeft=int(x[15])
+                self.id=x[16]
+            except:
+                print >>sys.stderr,"wrong format file"
+        for key in kwargs.keys():
+            setattr(self,key,kwargs[key])
+    def __str__(self):
+        s=""
+        s+=str(self.bin)
+        s+="\t"+str(self.swScore)
+        s+="\t"+str(self.milliDiv)
+        s+="\t"+str(self.milliDel)
+        s+="\t"+str(self.millIns)
+        s+="\t"+str(self.genoName)
+        s+="\t"+str(self.genoStart)
+        s+="\t"+str(self.genoEnd)
+        s+="\t"+str(self.genoLeft)
+        s+="\t"+str(self.strand)
+        s+="\t"+str(self.repName)
+        s+="\t"+str(self.repClass)
+        s+="\t"+str(self.repFamily)
+        s+="\t"+str(self.repStart)
+        s+="\t"+str(self.repEnd)
+        s+="\t"+str(self.repLeft)
+        s+="\t"+str(self.id)
+        return s
+
 
 
 

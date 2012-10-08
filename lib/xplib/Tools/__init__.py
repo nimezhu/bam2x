@@ -22,3 +22,12 @@ def shuffle(seq):
    random.shuffle(a)
    return "".join(a)
 
+def seq_wrapper(seq,width=60):
+    s=""
+    seqlen=len(seq)
+    for i in range(0,seqlen,width):
+        stop=i+width
+        if stop>seqlen:stop=seqlen
+        s+=seq[i:stop]+"\n"
+    return s
+

@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 16:49:26
+# Last-modified: 08 Oct 2012 17:38:58
 import BedIO
 import GeneBedIO
 import SimpleIO
@@ -8,6 +8,7 @@ import TransIO
 import OddsRatioSNPIO
 import BamIO
 import VCFIO
+import RepeatIO
 FormatToIterator = { "bed":BedIO.BedIterator,
                      "genebed":GeneBedIO.GeneBedIterator,
                      "simple":SimpleIO.SimpleIterator,
@@ -17,7 +18,8 @@ FormatToIterator = { "bed":BedIO.BedIterator,
                      "bam":BamIO.BamIterator,
                      "sam":BamIO.SamIterator,
                      "bam2bed":BamIO.BamToBedIterator,
-                     "vcf":VCFIO.VCFIterator
+                     "vcf":VCFIO.VCFIterator,
+                     "repeat":RepeatIO.RepeatIterator,
                    }
 def parse(handle,format="simple",**dict):
     """
