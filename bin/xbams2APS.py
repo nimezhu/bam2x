@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 16:53:41
+# Last-modified: 10 Oct 2012 16:31:37
 '''
 This program calculate the Allele Preference Score for Specific SNPs or Specific Regions or whole genome.
 
@@ -212,7 +212,7 @@ def QueryBed(i,dbi_A,dbi_B):
         As.append(x)
     for x in dbi_B.query(i):
         Bs.append(x)
-    for j in range(i.length()):
+    for j in range(len(i)):
         aps=OddsRatioSNP(A=As[j],B=Bs[j],chr=chr,start=offset+j)
         if binaryFilter(aps):
             yield aps
