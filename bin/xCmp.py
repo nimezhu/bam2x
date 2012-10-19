@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 16:54:17
+# Last-modified: 19 Oct 2012 12:57:47
 
 import os,sys,argparse
 from xplib.Annotation import *
@@ -57,10 +57,6 @@ def Main():
         except IOError:
             print >>sys.stderr,"can't open file ",args.output,"to write. Using stdout instead"
             out=sys.stdout
-    if args.input=="stdin":
-        input=sys.stdin
-    else:
-        input=open(args.input,"r")
 
     db_format=args.db_format
     if len(db_format)==0:
@@ -82,7 +78,7 @@ def Main():
         dbis.append(DBI.init(f,db_format[i]))
         hits.append(0)
     query_num=0
-    for bed in TableIO.parse(input,args.input_format):
+    for bed in TableIO.parse(args.input,args.input_format):
         if not args.m:
             print >>out,"QR\t",bed
         query_num+=1
