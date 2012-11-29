@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 08 Oct 2012 17:53:54
+#Last-modified: 29 Nov 2012 15:15:39
 # reader of any column file
 __all__=['Bed','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -441,7 +441,7 @@ class VCF(Bed):
         return s
         
     def __cmp__(self,other):
-	return cmp(self.chr,other.chr) or cmp(self.start,other.start)
+	return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.ref,other.ref) or cmp(self.alt,other.alt)
 
 
 class Repeat(Bed):

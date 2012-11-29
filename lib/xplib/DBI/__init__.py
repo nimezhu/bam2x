@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 10 Oct 2012 14:58:57
+# Last-modified: 29 Nov 2012 14:51:43
 __all__=['BamI','TabixI','MetaDBI',"BinIndexI","BamlistI","TwoBitI","GenomeI"]
 from DB import *
 
@@ -68,7 +68,7 @@ def init(handle,dbformat,**dict):
         
         dbi=DBI.init("filename.bam","bam")
         
-        dbi=DBI.init(["file1.bam","file2.bam","bamlist")
+        dbi=DBI.init(["file1.bam","file2.bam"],"bamlist")
 
 
     '''

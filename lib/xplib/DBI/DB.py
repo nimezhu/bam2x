@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 04 Oct 2012 01:41:20
+# Last-modified: 29 Nov 2012 14:42:35
 
 import os,sys
 from xplib.Annotation import *
@@ -20,6 +20,9 @@ class MetaDBI:
         self.data=data
     def query(self,x):
         pass
+    def __iter__(self):
+        for i in self.data:
+            yield i
 class BinIndexI(MetaDBI):
     '''
     DBI for flat annotation file or list
