@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 29 Nov 2012 14:42:35
+# Last-modified: 12-11-2012, 11:09:06 CST
 
 import os,sys
 from xplib.Annotation import *
@@ -82,7 +82,11 @@ class TabixI(MetaDBI):
                 yield item
         except:
            raise StopIteration
-    
+class FormatTabixI():
+    def __init__(self,format,tabixfile):
+        pass
+    def query(self,x):
+        pass
 class TwoBitI(MetaDBI): 
     def __init__(self,File,**kwargs):
         '''
