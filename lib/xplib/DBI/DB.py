@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-11-2012, 11:09:06 CST
+# Last-modified: 12-13-2012, 23:28:40 CST
 
 import os,sys
 from xplib.Annotation import *
@@ -72,6 +72,15 @@ class TabixI(MetaDBI):
             self.data=pysam.Tabixfile(tabix_file_name)
         except:
             print >>sys.stderr,"WARNING: Can't init the tabix file",tabix_file_name
+        if dict.has_key("header") and dict["header"]==True:
+            f=TableIO.parse(tabix_file_name)
+            h=f.next()
+            l=len(h)
+            for i in range(l):
+                h[i]=h[i].strip()
+            self.header=h
+            f.close()
+
 
     def query(self,x):
         '''

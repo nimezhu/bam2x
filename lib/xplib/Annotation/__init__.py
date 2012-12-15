@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 04 Dec 2012 11:30:10
+#Last-modified: 12-11-2012, 17:26:23 CST
 # reader of any column file
 __all__=['Bed','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -502,10 +502,10 @@ class Repeat(Bed):
 
 class MetaBed(Bed):
     def __init__(self,**dict):
-        self.attr=dict["attr"]
         attr=dict["attr"]
         for i in range(len(attr)):
             attr[i]=attr[i].strip()
+        self.attr=dict["attr"]
         value=dict["value"]
         if len(value)!=len(attr): 
             print >>sys.stderr,"length of value and attr are not the same"
@@ -521,7 +521,7 @@ class MetaBed(Bed):
             if self.__dict__.has_key('chromosome'):
                 self.__setattr__('chr',self.chromosome)
             if self.__dict__.has_key('chrom'):
-                self.__setattr__('chr','chrom')
+                self.__setattr__('chr',self.chrom)
     def __str__(self):
         s=[]
         for i in self.attr:
