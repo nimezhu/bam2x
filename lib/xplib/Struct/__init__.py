@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 16:48:12
+# Last-modified: 12-30-2012, 12:14:44 CST
 import os,sys,argparse,types
 from xplib.Annotation import Bed 
 from xplib import TableIO
@@ -106,7 +106,46 @@ class binindex(object):
 	            yield j+binindex.binOffsets[i]
 	        startBin >>= binindex.binNextShift
 	        endBin >>= binindex.binNextShift
+        @staticmethod
+        def bin2cov(data):
+            '''
+            input a binindex data
+            output total length of coverage for each bin 
+            '''
+            coverage={}
+            for index,i in enumerate(data):
+                if index%100==0:
+                    print >>sys.stderr,"processing %d entries\r"%index,
+                if not coverage.has_key(i.chr):
+                    coverage[i.chr]=[0 for k in range(binindex.binLength)]
+                i_bin=binindex.range2bin(i.start,i.stop)
+                for j in binindex.iter_range_overlap_bins(i.start,i.stop):
+                    (start,stop)=binindex.bin2range(j)
+                    max_start=max(start,i.start)
+                    min_stop=min(stop,i.stop)
+                    length=min_stop-max_start
+                    if float(length)/(stop-start)<0:
+                        print >>sys.stderr,length,stop,start
+                    coverage[i.chr][j]+=length
+            return coverage
         
+        
+        @staticmethod
+        def bin2range(bin):
+            binShift=binindex.binFirstShift
+            for i in binindex.binOffsets:
+                if bin-i>=0:
+                    bin=bin-i
+                    break
+                binShift+=binindex.binNextShift
+            return (bin<<binShift,(bin+1)<<binShift)
+        
+        @staticmethod
+        def bin2length(bin):
+            (start,end)=binindex.bin2range(bin)
+            return end-start
+
+      
         
         def __init__(self,handle=None,**kwargs):
             self.data={}
