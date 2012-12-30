@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-30-2012, 12:58:08 CST
+# Last-modified: 12-30-2012, 14:12:21 CST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -66,7 +66,7 @@ def Main():
     print >>out,"# Date: ",time.asctime()
     print >>out,"# The command line is :"
     print >>out,"#","\t".join(sys.argv)
-    print >>out,"chr\tstart\tstop\tbinindex\tcoverage\tcoverage_nt\tbinsize " 
+    print >>out,"chr\tstart\tstop\tbinindex\tcoverage\tcoverage_nt\tbinlevel\tbinsize " 
     header=False
     if (args.format=="metabed"): header=True
 
@@ -83,7 +83,7 @@ def Main():
                     continue
                 if end > chr_sizes[chr]:
                     end=chr_sizes[chr]
-            print >>out,chr,"\t",start,"\t",end,"\t",i,"\t",float(x)/(end-start),"\t",x,"\t",end-start
+            print >>out,chr,"\t",start,"\t",end,"\t",i,"\t",float(x)/(end-start),"\t",x,"\t",b.bin2level(i),"\t",end-start
 
 
 

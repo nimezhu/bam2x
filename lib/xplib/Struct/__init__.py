@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-30-2012, 12:14:44 CST
+# Last-modified: 12-30-2012, 14:13:28 CST
 import os,sys,argparse,types
 from xplib.Annotation import Bed 
 from xplib import TableIO
@@ -144,6 +144,11 @@ class binindex(object):
         def bin2length(bin):
             (start,end)=binindex.bin2range(bin)
             return end-start
+        @staticmethod
+        def bin2level(bin):
+            for (i,x) in enumerate(binindex.binOffsets):
+                if bin-x>=0:
+                    return 4-i 
 
       
         
