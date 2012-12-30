@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 08 Oct 2012 17:52:58
+# Last-modified: 12-30-2012, 13:03:13 CST
 
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -51,12 +51,15 @@ def Main():
     END OF IO TEMPLATE 
     '''
     a={}
-    for i in TableIO.parse(fin,args.format):
+    header=False
+    if args.format=="metabed":
+        header=True
+    for i in TableIO.parse(fin,args.format,header=header):
         if not a.has_key(i.chr):
             a[i.chr]=[]
         a[i.chr].append(i)
     for chr in sorted(a.keys()):
-        for i in a[chr]:
+        for i in sorted(a[chr]):
             print >>out,i
         
 

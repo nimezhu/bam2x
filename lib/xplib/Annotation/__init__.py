@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 12-11-2012, 17:26:23 CST
+#Last-modified: 12-30-2012, 13:16:44 CST
 # reader of any column file
 __all__=['Bed','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -527,6 +527,8 @@ class MetaBed(Bed):
         for i in self.attr:
             s.append(str(self.__dict__[i]))
         return "\t".join(s)
+    def __cmp__(self,other):
+	return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) 
         
 
 
