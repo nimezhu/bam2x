@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 16:49:40
+# Last-modified: 12-30-2012, 20:30:07 CST
 import types
 import gzip
 
@@ -39,6 +39,7 @@ def SimpleIterator(handle,**kwargs):
         if line[0]=="#": continue
         x=line.split(sep)
         for i,y in enumerate(x):
+            x[i]=x[i].strip()
             try:
               x[i]=float(x[i])
               if x[i]==int(x[i]):
