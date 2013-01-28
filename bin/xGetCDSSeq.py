@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-27-2013, 21:15:05 EST
+# Last-modified: 01-27-2013, 21:19:43 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -60,8 +60,8 @@ def Main():
     print >>out,"#\t"," ".join(sys.argv)
     genome=GenomeI(args.genome)
     for i in TableIO.parse(fin,"genebed"):
-            print ">",i.id+"_CDS"
-            print seq_wrapper(genome.get_cds_seq(i))
+            print >>out,">",i.id+"_CDS"
+            print >>out,seq_wrapper(genome.get_cds_seq(i))
 
 
 

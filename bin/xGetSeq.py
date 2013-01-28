@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-27-2013, 21:09:13 EST
+# Last-modified: 01-27-2013, 21:19:19 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -62,12 +62,12 @@ def Main():
     genome=GenomeI(args.genome)
     if args.format=="genebed":
         for i in TableIO.parse(fin,args.format):
-            print ">",i.id+"_cDNA"
-            print seq_wrapper(genome.get_cdna_seq(i))
+            print >>out,">",i.id+"_cDNA"
+            print >>out,seq_wrapper(genome.get_cdna_seq(i))
     elif args.format=="bed":
         for i in TableIO.parse(fin,args.format):
-            print ">",i.id
-            print seq_wrapper(genome.get_seq(i))
+            print >>out,">",i.id
+            print >>out,seq_wrapper(genome.get_seq(i))
 
 
 
