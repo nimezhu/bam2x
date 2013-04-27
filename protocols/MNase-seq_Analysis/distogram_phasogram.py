@@ -53,7 +53,7 @@ def detect_peak(x,y):
 
 
 def ParseArg():
-    p=argparse.ArgumentParser( description = "draw distogram/phasogram for MNase_seq data", epilog="Library dependency: pysam, matplotlib, scipy, numpy")
+    p=argparse.ArgumentParser( description = "draw distogram/phasogram/midpoint for MNase_seq data", epilog="Library dependency: pysam, matplotlib, scipy, numpy")
     group=p.add_mutually_exclusive_group()
     group.add_argument("-d","--distogram",action='store_true',help="draw distogram for MNase_seq data")
     group.add_argument("-p","--phasogram",action='store_true',help="draw phasogram for MNase-seq data")
