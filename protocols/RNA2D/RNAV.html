@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RNA Visualization</title>
+</head>
+<body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+<script src="http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js"></script>
+<script src="http://ajax.cdnjs.com/ajax/libs/underscore.js/1.1.6/underscore-min.js"></script>
+<script src="http://ajax.cdnjs.com/ajax/libs/backbone.js/0.3.3/backbone-min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="RNA2D.js"></script>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+<style>
+    .myDiv {font-family:sans-serif; font-size:12pt;}
+    .myDiv { width: 250px; height: 250px; padding: 0.5em; }
+    input { size:200;}
+    .myDiv {
+        border:2px solid #0094ff;
+        -webkit-border-top-left-radius:6px;
+        -webkit-border-top-right-radius:6px;
+        -moz-border-radius-topleft:6px;
+        -moz-border-radius-topright:6px;
+        border-top-left-radius:6px;
+        border-top-right-radius:6px;
+        width:300px;
+        font-size:12pt; /* or whatever */
+    }
+    .myDiv h2 {
+        padding:4px;
+        color:#fff;
+        margin:0;
+        background-color:#0094ff;
+        font-size:12pt; /* or whatever */
+    }
+    .myDiv p {
+        padding:4px;
+    }
+
+    li:hover {
+        background-color: #FF0000;
+    }
+
+</style>
+<script>
+    $(function() {
+        $( ".myDiv" ).draggable();
+    });
+</script>
+<div style="background-color: aliceblue;" class="myDiv">
+    <h2>Enter RNA2D String</h2>
+
+    <textarea id="INPUT" rows="10" cols="25">((((..)))((..)))
+    </textarea>
+    <button id="add">Add RNA</button>
+    <button id="clear" >Clear</button>
+    <button id="reset" >Reset</button>
+</div>
+<div id="FIGURE" style="background-color: aliceblue ; width:500px ;height:500px ; float: left" class="myDiv">
+    <h2>FIGURE</h2>
+    <svg>
+        <g id="ideogram">
+
+        </g>
+        <g id="highlight">
+
+        </g>
+        <g id="link">
+
+        </g>
+    </svg>
+
+</div >
+
+
+<div    style="background-color: aliceblue ; float: left" class="myDiv">
+      <h2>OUTPUT</h2>
+      <div id="OUT"></div>
+</div>
+
+<div id="output" style="background-color: aliceblue ; float: left" class="myDiv">
+    <h2>LIST</h2>
+    <ul id="OUTPUTLIST">
+
+    </ul>
+</div>
+<script type="text/javascript" src="RNAV.js"></script>
+</body>
+</html>
