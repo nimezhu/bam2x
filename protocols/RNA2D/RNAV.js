@@ -27,7 +27,7 @@ $(function() {
 
             this.bind("add", function( model ){
 
-                var R2D = new RNA2DView(model);
+                var R2D = new RNA2DView({model:model});
                 R2D.render();
             })
 
@@ -39,9 +39,9 @@ $(function() {
 
     RNA2DView = Backbone.View.extend(
         {
-        initialize: function(model) {
-            this.model=model;
-        //_.bindAll(this,'render')
+        initialize: function() {
+            //this.model=model;
+        _.bindAll(this,'render','render_figure_header','render_figure');
 
     },
     render: function()
@@ -60,7 +60,7 @@ $(function() {
             ,
             render_figure: function( struct2d )
             {
-
+                struct2d=struct2d.trim();
                 var fill = d3.scale.ordinal()
                     .domain(d3.range(4))
                     .range(["#000000", "#FFDD89", "#957244", "#F26223"]);
@@ -81,7 +81,7 @@ $(function() {
                 var stems=highlight.selectAll("g").data(stem_vector);
 
                 var length=struct2d.length;
-
+                console.log("struct2d length: "+length);
                 var g_stems=stems.enter().append("g");
 
                 g_stems.append("path").attr("fill","red")
@@ -115,16 +115,34 @@ $(function() {
                 link_g.append("path").attr("data",function(d) {return d})
                     .attr("d",
                         d3.svg.chord()
-                            .source(function(d,i) {return {startAngle:(stem_vector[i][0]-1)/length*6.20,
-                                endAngle:stem_vector[i][1]/length*6.20}})
-                            .target(function(d,i) {return {startAngle:(stem_vector[i][2]-1)/length*6.20,
-                                endAngle:stem_vector[i][3]/length*6.20}})
+                            .source(function(d,i) {return {startAngle:(d[0]-1)/length*6.20,
+                                endAngle:d[1]/length*6.20}})
+                            .target(function(d,i) {return {startAngle:(d[2]-1)/length*6.20,
+                                endAngle:d[3]/length*6.20}})
                             .radius(150)
 
 
                     )   .style("fill",  function(d,i){return fill(i%4)})
 
                     .style("opacity", 0.5)
+                    .on("mouseover",function(d,i){$("#OUT").html(highlight_text(d)); d3.select(this).style("opacity",1.0);})
+                    .on("mouseout",function(d,i){$("#OUT").html(struct2d);d3.select(this).style("opacity",0.5)});
+
+                function highlight_text(d)
+                {
+                    var s=struct2d.split('');
+                    var state=0;
+                    var retv='';
+                    for (var i0=0;i0< s.length;i0++)
+                    {
+                        if (i0+1==d[0]) {retv+='<span style="color: indianred">';}
+                        if (i0+1==d[2]) {retv+='<span style="color: indianred">';}
+                        retv+=s[i0];
+                        if (i0+1==d[1]) {retv+='</span>';}
+                        if (i0+1==d[3]) {retv+='</span>';}
+                    }
+                    return retv+d;
+                }
             }
 
 
@@ -155,7 +173,7 @@ $(function() {
             },
             view: function()
             {
-                var R2D = new RNA2DView(this.model);
+                var R2D = new RNA2DView({model:this.model});
                 R2D.render();
 
                 $("#OUT").text(this.model.get("struct2d"));//
