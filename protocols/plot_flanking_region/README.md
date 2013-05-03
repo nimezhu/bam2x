@@ -8,8 +8,10 @@ plot_flanking_region
 
 
 ### EXAMPLE: ###
-  see [test_run.sh](https://github.com/yu68/bam2x/blob/master/protocols/plot_flanking_region/test_run.sh)
-  output are *.png
+  see [test_run.sh](https://github.com/yu68/bam2x/blob/master/protocols/plot_flanking_region/test_run.sh)  
+  Output are *.png  
+    One Heatmap example:  
+      ![Heatmap 1](./heatmap_test_MNase_CTCF.png)
 
 
 ### HELP: ###
