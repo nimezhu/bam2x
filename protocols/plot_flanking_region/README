@@ -1,14 +1,18 @@
-This program is used to plot internsities of NGS data around given interval regions.
-It has two functions:
+plot_flanking_region
+====================
+
+#### This program is used to plot internsities of NGS data around given interval regions. ####
+#### It has two functions: ####
   1. plot average internsities for each of multiple datasets (BAM) or each of multiplt groups of intervals
   1. plot heatmap for individual intervals, and separate by groups
 
 
-EXAMPLE:
-  see test_run.sh
+### EXAMPLE: ###
+  see [test_run.sh](https://github.com/yu68/bam2x/blob/master/protocols/plot_flanking_region/test_run.sh)
   output are *.png
 
-HELP:
+
+### HELP: ###
 
 usage: plot_flanking_region.py [-h] [-H | -A] [-b BAMS [BAMS ...]]
                                [-i INTERVALS [INTERVALS ...]] [-d]
