@@ -95,9 +95,10 @@ optional arguments:
                         eps, pdf, png, ps, raw, rgba, svg, svgz
 
 Library dependency: matplotlib, scipy, numpy
+```
 
-
-  3. Epi_Intensity_nucleosome.py
+#####  3. Epi_Intensity_nucleosome.py #####
+```
 usage: Epi_Intensity_nucleosome.py [-h] [-N NUCLEOSOME] [-b BEDS [BEDS ...]]
                                    [-l LEN] [-n NAME [NAME ...]] [-o OUTPUT]
 
