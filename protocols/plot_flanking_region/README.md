@@ -13,7 +13,7 @@ plot_flanking_region
 
 
 ### HELP: ###
-
+```
 usage: plot_flanking_region.py [-h] [-H | -A] [-b BAMS [BAMS ...]]
                                [-i INTERVALS [INTERVALS ...]] [-d]
                                [-r RESOLUTION] [-l LENGTH] [-f FRAG_L]
@@ -54,4 +54,4 @@ optional arguments:
                         png,jpg,...) final will be average_* or heatmap_*
 
 Library dependency : xplib, pylab, scipy, numpy, pysam, matplotlib
-
+```
