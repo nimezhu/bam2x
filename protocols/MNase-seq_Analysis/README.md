@@ -2,42 +2,45 @@ MNase-seq_Analysis:
 -------------------
 
 ###  1. distogram and phasogram. ###
-     Based on the idea of supplemental figure 3 of this paper:  
-     http://www.nature.com/nature/journal/v474/n7352/full/nature10002.html  
+Based on the idea of supplemental figure 3 of this paper:  
+http://www.nature.com/nature/journal/v474/n7352/full/nature10002.html  
      
-     * Example command:
-       * see run-phasogram-E14.sh
-       * similar for distogram
-     * Example output:
-       * see pdf files
+* Example command:
+  * see run-phasogram-E14.sh
+  * similar for distogram
+* Example output:
+  * see pdf files
 
 
 ###  2. midpoint-gram ###
-     Originated from Figure 1C of this paper:  
-     http://www.plosgenetics.org/article/info%3Adoi%2F10.1371%2Fjournal.pgen.1003036  
+Originated from Figure 1C of this paper:  
+http://www.plosgenetics.org/article/info%3Adoi%2F10.1371%2Fjournal.pgen.1003036  
 
-     * Example command:
+* Example command:
        ```
        python distogram_phasogram.py MNase_E14_mm9_rmdup.sorted.bam -n 50000000 -m -x -200 200 -i 1 -o E14_rmdup.pdf
        ```
-     * Example output:
-       * see pdf files
+* Example output:
+  * see pdf files
 
 
 ###  3. Count epi- mark data in single nucleosome level ###
-     First achieve nucleosome position information using Danpos software.
-     Danpos: https://code.google.com/p/danpos/
-     The script take output xls file of Danpos as input file for nucleosome positions.
-     The figure file (histone mark intensity-single nucleosome.jpg) illustrate the idea.
+First achieve nucleosome position information using Danpos software.
+Danpos: https://code.google.com/p/danpos/
+The script take output xls file of Danpos as input file for nucleosome positions.
+The figure below illustrate the idea.  
+  ![histone mark intensity-single nucleosome](./histone mark intensity-single nucleosome.jpg)
 
-     Example command:
-       see Epi_Intensity_nucleosome_example.sh
+* Example command:
+  * see Epi_Intensity_nucleosome_example.sh
 
 
 
-## Program argument options: ##
 
-  #### 1. distogram_phasogram.py ####
+
+#### Program argument options: ####
+
+##### 1. distogram_phasogram.py #####
 ```
 usage: distogram_phasogram.py [-h] [-d | -p | -m] [-b input_bam] [-o OUTPUT]
                               [-i PILE] [-x XLIM [XLIM ...]] [-n NUM]
@@ -70,7 +73,7 @@ optional arguments:
 Library dependency: pysam, matplotlib, scipy, numpy
 ```
   
-####  2. plot_histogram.py ####
+#####  2. plot_histogram.py #####
 ```
 usage: plot_histogram.py [-h] [-d | -p] [-x XLIM [XLIM ...]] [-o OUTPUT]
                          input_count
