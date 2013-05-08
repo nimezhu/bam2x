@@ -14,33 +14,45 @@
 <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
 <style>
-    .myDiv {font-family:Arial; font-size:12pt;}
-    .myDiv { width: 250px; height: 240px; padding: 0.5em; }
+    html,body{margin:5;padding:5;}
+
+    /*.myDiv { width: 250px; height: 240px; padding: 0.5em; } */
     input { size:200;}
     .myDiv {
-        border:2px solid black;
+        /*border:1px solid black;
         -webkit-border-top-left-radius:6px;
         -webkit-border-top-right-radius:6px;
         -moz-border-radius-topleft:6px;
         -moz-border-radius-topright:6px;
         border-top-left-radius:6px;
         border-top-right-radius:6px;
-        width:300px;
-        font-size:12pt; /* or whatever */
-        background-color: aliceblue
+        /*width:300px; */
+        font-size:9pt; /* or whatever */
+        /* background-color: aliceblue */
     }
     .myDiv h2 {
         padding:4px;
         color:#fff;
         margin:0;
         background-color:black;
-        font-size:12pt; /* or whatever */
+        font-size: 10pt; /* or whatever */
         font-family:Arial;
     }
     .myDiv p {
         font-family:Arial;
-        padding:4px;
+        /*padding:4px; */
     }
+
+    .middle h2 {
+        padding:4px;
+        color:#fff;
+        margin:0;
+        background-color:navy;
+        font-size: 10pt; /* or whatever */
+        font-family:Arial;
+
+    }
+
 
     li:hover {
         background-color: #FF0000;
@@ -48,17 +60,20 @@
 
 </style>
 <script>
+    /*
     $(function() {
         $( "#workspace" ).sortable();
         $("#left").sortable();
 
     })
+    */
 
 </script>
 
-<div  id="workspace">
-<div  style="float: left; height:500px" id="left">
-<div style="background-color: aliceblue;" class="myDiv" >
+<div  id="workspace" style="position: absolute; top: -20; left: 20; width: 100%; height: 750px; min-width: 900px ">
+
+<div  style="position:absolute; float: left; height:100%; width:210px ; left:0; top:0; border: 1px;background-color: aliceblue" id="left">
+<div style=" height:33.33%" class="myDiv" >
     <h2>Enter RNA2D String</h2>
 
     <textarea id="INPUT" rows="10" cols="25">((((..)))((..)))
@@ -68,7 +83,7 @@
     <button id="reset" >Reset</button>
 </div>
 
-    <div style="background-color: aliceblue;" class="myDiv" >
+    <div style="height:33.33%" class="myDiv" >
         <h2>RNA Nucleotide Scores</h2>
 
         <textarea id="PLOT" rows="10" cols="25">
@@ -76,13 +91,13 @@
         </textarea>
         <button id="plotScore">Plot Score</button>
     </div>
-<div    style=" " class="myDiv">
+<div    style=" height:33.33%" class="myDiv">
     <h2>OUTPUT</h2>
     <div id="OUT"></div>
 </div>
 
 </div>
-<div id="FIGURE" style=" width:500px ;height:750px ; float: left" class="myDiv">
+<div id="FIGURE" style=" margin:0 210px ;  height:100% ; background-color: white; border: 1px" class="middle">
     <h2>FIGURE</h2>
     <div id="div_svg">
     <svg id="svg">
@@ -106,7 +121,7 @@
 
 
 
-<div id="output" style="float: left; height: 750px" class="myDiv">
+<div id="output" style="position: absolute; float: right; height: 100%; width: 210px; right:0 ; top:0; border:1px;background-color: aliceblue" class="myDiv">
     <h2>LIST</h2>
     <ul id="OUTPUTLIST">
 
