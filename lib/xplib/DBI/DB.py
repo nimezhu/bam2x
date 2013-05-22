@@ -192,30 +192,42 @@ class BamlistI(MetaDBI):
                     print >>sys.stderr,"WARNING: Can't init the bam file",bamfile
             self.bamfiles.append(bamfile)
 
-    def query(self,x):
-        s=[[0,0,0,0] for row in range(x.stop-x.start)]
-        for bamfile in self.bamfiles:
-            try:
-                A=bamfile.pileup(x.chr,x.start,x.stop)
-            except:
-                print >>sys.stderr,"Can't pile up",x.chr,x.start,x.stop
-                raise StopIteration 
-            for pileupcolumn in A:
-                j=pileupcolumn.pos-x.start
-                if j<0: continue
-                if j>x.stop-x.start: break
-                for pileupread in pileupcolumn.pileups:
-                    try:
-                        if pileupread.is_del: continue
-                        if pileupread.indel!=0: continue
-                        nt=pileupread.alignment.seq[pileupread.qpos]
-                        if BamI.hNtToNum.has_key(nt):
-                            k=BamI.hNtToNum[nt]
-                            s[j][k]+=1
-                    except:
-                        pass
-        for i in s:
-            yield i
+    def query(self,x,method='pileup'):
+        if method=='fetch':
+            for bamfile in self.bamfiles:
+                for read in bamfile.fetch(x.chr,x.start,x.stop):
+                    if read.tid<0:continue
+                    strand='+'
+                    if read.is_reverse:
+                        strand='-'
+                    score=read.mapq
+                    bed=Bed([bamfile.references[read.tid],read.pos,read.aend,read.qname,score,strand])
+                    yield bed
+        elif method=='pileup':
+            s=[[0,0,0,0] for row in range(x.stop-x.start)]
+            for bamfile in self.bamfiles:
+                try:
+                    A=bamfile.pileup(x.chr,x.start,x.stop)
+
+                except:
+                    print >>sys.stderr,"Can't pile up",x.chr,x.start,x.stop
+                    raise StopIteration 
+                for pileupcolumn in A:
+                    j=pileupcolumn.pos-x.start
+                    if j<0: continue
+                    if j>x.stop-x.start: break
+                    for pileupread in pileupcolumn.pileups:
+                        try:
+                            if pileupread.is_del: continue
+                            if pileupread.indel!=0: continue
+                            nt=pileupread.alignment.seq[pileupread.qpos]
+                            if BamI.hNtToNum.has_key(nt):
+                                k=BamI.hNtToNum[nt]
+                                s[j][k]+=1
+                        except:
+                            pass
+            for i in s:
+                yield i
 
 
 
