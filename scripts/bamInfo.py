@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # programmer : zhuxp
 # usage:
 import sys
