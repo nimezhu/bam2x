@@ -170,7 +170,7 @@ def show_help():
     print >>sys.stderr,"                             /data/user/2.bam"
     print >>sys.stderr,"Options:"
     print >>sys.stderr,"   -h,--help          show this help message"
-    print >>sys.stderr,"   -b binsize         TSS up and down bp number default: 2000  (-1000,+1000)"
+    print >>sys.stderr,"   --bed file.bed     the query regions in bed format"
     print >>sys.stderr,"   --bam bamlistfile"
     print >>sys.stderr,"                      a file contains bam filenames and reads number<optional> in each line"
     print >>sys.stderr,"   -r,--reads         not normalize to RPKM"
