@@ -76,7 +76,7 @@ def Main():
             File_reads_number[i]=ss
             samfile.close()
     for i in bamlist:
-            print "Total Reads Nunmber:"
+            #print "Total Reads Nunmber:"
             print i+"\t"+str(File_reads_number[i])
     
 
