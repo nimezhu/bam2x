@@ -201,11 +201,11 @@ def OutputTable():
     for i,x in enumerate(bamlist):
         print "#    BAM."+str(i+1)+":",x,"\t",File_reads_number[x],"reads"
     print "# Normalized to RPKM:",ifNormalize
-    print "# chr\tstart\tend\tid\tstrand",
+    print "# chr\tstart\tend\tid\tscore\tstrand",
     for i in range(len(bamlist)):
         print "\tBAM."+str(i+1),
     print 
-    print "# chr\tstart\tend\tid\tstrand",
+    print "# chr\tstart\tend\tid\tscore\tstrand",
     for i in range(len(bamlist)):
         dirfile=bamlist[i].split("/")
         file=dirfile[-1].replace(".bam","")
