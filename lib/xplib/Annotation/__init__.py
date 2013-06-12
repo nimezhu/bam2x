@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 06-12-2013, 13:25:21 EDT
+#Last-modified: 06-12-2013, 13:34:50 EDT
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -384,11 +384,11 @@ class GeneBed(Bed):
         return s
 
 
-    def __str__():
+    def __str__(self):
         s=""
         s+=self.id+"\t"
         s+=self.chr+"\t"
-        s+-self.strand+"\t"
+        s+=self.strand+"\t"
         s+=str(self.start)+"\t"
         s+=str(self.stop)+"\t"
         s+=str(self.cds_start)+"\t"
