@@ -1,7 +1,7 @@
 # Programmer : zhuxp
 # Date:
-# Last-modified: 03 Oct 2012 16:49:20
-from xplib.Annotation import Bed
+# Last-modified: 06-12-2013, 13:13:51 EDT
+from xplib.Annotation import Bed,Bed12
 import types
 import gzip
 import SimpleIO 
@@ -20,6 +20,9 @@ def BedIterator(handle,**dict):
     Bed is xplib.Annotation.Bed object.
     '''
     for i in SimpleIO.SimpleIterator(handle,**dict):
-        yield Bed(i)
+        if(len(i)>=12):
+            yield Bed12(i)
+        else:
+            yield Bed(i)
 
     

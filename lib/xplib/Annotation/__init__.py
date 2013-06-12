@@ -1,9 +1,9 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 12-30-2012, 13:16:44 CST
+#Last-modified: 06-12-2013, 13:25:21 EDT
 # reader of any column file
-__all__=['Bed','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
+__all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
 class Bed(object):
     '''
@@ -364,7 +364,81 @@ class GeneBed(Bed):
             if exon_start_count < exon_count:
                     exon_starts=str(self.cds_stop)+","+exon_starts
             return GeneBed([id,chr,strand,start,stop,cds_start,cds_stop,exon_count,exon_starts,exon_stops])
+    def toBedString(self):
+        s=""
+        s+=self.chr+"\t"
+        s+=str(self.start)+"\t"
+        s+=str(self.stop)+"\t"
+        s+=self.id+"\t"
+        s+=str(self.score)+"\t"
+        s+=self.strand+"\t"
+        s+=str(self.cds_start)+"\t"
+        s+=str(self.cds_stop)+"\t"
+        s+="0,0,0"+"\t"
+        s+=str(self.exon_count)+"\t"
+        for i in range(self.exon_count):
+            s+=str(self.exon_stops[i]-self.exon_starts[i])+","
+        s+="\t"
+        for x in self.exon_starts:
+            s+=str(x-self.start)+","
+        return s
 
+
+    def __str__():
+        s=""
+        s+=self.id+"\t"
+        s+=self.chr+"\t"
+        s+-self.strand+"\t"
+        s+=str(self.start)+"\t"
+        s+=str(self.stop)+"\t"
+        s+=str(self.cds_start)+"\t"
+        s+=str(self.cds_stop)+"\t"
+        s+=str(self.exon_count)+"\t"
+        for x in self.exon_starts:
+            s+=str(x)+","
+        s+="\t"
+        for x in self.exon_stops:
+            s+=str(x)+","
+        if hasattr(self,"name2"):
+            s+="\t"
+            s+=self.name2
+        return s
+    
+        
+        
+
+
+class Bed12(GeneBed):
+    def __init__(self,x,**kwargs):
+        self.chr=x[0].strip()
+        self.start=int(x[1])
+        self.stop=int(x[2])
+        self.id=x[3].rstrip()
+        self.score=float(x[4])
+        self.strand=x[5].strip()
+        self.cds_start=int(x[6])
+        self.cds_stop=int(x[7])
+        self.itemRgb=x[8]
+        self.blockCount=int(x[9])
+        
+        self.exon_count=self.blockCount
+
+        self.blockSizes=x[10].strip().strip(",").split(",")
+        self.blockStarts=x[11].strip().strip(",").split(",")
+        self.exon_starts=[0 for n in range(self.exon_count)]
+        self.exon_stops=[0  for n in range(self.exon_count)]
+        for i in range(self.blockCount):
+            try:
+                self.blockStarts[i]=int(self.blockStarts[i])
+                self.blockSizes[i]=int(self.blockSizes[i])
+                self.exon_starts[i]=self.blockStarts[i]+self.start
+                self.exon_stops[i]=self.blockStarts[i]+self.blockSizes[i]+self.start
+            except:
+                pass
+    def __str__(self):
+        return self.toBedString()
+
+        
 
                    
 class VCF(Bed):
