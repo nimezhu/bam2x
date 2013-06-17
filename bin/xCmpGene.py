@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-17-2013, 12:57:19 EDT
+# Last-modified: 06-17-2013, 15:49:45 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -88,7 +88,7 @@ def Main():
     utr5=DBI.init(utr5_list,"genebed")
 
 
-    print >>out,"#chr\tstart\tend\tname\tscore\tstrand\tupstream\tdownstream\texon\tintron\tutr3\tutr5"
+    print >>out,"#chr\tstart\tend\tname\tscore\tstrand\tgene\tupstream\tdownstream\texon\tintron\tutr3\tutr5"
     for i in TableIO.parse(fin,args.format):
         print >>out,i,
         print >>out,"\t",toIDs(gene.query(i)),
