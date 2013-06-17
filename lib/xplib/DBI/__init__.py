@@ -1,12 +1,13 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 29 Nov 2012 14:51:43
+# Last-modified: 06-17-2013, 11:01:46 EDT
 __all__=['BamI','TabixI','MetaDBI',"BinIndexI","BamlistI","TwoBitI","GenomeI"]
 from DB import *
 
 FormatToDBI = { 
              "bed":BinIndexI,
              "genebed":BinIndexI,
+             "genepred":BinIndexI,
              "bam":BamI,
              "bams":BamlistI,
              "bamlist":BamlistI,

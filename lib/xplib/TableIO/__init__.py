@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-11-2012, 11:50:26 CST
+# Last-modified: 06-17-2013, 10:58:28 EDT
 import BedIO
 import GeneBedIO
 import SimpleIO
@@ -12,6 +12,7 @@ import RepeatIO
 import MetaBedIO
 FormatToIterator = { "bed":BedIO.BedIterator,
                      "genebed":GeneBedIO.GeneBedIterator,
+                     "genepred":GeneBedIO.GeneBedIterator,
                      "simple":SimpleIO.SimpleIterator,
                      "transunit":TransIO.TransUnitIterator,
                      "oddsratiosnp":OddsRatioSNPIO.OddsRatioSNPIterator,

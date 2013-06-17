@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 06-12-2013, 13:34:50 EDT
+#Last-modified: 06-17-2013, 12:48:17 EDT
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -162,14 +162,17 @@ class GeneBed(Bed):
                 self.exon_stops[i]=int(self.exon_stops[i])
             except:
                 pass
-        self.score=0
         try:
-            self.protein_id=x[10]
-            self.name2=x[10]
+            self.score=x[10]
+        except:
+            self.score=0
+        try:
+            self.protein_id=x[11]
+            self.name2=x[11]
         except:
             self.name2="None"
         try:
-            self.align_id=x[11]
+            self.align_id=x[12]
         except:
             pass
         for key in kwargs.keys():
@@ -260,7 +263,7 @@ class GeneBed(Bed):
         exon_stops+=str(cds_stop)+","
         return GeneBed([id,chr,strand,start,stop,cds_start,cds_stop,exon_count,exon_starts,exon_stops])
 
-    def new_utr5(self):
+    def utr5(self):
         '''
         Return 5 UTR as a GeneBed Object
         '''
