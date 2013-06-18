@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-18-2013, 17:20:37 EDT
+# Last-modified: 06-18-2013, 17:52:44 EDT
 VERSION="0.3"
 '''
 xQuery.py is an example program for using xplib.DBI interface
@@ -84,6 +84,7 @@ def Main():
         query+=1
         query_length+=len(x)
         results=dbi.query(x,**dict)
+        print >>sys.stderr,type(x)
         if isinstance(results,numpy.ndarray):
             print >>out,"HT\t",
             for value in results:
@@ -91,6 +92,12 @@ def Main():
             print >>out,""
             hit=1
             hits_number+=1
+        elif isinstance(results,string):
+            print >>out,"HT\t",
+            print >>out,results
+            hit=1
+            hits_number+=1
+
         else:
             for j in results:
                 print >>out,"HT\t",j
