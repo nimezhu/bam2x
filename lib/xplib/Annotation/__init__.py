@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 06-17-2013, 12:48:17 EDT
+#Last-modified: 06-18-2013, 11:46:19 EDT
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -140,8 +140,8 @@ class GeneBed(Bed):
                 x=x[1:]
         except:
             pass
-        self.id=x[0].rstrip()
-        self.chr=x[1].rstrip()
+        self.id=str(x[0]).rstrip()
+        self.chr=str(x[1]).rstrip()
         self.strand=x[2]
         if(self.strand == 1):
             self.strand="+"
