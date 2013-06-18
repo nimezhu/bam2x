@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-18-2013, 16:44:52 EDT
+# Last-modified: 06-18-2013, 17:20:37 EDT
 VERSION="0.3"
 '''
 xQuery.py is an example program for using xplib.DBI interface
@@ -28,6 +28,7 @@ from xplib import DBI
 import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
 import time
+import numpy
 
 def ParseArg():
     ''' This Function Parse the Argument '''
@@ -75,15 +76,26 @@ def Main():
 
     query_length=0
     hits_number=0
-    for x in TableIO.parse(input,args.input_format):
+    for (i0,x) in enumerate(TableIO.parse(input,args.input_format)):
+        if i0%100==0:
+            print >>sys.stderr,"query ",i0," entries\r",
         print >>out,"QR\t",x
         hit=0
         query+=1
         query_length+=len(x)
-        for j in dbi.query(x,**dict):
-            print >>out,"HT\t",j
+        results=dbi.query(x,**dict)
+        if isinstance(results,numpy.ndarray):
+            print >>out,"HT\t",
+            for value in results:
+                print >>out,str(value)+",",
+            print >>out,""
             hit=1
             hits_number+=1
+        else:
+            for j in results:
+                print >>out,"HT\t",j
+                hit=1
+                hits_number+=1
 
         if args.dbformat=="tabix":
             x.chr=x.chr.replace("chr","")
