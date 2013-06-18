@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-18-2013, 17:47:56 EDT
+# Last-modified: 06-18-2013, 18:14:10 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -306,10 +306,10 @@ class BigWigI(MetaDBI):
         '''
         query bw file
         '''
-        if not dict.has_key("model"):
+        if not dict.has_key("method"):
             return self.data.get_as_array(x.chr,x.start,x.stop)
         else:
-            if dict["model"]=="cDNA" or dict["model"]=="cdna":
+            if dict["method"]=="cDNA" or dict["method"]=="cdna":
                 s=[]
                 for i in x.Exons():
                     array=self.data.get_as_array(i.chr,i.start,i.stop)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-27-2013, 21:19:19 EST
+# Last-modified: 06-17-2013, 13:23:00 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -66,8 +66,10 @@ def Main():
             print >>out,seq_wrapper(genome.get_cdna_seq(i))
     elif args.format=="bed":
         for i in TableIO.parse(fin,args.format):
-            print >>out,">",i.id
-            print >>out,seq_wrapper(genome.get_seq(i))
+            if (i.id=="NONAME"):
+                i.id=i.chr+"_"+str(i.start)+"_"+str(i.stop)
+            print >>out,">"+i.id
+            print >>out,seq_wrapper(genome.get_seq(i)),
 
 
 

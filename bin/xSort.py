@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-30-2012, 13:03:13 CST
+# Last-modified: 06-12-2013, 13:13:10 EDT
 
 import os,sys,argparse
-from xplib.Annotation import Bed
+from xplib.Annotation import *
 from xplib import TableIO
 import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
