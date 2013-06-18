@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-13-2012, 23:28:40 CST
+# Last-modified: 06-18-2013, 16:43:33 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -265,3 +265,51 @@ class BamI(BamlistI):
                 except:
                     print >>sys.stderr,"WARNING: Can't init the bam file",bam
             self.bamfiles.append(bam)
+ 
+
+
+import bx.bbi.bigwig_file
+class BigWigI(MetaDBI):
+    '''
+    A DBI for bigwig file
+    lib dependent: bxpython
+    '''
+    def __init__(self,bwfile,**dict):
+        '''
+        init bw file
+        '''
+        if type(bwfile)==type("string"):
+            self.data=bx.bbi.bigwig_file.BigWigFile(open(bwfile,"rb"))
+        else:
+            try:
+                self.data=bx.bbi.bigwig_file.BigWigFile(bwfile)
+            except:
+                print >>sys.stderr,"Error in open bw file"
+
+    def query(self,x,**dict):
+        '''
+        query bw file
+        '''
+        if not dict.has_key("model"):
+            return self.data.get_as_array(x.chr,x.start,x.stop)
+        else:
+            if dict["model"]=="cDNA" or dict["model"]=="cdna":
+                s=[]
+                for i in x.Exons():
+                    array=self.data.get_as_array(i.chr,i.start,i.stop)
+                    size=i.stop-i.start
+                    if  x.strand=="+" or x.strand==".":
+                        for j in range(size):
+                            s.append(array[j])
+                    elif x.strand=="-":
+                        for j in xrange(size-1,-1,-1):
+                            s.append(array[j])
+                return s
+            else:
+                print >>sys.stderr,"query model is wrong for bw file"
+
+        
+
+
+
+

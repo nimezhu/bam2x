@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Dec 2012 21:34:20
+# Last-modified: 06-18-2013, 16:44:52 EDT
 VERSION="0.3"
 '''
 xQuery.py is an example program for using xplib.DBI interface
@@ -38,6 +38,7 @@ def ParseArg():
     p.add_argument('-A','--dbformat',dest="dbformat",type=str,help="input file database format. {bed|genebed|tabix|bam}",default="bed")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file")
     p.add_argument('-a','--annotations',dest="db",type=str,default="",required=True,help="query annotation files")
+    p.add_argument('-m','--query_method',dest="query_method",type=str,help="query method : ( bamfile: pileup or fetch ; bigwig: cDNA or not )")
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
@@ -47,6 +48,7 @@ def ParseArg():
 def Main():
     global args,out
     args=ParseArg()
+    dict={}
     if args.output=="stdout":
         out=sys.stdout
     else:
@@ -61,7 +63,8 @@ def Main():
     print >>out,"in bam2x ( https://github.com/nimezhu/bam2x )"
     print >>out,"# Date: ",time.asctime()
     print >>out,"# The command line is :\n#\t"," ".join(argv)
-   
+    if args.query_method:
+        dict["method"]=args.query_method
     dbi=DBI.init(args.db,args.dbformat)
     hits=0
     query=0
@@ -77,14 +80,14 @@ def Main():
         hit=0
         query+=1
         query_length+=len(x)
-        for j in dbi.query(x):
+        for j in dbi.query(x,**dict):
             print >>out,"HT\t",j
             hit=1
             hits_number+=1
 
         if args.dbformat=="tabix":
             x.chr=x.chr.replace("chr","")
-            for j in dbi.query(x):
+            for j in dbi.query(x,**dict):
                 print >>out,"HT\t",j
                 hit=1
                 hits_number+=1

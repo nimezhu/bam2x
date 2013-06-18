@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-17-2013, 11:01:46 EDT
+# Last-modified: 06-18-2013, 15:55:56 EDT
 __all__=['BamI','TabixI','MetaDBI',"BinIndexI","BamlistI","TwoBitI","GenomeI"]
 from DB import *
 
@@ -17,9 +17,10 @@ FormatToDBI = {
              "vcf":BinIndexI,
              "2bit":TwoBitI,
              "genome":GenomeI,
-             "repeat":BinIndexI
+             "repeat":BinIndexI,
+             "bigwig":BigWigI
             }
-def query(x,dbi):
+def query(x,dbi,**dict):
     '''
     DBI.query is wrapper for query all kinds of data|file|database. 
     
@@ -53,7 +54,7 @@ def query(x,dbi):
         for i in dbi.query(bed):
             print i
     '''
-    for i in dbi.query(x):
+    for i in dbi.query(x,**dict):
         yield i
         
 def init(handle,dbformat,**dict):
