@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 06-18-2013, 11:46:19 EDT
+#Last-modified: 06-18-2013, 16:54:45 EDT
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -37,6 +37,7 @@ class Bed(object):
 	        self.strand=x[5].strip()
             except:
                 pass
+        self.exon_count=1
         for key in kwargs.keys():
             setattr(self,key,kwargs[key])
     def __str__(self):
@@ -126,6 +127,11 @@ class Bed(object):
             return "+"
         else:
             return "-"
+    def Exons(self):
+        b=Bed([self.chr,self.start,self.stop,self.id+"_Exon_1",self.strand,self.score])
+        a=[]
+        a.append(b)
+        return a
 
 
 class GeneBed(Bed):
