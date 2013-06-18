@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-18-2013, 16:43:33 EDT
+# Last-modified: 06-18-2013, 17:47:56 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -110,9 +110,25 @@ class GenomeI(TwoBitI):
     Wrapped for query sequence
     Initialize genome 2bit file only once.
     '''
-    def get_seq(self,bed):
-        seq=self.query(bed)
-        if bed.strand=="-":
+    def query(self,x,**dict):
+        method="seq"
+        if(dict.has_key("method")):
+            method=dict["method"]
+        if method=="seq":
+            return self.get_seq(x)
+        elif method=="cdna" or method=="cDNA":
+            return self.get_cdna_seq(x)
+        elif method=="cds" or method=="CDS":
+            return self.get_cds_seq(x)
+        elif method=="utr3":
+            return self.get_utr3_seq(x)
+        elif method=="utr5":
+            return self.get_utr5_seq(x)
+
+    def get_seq(self,x):
+        chr=self.data[x.chr]
+        seq=chr[x.start:x.stop]
+        if x.strand=="-":
             seq=rc(seq)
         return seq
     def get_cdna_seq(self,genebed):
