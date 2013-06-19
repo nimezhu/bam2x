@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-18-2013, 18:26:11 EDT
+# Last-modified: 06-18-2013, 18:42:50 EDT
 VERSION="0.3"
 '''
 xQuery.py is an example program for using xplib.DBI interface
@@ -39,7 +39,7 @@ def ParseArg():
     p.add_argument('-A','--dbformat',dest="dbformat",type=str,help="input file database format. {bed|genebed|tabix|bam}",default="bed")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file")
     p.add_argument('-a','--annotations',dest="db",type=str,default="",required=True,help="query annotation files")
-    p.add_argument('-m','--query_method',dest="query_method",type=str,help="query method : ( bamfile: pileup or fetch ; bigwig: cDNA or not )")
+    p.add_argument('-m','--query_method',dest="query_method",type=str,help="query method : ( bamfile: pileup or fetch ; bigwig: cDNA or not ; twobit: seq | cDNA | cds | utr3 | utr5 )")
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
