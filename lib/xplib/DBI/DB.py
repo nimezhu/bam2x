@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-28-2013, 10:26:35 EDT
+# Last-modified: 06-28-2013, 11:24:17 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -73,6 +73,7 @@ class TabixI(MetaDBI):
             self.data=pysam.Tabixfile(tabix_file_name)
         except:
             print >>sys.stderr,"WARNING: Can't init the tabix file",tabix_file_name
+        self.header=None
         if dict.has_key("header") and dict["header"]==True:
             f=TableIO.parse(tabix_file_name)
             h=f.next()
@@ -81,6 +82,13 @@ class TabixI(MetaDBI):
                 h[i]=h[i].strip()
             self.header=h
             f.close()
+        elif dict.has_key("header") and isinstance(dict["header"],list):
+            self.header=dict["header"]
+        elif dict.has_key("header") and isinstance(dict["header"],str):
+            fh=TableIO.parse(dict["header"])
+            self.header=fh.next()
+            #print >>sys.stderr,self.header
+            
 
 
     def query(self,x):
@@ -91,7 +99,7 @@ class TabixI(MetaDBI):
         if self.dict.has_key("tabix"):
             f=self.dict["tabix"]
         try:
-            for item in TableIO.parse(self.data.fetch(x.chr,x.start,x.stop),format=f):
+            for item in TableIO.parse(self.data.fetch(x.chr,x.start,x.stop),format=f,header=self.header):
                 yield item
         except:
            raise StopIteration
