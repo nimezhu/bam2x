@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 06-18-2013, 16:54:45 EDT
+#Last-modified: 06-19-2013, 13:27:37 EDT
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -613,7 +613,37 @@ class MetaBed(Bed):
     def __cmp__(self,other):
 	return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) 
         
-
+class Fimo(Bed):
+    '''
+    FIMO - Motif search tool
+    '''
+    def __init__(self,x,**dict):
+        if dict.has_key("sep"): sep=dict["sep"]
+        else:   sep="\t"
+        if isinstance(x,str): x=x.split(sep)
+        self.pattern=x[0]
+        self.chr=x[1]
+        self.seqname=x[1]
+        self.start=int(x[2])-1
+        self.stop=int(x[3])
+        self.strand=x[4]
+        self.score=float(x[5])
+        self.pvalue=float(x[6])
+        self.qvalue=float(x[7])
+        self.match_seq=x[8]
+    def __str__(self):
+        s=""
+        s+=self.pattern+"\t"
+        s+=self.chr+"\t"
+        s+=str(self.start+1)+"\t"
+        s+=str(self.stop)+"\t"
+        s+=self.strand+"\t"
+        s+=str(self.score)+"\t"
+        s+=str(self.pvalue)+"\t"
+        s+=str(self.qvalue)+"\t"
+        s+=str(self.match_seq)
+        return s
+    
 
 ###################### Below is Private Format
 class Peak(Bed):

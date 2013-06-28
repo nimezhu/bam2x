@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-18-2013, 15:55:56 EDT
+# Last-modified: 06-19-2013, 13:52:05 EDT
 __all__=['BamI','TabixI','MetaDBI',"BinIndexI","BamlistI","TwoBitI","GenomeI"]
 from DB import *
 
@@ -76,5 +76,8 @@ def init(handle,dbformat,**dict):
     '''
     if dbformat in FormatToDBI:
         dbi=FormatToDBI[dbformat]
+        return dbi(handle,format=dbformat,**dict)
+    else:
+        dbi=BinIndexI
         return dbi(handle,format=dbformat,**dict)
 

@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-18-2013, 10:59:58 EDT
+# Last-modified: 06-19-2013, 13:28:58 EDT
 import BedIO
 import GeneBedIO
 import SimpleIO
@@ -11,6 +11,7 @@ import VCFIO
 import RepeatIO
 import MetaBedIO
 import gtfIO
+import IO
 FormatToIterator = { "bed":BedIO.BedIterator,
                      "genebed":GeneBedIO.GeneBedIterator,
                      "genepred":GeneBedIO.GeneBedIterator,
@@ -24,7 +25,8 @@ FormatToIterator = { "bed":BedIO.BedIterator,
                      "vcf":VCFIO.VCFIterator,
                      "repeat":RepeatIO.RepeatIterator,
                      "metabed":MetaBedIO.MetaBedIterator,
-                     "gtf":gtfIO.GTFIterator
+                     "gtf":gtfIO.GTFIterator,
+                     "fimo":IO.FimoIterator
                    }
 def parse(handle,format="simple",**dict):
     """

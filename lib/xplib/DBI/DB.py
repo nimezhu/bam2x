@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-19-2013, 01:34:01 EDT
+# Last-modified: 06-28-2013, 10:26:35 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -68,6 +68,7 @@ class TabixI(MetaDBI):
         wrapped in DBI.init(filename,"tabix")
         '''
         self.tabix_file_name=tabix_file_name
+        self.dict=dict
         try:
             self.data=pysam.Tabixfile(tabix_file_name)
         except:
@@ -86,8 +87,11 @@ class TabixI(MetaDBI):
         '''
         yield the overlap feature in tabix index files
         '''
+        f="simple"
+        if self.dict.has_key("tabix"):
+            f=self.dict["tabix"]
         try:
-            for item in self.data.fetch(x.chr,x.start,x.stop):
+            for item in TableIO.parse(self.data.fetch(x.chr,x.start,x.stop),format=f):
                 yield item
         except:
            raise StopIteration

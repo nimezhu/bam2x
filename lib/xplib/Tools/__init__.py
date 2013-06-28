@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 06-12-2013, 15:01:47 EDT
+# Last-modified: 06-19-2013, 14:17:06 EDT
 
 hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
@@ -60,3 +60,32 @@ def overlap(A,B):
     if (A.stop < B.start) : return 0
     if (B.stop < A.start) : return 0
     return 1
+from xplib.Annotation import Bed
+def find_nearest(bed,dbi,extends=50000,**dict):
+    start=bed.start-extends
+    stop=bed.stop+extends
+    chr=bed.chr
+    if start<0: start=0
+    new_bed=Bed([chr,start,stop])
+
+    results=dbi.query(new_bed,**dict)
+    d=2*extends
+    flag=0
+    
+    for result in results:
+        if distance(bed,result)<d:
+            d=distance(bed,result)
+            nearest=result
+            if  result.strand=="." or bed.strand==".":
+                strand="."
+            elif result.strand==bed.strand:
+                strand="+"
+            else:
+                strand="-"
+                
+            flag=1
+    if flag==0:
+        return (None,None,None)
+    else:
+        return (d,nearest,strand)
+

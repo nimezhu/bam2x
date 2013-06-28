@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-17-2013, 13:23:00 EDT
+# Last-modified: 06-20-2013, 11:31:39 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -20,6 +20,7 @@ def ParseArg():
     p.add_argument('-I','--format',dest="format",default="bed",type=str,help="input format DEFAULT: bed CHOICES:{bed,genebed}")
     p.add_argument('-g','--genome',dest="genome",type=str,help="chromosome.2bit file")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
+    p.add_argument('-l','--line',dest="line",action="store_true",default=False,help="output file DEFAULT: STDOUT")
     
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
@@ -60,16 +61,12 @@ def Main():
     print >>out,"# The command line is :"
     print >>out,"#\t"," ".join(sys.argv)
     genome=GenomeI(args.genome)
-    if args.format=="genebed":
-        for i in TableIO.parse(fin,args.format):
-            print >>out,">",i.id+"_cDNA"
-            print >>out,seq_wrapper(genome.get_cdna_seq(i))
-    elif args.format=="bed":
-        for i in TableIO.parse(fin,args.format):
-            if (i.id=="NONAME"):
-                i.id=i.chr+"_"+str(i.start)+"_"+str(i.stop)
-            print >>out,">"+i.id
-            print >>out,seq_wrapper(genome.get_seq(i)),
+    for i in TableIO.parse(fin,args.format):
+            print >>out,">"+i.id+"_cDNA"
+            if args.line:
+                print >>out,genome.get_cdna_seq(i)
+            else:
+                print >>out,seq_wrapper(genome.get_cdna_seq(i))
 
 
 
