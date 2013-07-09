@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-20-2013, 11:31:39 EDT
+# Last-modified: 06-28-2013, 19:27:57 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -10,17 +10,17 @@ import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
 import gzip
 import time
-from xplib.DBI.DB import GenomeI
-from xplib.Tools import seq_wrapper
+
 def ParseArg():
     ''' This Function Parse the Argument '''
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : xplib')
     p.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
-    p.add_argument('-i','--input',dest="input",default="stdin",type=str,help="input annotation file in gene table format or bed DEFAULT: STDIN")
-    p.add_argument('-I','--format',dest="format",default="bed",type=str,help="input format DEFAULT: bed CHOICES:{bed,genebed}")
-    p.add_argument('-g','--genome',dest="genome",type=str,help="chromosome.2bit file")
+    p.add_argument('-i','--input1',dest="input",default="stdin",type=str,help="input file No.1 DEFAULT: STDIN")
+    p.add_argument('-j','--input2',dest="input2",type=str,help="input table file No.2")
+    p.add_argument('-I','--column_index1',dest="c1",default=1,type=int,help="table one id column number")
+    p.add_argument('-J','--column_index2',dest="c2",default=1,type=int,help="table two id column number")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
-    p.add_argument('-l','--line',dest="line",action="store_true",default=False,help="output file DEFAULT: STDOUT")
+
     
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
@@ -60,13 +60,17 @@ def Main():
     print >>out,"# Date: ",time.asctime()
     print >>out,"# The command line is :"
     print >>out,"#\t"," ".join(sys.argv)
-    genome=GenomeI(args.genome)
-    for i in TableIO.parse(fin,args.format):
-            print >>out,">"+i.id+"_cDNA"
-            if args.line:
-                print >>out,genome.get_cdna_seq(i)
-            else:
-                print >>out,seq_wrapper(genome.get_cdna_seq(i))
+    h1={}
+    h2={}
+
+    for i in TableIO.parse(fin):
+        h1[i[args.c1-1]]=i
+    for j in TableIO.parse(args.input2):
+        h2[j[args.c2-1]]=j
+
+        if h1.has_key(j[args.c2-1]):
+            print >>out,TableIO.format_string(h1[j[args.c2-1]])+"\t"+TableIO.format_string(j)
+
 
 
 

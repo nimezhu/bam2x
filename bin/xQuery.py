@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Dec 2012 21:34:20
+# Last-modified: 06-18-2013, 18:42:50 EDT
 VERSION="0.3"
 '''
 xQuery.py is an example program for using xplib.DBI interface
@@ -28,6 +28,7 @@ from xplib import DBI
 import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
 import time
+import numpy
 
 def ParseArg():
     ''' This Function Parse the Argument '''
@@ -38,6 +39,7 @@ def ParseArg():
     p.add_argument('-A','--dbformat',dest="dbformat",type=str,help="input file database format. {bed|genebed|tabix|bam}",default="bed")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file")
     p.add_argument('-a','--annotations',dest="db",type=str,default="",required=True,help="query annotation files")
+    p.add_argument('-m','--query_method',dest="query_method",type=str,help="query method : ( bamfile: pileup or fetch ; bigwig: cDNA or not ; twobit: seq | cDNA | cds | utr3 | utr5 )")
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
@@ -47,6 +49,7 @@ def ParseArg():
 def Main():
     global args,out
     args=ParseArg()
+    dict={}
     if args.output=="stdout":
         out=sys.stdout
     else:
@@ -61,7 +64,8 @@ def Main():
     print >>out,"in bam2x ( https://github.com/nimezhu/bam2x )"
     print >>out,"# Date: ",time.asctime()
     print >>out,"# The command line is :\n#\t"," ".join(argv)
-   
+    if args.query_method:
+        dict["method"]=args.query_method
     dbi=DBI.init(args.db,args.dbformat)
     hits=0
     query=0
@@ -72,19 +76,37 @@ def Main():
 
     query_length=0
     hits_number=0
-    for x in TableIO.parse(input,args.input_format):
+    for (i0,x) in enumerate(TableIO.parse(input,args.input_format)):
+        if i0%100==0:
+            print >>sys.stderr,"query ",i0," entries\r",
         print >>out,"QR\t",x
         hit=0
         query+=1
         query_length+=len(x)
-        for j in dbi.query(x):
-            print >>out,"HT\t",j
+        results=dbi.query(x,**dict)
+        #print >>sys.stderr,type(results)
+        if isinstance(results,numpy.ndarray) or isinstance(results,list):
+            print >>out,"HT\t",
+            for value in results:
+                print >>out,str(value)+",",
+            print >>out,""
+            hit=1
+            hits_number+=1
+        elif isinstance(results,str):
+            print >>out,"HT\t",
+            print >>out,results
             hit=1
             hits_number+=1
 
+        else:
+            for j in results:
+                print >>out,"HT\t",j
+                hit=1
+                hits_number+=1
+
         if args.dbformat=="tabix":
             x.chr=x.chr.replace("chr","")
-            for j in dbi.query(x):
+            for j in dbi.query(x,**dict):
                 print >>out,"HT\t",j
                 hit=1
                 hits_number+=1

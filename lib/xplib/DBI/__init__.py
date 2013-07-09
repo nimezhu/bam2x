@@ -1,12 +1,13 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 29 Nov 2012 14:51:43
+# Last-modified: 06-19-2013, 13:52:05 EDT
 __all__=['BamI','TabixI','MetaDBI',"BinIndexI","BamlistI","TwoBitI","GenomeI"]
 from DB import *
 
 FormatToDBI = { 
              "bed":BinIndexI,
              "genebed":BinIndexI,
+             "genepred":BinIndexI,
              "bam":BamI,
              "bams":BamlistI,
              "bamlist":BamlistI,
@@ -16,9 +17,10 @@ FormatToDBI = {
              "vcf":BinIndexI,
              "2bit":TwoBitI,
              "genome":GenomeI,
-             "repeat":BinIndexI
+             "repeat":BinIndexI,
+             "bigwig":BigWigI
             }
-def query(x,dbi):
+def query(x,dbi,**dict):
     '''
     DBI.query is wrapper for query all kinds of data|file|database. 
     
@@ -52,7 +54,7 @@ def query(x,dbi):
         for i in dbi.query(bed):
             print i
     '''
-    for i in dbi.query(x):
+    for i in dbi.query(x,**dict):
         yield i
         
 def init(handle,dbformat,**dict):
@@ -74,5 +76,8 @@ def init(handle,dbformat,**dict):
     '''
     if dbformat in FormatToDBI:
         dbi=FormatToDBI[dbformat]
+        return dbi(handle,format=dbformat,**dict)
+    else:
+        dbi=BinIndexI
         return dbi(handle,format=dbformat,**dict)
 

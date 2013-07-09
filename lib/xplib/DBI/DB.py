@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-13-2012, 23:28:40 CST
+# Last-modified: 06-28-2013, 11:24:17 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -68,10 +68,12 @@ class TabixI(MetaDBI):
         wrapped in DBI.init(filename,"tabix")
         '''
         self.tabix_file_name=tabix_file_name
+        self.dict=dict
         try:
             self.data=pysam.Tabixfile(tabix_file_name)
         except:
             print >>sys.stderr,"WARNING: Can't init the tabix file",tabix_file_name
+        self.header=None
         if dict.has_key("header") and dict["header"]==True:
             f=TableIO.parse(tabix_file_name)
             h=f.next()
@@ -80,14 +82,24 @@ class TabixI(MetaDBI):
                 h[i]=h[i].strip()
             self.header=h
             f.close()
+        elif dict.has_key("header") and isinstance(dict["header"],list):
+            self.header=dict["header"]
+        elif dict.has_key("header") and isinstance(dict["header"],str):
+            fh=TableIO.parse(dict["header"])
+            self.header=fh.next()
+            #print >>sys.stderr,self.header
+            
 
 
     def query(self,x):
         '''
         yield the overlap feature in tabix index files
         '''
+        f="simple"
+        if self.dict.has_key("tabix"):
+            f=self.dict["tabix"]
         try:
-            for item in self.data.fetch(x.chr,x.start,x.stop):
+            for item in TableIO.parse(self.data.fetch(x.chr,x.start,x.stop),format=f,header=self.header):
                 yield item
         except:
            raise StopIteration
@@ -110,9 +122,25 @@ class GenomeI(TwoBitI):
     Wrapped for query sequence
     Initialize genome 2bit file only once.
     '''
-    def get_seq(self,bed):
-        seq=self.query(bed)
-        if bed.strand=="-":
+    def query(self,x,**dict):
+        method="seq"
+        if(dict.has_key("method")):
+            method=dict["method"]
+        if method=="seq":
+            return self.get_seq(x)
+        elif method=="cdna" or method=="cDNA":
+            return self.get_cdna_seq(x)
+        elif method=="cds" or method=="CDS":
+            return self.get_cds_seq(x)
+        elif method=="utr3":
+            return self.get_utr3_seq(x)
+        elif method=="utr5":
+            return self.get_utr5_seq(x)
+
+    def get_seq(self,x):
+        chr=self.data[x.chr]
+        seq=chr[x.start:x.stop]
+        if x.strand=="-":
             seq=rc(seq)
         return seq
     def get_cdna_seq(self,genebed):
@@ -265,3 +293,55 @@ class BamI(BamlistI):
                 except:
                     print >>sys.stderr,"WARNING: Can't init the bam file",bam
             self.bamfiles.append(bam)
+ 
+
+
+import bx.bbi.bigwig_file
+class BigWigI(MetaDBI):
+    '''
+    A DBI for bigwig file
+    lib dependent: bxpython
+    '''
+    def __init__(self,bwfile,**dict):
+        '''
+        init bw file
+        '''
+        if type(bwfile)==type("string"):
+            self.data=bx.bbi.bigwig_file.BigWigFile(open(bwfile,"rb"))
+        else:
+            try:
+                self.data=bx.bbi.bigwig_file.BigWigFile(bwfile)
+            except:
+                print >>sys.stderr,"Error in open bw file"
+
+    def query(self,x,**dict):
+        '''
+        query bw file
+        '''
+        if not dict.has_key("method"):
+            results=self.data.get_as_array(x.chr,x.start,x.stop)
+            if x.strand=="-":
+                return results[::-1]
+            else:
+                return results
+        else:
+            if dict["method"]=="cDNA" or dict["method"]=="cdna":
+                s=[]
+                for i in x.Exons():
+                    array=self.data.get_as_array(i.chr,i.start,i.stop)
+                    size=i.stop-i.start
+                    if  x.strand=="+" or x.strand==".":
+                        for j in range(size):
+                            s.append(array[j])
+                    elif x.strand=="-":
+                        for j in xrange(size-1,-1,-1):
+                            s.append(array[j])
+                return s
+            else:
+                print >>sys.stderr,"query model is wrong for bw file"
+
+        
+
+
+
+

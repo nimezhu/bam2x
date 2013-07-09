@@ -1,9 +1,9 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 12-30-2012, 13:16:44 CST
+#Last-modified: 06-19-2013, 13:27:37 EDT
 # reader of any column file
-__all__=['Bed','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
+__all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
 class Bed(object):
     '''
@@ -37,6 +37,7 @@ class Bed(object):
 	        self.strand=x[5].strip()
             except:
                 pass
+        self.exon_count=1
         for key in kwargs.keys():
             setattr(self,key,kwargs[key])
     def __str__(self):
@@ -126,6 +127,11 @@ class Bed(object):
             return "+"
         else:
             return "-"
+    def Exons(self):
+        b=Bed([self.chr,self.start,self.stop,self.id+"_Exon_1",self.strand,self.score])
+        a=[]
+        a.append(b)
+        return a
 
 
 class GeneBed(Bed):
@@ -140,8 +146,8 @@ class GeneBed(Bed):
                 x=x[1:]
         except:
             pass
-        self.id=x[0].rstrip()
-        self.chr=x[1].rstrip()
+        self.id=str(x[0]).rstrip()
+        self.chr=str(x[1]).rstrip()
         self.strand=x[2]
         if(self.strand == 1):
             self.strand="+"
@@ -162,14 +168,17 @@ class GeneBed(Bed):
                 self.exon_stops[i]=int(self.exon_stops[i])
             except:
                 pass
-        self.score=0
         try:
-            self.protein_id=x[10]
-            self.name2=x[10]
+            self.score=x[10]
+        except:
+            self.score=0
+        try:
+            self.protein_id=x[11]
+            self.name2=x[11]
         except:
             self.name2="None"
         try:
-            self.align_id=x[11]
+            self.align_id=x[12]
         except:
             pass
         for key in kwargs.keys():
@@ -260,7 +269,7 @@ class GeneBed(Bed):
         exon_stops+=str(cds_stop)+","
         return GeneBed([id,chr,strand,start,stop,cds_start,cds_stop,exon_count,exon_starts,exon_stops])
 
-    def new_utr5(self):
+    def utr5(self):
         '''
         Return 5 UTR as a GeneBed Object
         '''
@@ -364,7 +373,81 @@ class GeneBed(Bed):
             if exon_start_count < exon_count:
                     exon_starts=str(self.cds_stop)+","+exon_starts
             return GeneBed([id,chr,strand,start,stop,cds_start,cds_stop,exon_count,exon_starts,exon_stops])
+    def toBedString(self):
+        s=""
+        s+=self.chr+"\t"
+        s+=str(self.start)+"\t"
+        s+=str(self.stop)+"\t"
+        s+=self.id+"\t"
+        s+=str(self.score)+"\t"
+        s+=self.strand+"\t"
+        s+=str(self.cds_start)+"\t"
+        s+=str(self.cds_stop)+"\t"
+        s+="0,0,0"+"\t"
+        s+=str(self.exon_count)+"\t"
+        for i in range(self.exon_count):
+            s+=str(self.exon_stops[i]-self.exon_starts[i])+","
+        s+="\t"
+        for x in self.exon_starts:
+            s+=str(x-self.start)+","
+        return s
 
+
+    def __str__(self):
+        s=""
+        s+=self.id+"\t"
+        s+=self.chr+"\t"
+        s+=self.strand+"\t"
+        s+=str(self.start)+"\t"
+        s+=str(self.stop)+"\t"
+        s+=str(self.cds_start)+"\t"
+        s+=str(self.cds_stop)+"\t"
+        s+=str(self.exon_count)+"\t"
+        for x in self.exon_starts:
+            s+=str(x)+","
+        s+="\t"
+        for x in self.exon_stops:
+            s+=str(x)+","
+        if hasattr(self,"name2"):
+            s+="\t"
+            s+=self.name2
+        return s
+    
+        
+        
+
+
+class Bed12(GeneBed):
+    def __init__(self,x,**kwargs):
+        self.chr=x[0].strip()
+        self.start=int(x[1])
+        self.stop=int(x[2])
+        self.id=x[3].rstrip()
+        self.score=float(x[4])
+        self.strand=x[5].strip()
+        self.cds_start=int(x[6])
+        self.cds_stop=int(x[7])
+        self.itemRgb=x[8]
+        self.blockCount=int(x[9])
+        
+        self.exon_count=self.blockCount
+
+        self.blockSizes=x[10].strip().strip(",").split(",")
+        self.blockStarts=x[11].strip().strip(",").split(",")
+        self.exon_starts=[0 for n in range(self.exon_count)]
+        self.exon_stops=[0  for n in range(self.exon_count)]
+        for i in range(self.blockCount):
+            try:
+                self.blockStarts[i]=int(self.blockStarts[i])
+                self.blockSizes[i]=int(self.blockSizes[i])
+                self.exon_starts[i]=self.blockStarts[i]+self.start
+                self.exon_stops[i]=self.blockStarts[i]+self.blockSizes[i]+self.start
+            except:
+                pass
+    def __str__(self):
+        return self.toBedString()
+
+        
 
                    
 class VCF(Bed):
@@ -530,7 +613,37 @@ class MetaBed(Bed):
     def __cmp__(self,other):
 	return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) 
         
-
+class Fimo(Bed):
+    '''
+    FIMO - Motif search tool
+    '''
+    def __init__(self,x,**dict):
+        if dict.has_key("sep"): sep=dict["sep"]
+        else:   sep="\t"
+        if isinstance(x,str): x=x.split(sep)
+        self.pattern=x[0]
+        self.chr=x[1]
+        self.seqname=x[1]
+        self.start=int(x[2])-1
+        self.stop=int(x[3])
+        self.strand=x[4]
+        self.score=float(x[5])
+        self.pvalue=float(x[6])
+        self.qvalue=float(x[7])
+        self.match_seq=x[8]
+    def __str__(self):
+        s=""
+        s+=self.pattern+"\t"
+        s+=self.chr+"\t"
+        s+=str(self.start+1)+"\t"
+        s+=str(self.stop)+"\t"
+        s+=self.strand+"\t"
+        s+=str(self.score)+"\t"
+        s+=str(self.pvalue)+"\t"
+        s+=str(self.qvalue)+"\t"
+        s+=str(self.match_seq)
+        return s
+    
 
 ###################### Below is Private Format
 class Peak(Bed):

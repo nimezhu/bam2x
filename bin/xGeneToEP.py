@@ -1,26 +1,28 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-20-2013, 11:31:39 EDT
+# Last-modified: 06-28-2013, 11:30:32 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
 from xplib import TableIO
+from xplib import DBI
 import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
 import gzip
 import time
-from xplib.DBI.DB import GenomeI
-from xplib.Tools import seq_wrapper
+import re
+
 def ParseArg():
     ''' This Function Parse the Argument '''
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : xplib')
     p.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
-    p.add_argument('-i','--input',dest="input",default="stdin",type=str,help="input annotation file in gene table format or bed DEFAULT: STDIN")
-    p.add_argument('-I','--format',dest="format",default="bed",type=str,help="input format DEFAULT: bed CHOICES:{bed,genebed}")
-    p.add_argument('-g','--genome',dest="genome",type=str,help="chromosome.2bit file")
+    p.add_argument('-i','--input',dest="input",default="stdin",type=str,help="input file DEFAULT: STDIN")
+    p.add_argument('-I','--input_format',dest="format",default="bed",type=str,help="input file format")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
-    p.add_argument('-l','--line',dest="line",action="store_true",default=False,help="output file DEFAULT: STDOUT")
+    p.add_argument('-e','--enhancer',dest="enhancer_tabix",type=str,help="enhancer table tabix file")
+    p.add_argument('-p','--promoter',dest="promoter_tabix",type=str,help="promoter table tabix file")
+    p.add_argument('-s','--size',dest="size",type=int,default=50000, help="the max distance")
     
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
@@ -60,13 +62,20 @@ def Main():
     print >>out,"# Date: ",time.asctime()
     print >>out,"# The command line is :"
     print >>out,"#\t"," ".join(sys.argv)
-    genome=GenomeI(args.genome)
+    enhancer_dbi=DBI.init(args.enhancer_tabix,"tabix",tabix="metabed",header=re.sub(".gz$",".header",args.enhancer_tabix))
+    promoter_dbi=DBI.init(args.promoter_tabix,"tabix",tabix="metabed",header=re.sub(".gz$",".header",args.promoter_tabix))
+
     for i in TableIO.parse(fin,args.format):
-            print >>out,">"+i.id+"_cDNA"
-            if args.line:
-                print >>out,genome.get_cdna_seq(i)
-            else:
-                print >>out,seq_wrapper(genome.get_cdna_seq(i))
+        tss=i.tss()
+        tss.start-=args.size
+        tss.stop+=args.size
+        if tss.start<0: tss.start=0
+        tss.id+="_near"+str(args.size)
+        print "QR\t",tss
+        for e in enhancer_dbi.query(tss):
+            print "EH\t",e
+        for p in promoter_dbi.query(tss):
+            print "PM\t",p
 
 
 

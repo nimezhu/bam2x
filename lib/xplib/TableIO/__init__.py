@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-11-2012, 11:50:26 CST
+# Last-modified: 06-19-2013, 13:28:58 EDT
 import BedIO
 import GeneBedIO
 import SimpleIO
@@ -10,8 +10,11 @@ import BamIO
 import VCFIO
 import RepeatIO
 import MetaBedIO
+import gtfIO
+import IO
 FormatToIterator = { "bed":BedIO.BedIterator,
                      "genebed":GeneBedIO.GeneBedIterator,
+                     "genepred":GeneBedIO.GeneBedIterator,
                      "simple":SimpleIO.SimpleIterator,
                      "transunit":TransIO.TransUnitIterator,
                      "oddsratiosnp":OddsRatioSNPIO.OddsRatioSNPIterator,
@@ -21,13 +24,15 @@ FormatToIterator = { "bed":BedIO.BedIterator,
                      "bam2bed":BamIO.BamToBedIterator,
                      "vcf":VCFIO.VCFIterator,
                      "repeat":RepeatIO.RepeatIterator,
-                     "metabed":MetaBedIO.MetaBedIterator
+                     "metabed":MetaBedIO.MetaBedIterator,
+                     "gtf":gtfIO.GTFIterator,
+                     "fimo":IO.FimoIterator
                    }
 def parse(handle,format="simple",**dict):
     """
     - handle  - handle to the file, or the filename
     - format  - lower case string describing the file format
-                example 'bed' 'genebed' 'bam' 'sam' 'vcf'
+                example 'bed' 'genebed' 'bam' 'sam' 'vcf' 'gtf'
     Example:
         from xplib import TableIO
         for i in TableIO.parse(file or filename,"bed"):
