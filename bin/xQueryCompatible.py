@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 08-28-2013, 14:29:17 EDT
+# Last-modified: 08-28-2013, 15:24:35 EDT
 VERSION="0.3"
 '''
 xQuery.py is an example program for using xplib.DBI interface
@@ -77,13 +77,14 @@ def Main():
     query_length=0
     hits_number=0
     for (i0,x) in enumerate(TableIO.parse(input,args.input_format)):
-        if i0%100==0:
+        if i0%10==0:
             print >>sys.stderr,"query ",i0," entries\r",
         print >>out,"QR\t",x
         hit=0
         query+=1
         query_length+=len(x)
         results=dbi.query(x,**dict)
+        compatible=0
         #print >>sys.stderr,type(results)
         if isinstance(results,numpy.ndarray) or isinstance(results,list):
             print >>out,"HT\t",
@@ -104,9 +105,15 @@ def Main():
                 hit=1
                 hits_number+=1
                 if isinstance(j,xplib.Annotation.Bed12) and isinstance(x,xplib.Annotation.Bed12):
-                    print >>out,"\tCompatible:",Tools.compatible_with_transcript(j,x)
+                    compatible_binary=Tools.compatible_with_transcript(j,x)
+                    print >>out,"\tCompatible:",compatible_binary
+                    if compatible_binary:
+                        compatible+=1
                 else:
                     print >>out,""
+            print >>out,"TT\t",hits_number
+            if compatible>0:
+                print >>out,"CP\t",compatible
 
         if args.dbformat=="tabix":
             x.chr=x.chr.replace("chr","")
