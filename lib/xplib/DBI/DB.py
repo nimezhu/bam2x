@@ -8,6 +8,7 @@ from xplib import TableIO
 from xplib.Struct import binindex
 import pysam
 from xplib.Tools import rc
+from xplib import Tools
 from twobitreader import *
 '''
 BASIC QUERY FUNCTIONS
@@ -230,6 +231,28 @@ class BamlistI(MetaDBI):
                         strand='-'
                     score=read.mapq
                     bed=Bed([bamfile.references[read.tid],read.pos,read.aend,read.qname,score,strand])
+                    yield bed
+        elif method=='fetch12':
+            '''
+            test version
+            still test Tools.cigar_to_coordinates
+            '''
+            for bamfile in self.bamfiles:
+                for read in bamfile.fetch(x.chr,x.start,x.stop):
+                    if read.tid<0:continue
+                    chr=bamfile.references[read.tid]
+                    strand='+'
+                    if read.is_reverse:
+                        strand='-'
+                    score=read.mapq
+                    start=read.pos
+                    end=read.aend
+                    name=read.qname
+                    cds_start=start
+                    cds_end=start
+                    itemRgb="0,0,0"
+                    (block_starts,block_sizes)=Tools.cigar_to_coordinates(read.cigar,read.pos); 
+                    bed=Bed12([chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts])
                     yield bed
         elif method=='pileup':
             s=[[0,0,0,0] for row in range(x.stop-x.start)]

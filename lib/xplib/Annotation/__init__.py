@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 06-19-2013, 13:27:37 EDT
+#Last-modified: 06-28-2013, 12:02:45 EDT
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -432,8 +432,14 @@ class Bed12(GeneBed):
         
         self.exon_count=self.blockCount
 
-        self.blockSizes=x[10].strip().strip(",").split(",")
-        self.blockStarts=x[11].strip().strip(",").split(",")
+        if type(x[10])==type("string"):
+            self.blockSizes=x[10].strip().strip(",").split(",")
+        else:
+            self.blockSizes=x[10]
+        if type(x[11])==type("string"):
+            self.blockStarts=x[11].strip().strip(",").split(",")
+        else:
+            self.blockStarts=x[11]
         self.exon_starts=[0 for n in range(self.exon_count)]
         self.exon_stops=[0  for n in range(self.exon_count)]
         for i in range(self.blockCount):
@@ -605,6 +611,9 @@ class MetaBed(Bed):
                 self.__setattr__('chr',self.chromosome)
             if self.__dict__.has_key('chrom'):
                 self.__setattr__('chr',self.chrom)
+        if not self.__dict__.has_key('stop'):
+            if self.__dict__.has_key('end'):
+                self.__setattr__('stop',self.end)
     def __str__(self):
         s=[]
         for i in self.attr:

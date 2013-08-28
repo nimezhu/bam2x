@@ -3,7 +3,8 @@
 # Last-modified: 03 Oct 2012 16:49:10
 import types
 import pysam
-from xplib.Annotation import Bed
+from xplib.Annotation import Bed,Bed12
+from xplib import Tools
 
 def BamIterator(filename,**kwargs):
     '''
@@ -66,4 +67,38 @@ def BamToBedIterator(filename,**kwargs):
             strand="-"
         score=i.mapq
         bed=Bed([f.references[i.tid],i.pos,i.aend,i.qname,score,strand])
+        yield bed
+def BamToBed12Iterator(handle,**kwargs):
+    '''
+    handle is an bam iterator
+    need references hash if handle is not filename.
+    '''
+    if type(handle)==type("string"):
+        handle=pysam.Samfile(handle,"rb");
+    for i in handle:
+        if i.tid<0: continue
+        strand="+"
+        if i.is_reverse:
+            strand="-"
+        score=i.mapq
+        
+        '''
+        test
+        '''
+        if kwargs.has_key("references"):
+            chr=kwargs["references"][i.tid];
+        else:
+            try:
+                 chr=handle.references[i.tid];
+            except:
+                 chr="chr"
+        
+        start=i.pos
+        end=i.aend
+        name=i.qname
+        cds_start=start
+        cds_end=start
+        itemRgb="0,0,0"
+        (block_starts,block_sizes)=Tools.cigar_to_coordinates(i.cigar,i.pos);
+        bed=Bed12([chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts])
         yield bed

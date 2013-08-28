@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-19-2013, 13:28:58 EDT
+# Last-modified: 06-28-2013, 16:10:09 EDT
 import BedIO
 import GeneBedIO
 import SimpleIO
@@ -26,7 +26,8 @@ FormatToIterator = { "bed":BedIO.BedIterator,
                      "repeat":RepeatIO.RepeatIterator,
                      "metabed":MetaBedIO.MetaBedIterator,
                      "gtf":gtfIO.GTFIterator,
-                     "fimo":IO.FimoIterator
+                     "fimo":IO.FimoIterator,
+                     "bam2bed12":BamIO.BamToBed12Iterator,
                    }
 def parse(handle,format="simple",**dict):
     """
@@ -45,4 +46,9 @@ def parse(handle,format="simple",**dict):
         i=iterator_generator(handle,**dict)
     for r in i:
         yield r
-
+def format_string(x):
+    s=""
+    for i in x:
+        s+=str(i)+"\t"
+    s=s.strip("\t")
+    return s

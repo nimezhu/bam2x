@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 06-19-2013, 14:17:06 EDT
+# Last-modified: 08-27-2013, 11:20:33 EDT
 
 hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
@@ -89,3 +89,81 @@ def find_nearest(bed,dbi,extends=50000,**dict):
     else:
         return (d,nearest,strand)
 
+
+def compatible(a,b):
+    '''
+    VERSION: TEST
+    if a and b are compatible return true
+    a and b are BED12 class or GENEBED 
+    definition of compatible
+       the overlap region should be same transcript structure.
+    '''
+    if (not overlap(a,b)): return True; 
+    '''
+    if two bed is not overlap, they are compatible.
+    '''
+    start=a.start;
+    if (start < b.start): start=b.start 
+    '''
+    start is the max start of a.start and b.start 
+    '''
+    stop=a.stop
+    if (stop > b.stop): stop=b.stop
+    '''
+    stop is the min stop of a.stop and b.stop
+    find the overlap region from [start,stop)
+    '''
+    a_starts_slice=[];
+    
+    for i in a.exon_starts:
+        if i>start and i<stop:
+            a_starts_slice.append(i); 
+    j=0;
+    l=len(a_starts_slice);
+    for i in b.exon_starts:
+        if i>start and i<stop:
+            if (j>l-1 or a_starts_slice[j]!=i) : return False
+            j+=1
+    if j!=l-1 : return False
+    
+    
+    a_stops_slice=[];
+    for i in a.exon_stops:
+        if i>start and i<stop:
+            a_stops_slice.append(i); 
+    
+    j=0;
+    l=len(a_stops_slice);
+    for i in b.exon_stops:
+        if i>start and i<stop:
+            if (j>l-1 or a_stops_slice[j]!=i) : return False
+            j+=1
+    if j!=l-1 : return False
+    return True 
+
+
+def cigar_to_coordinates(cigar,offset=0):
+    '''
+    demo version
+    need to test
+    
+    deletion from genome (case 3) now consider as exon indel. 
+    '''
+    exon_starts=[offset]
+    exon_lengths=[0]
+    state=0
+    for i in cigar:
+        if i[0]==0 or i[0]==7 or i[0]==8:  # match
+           exon_lengths[-1]+=i[1] 
+           state=1 
+        if i[0]==2:  # deletion from genome , need to consider this should be exon or intron? now count as exon. 
+           exon_lengths[-1]+=i[1] 
+           state=1 
+        if i[0]==3:  # skipped region from the reference 
+           if state==1:
+               exon_starts.append(exon_starts[-1]+exon_lengths[-1]+i[1]);
+               exon_lengths.append(0);
+           else:
+               exon_starts[-1]+=i[1]
+           state=0
+    return (exon_starts,exon_lengths)
