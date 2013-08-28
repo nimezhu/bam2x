@@ -122,9 +122,11 @@ def compatible(a,b):
     l=len(a_starts_slice);
     for i in b.exon_starts:
         if i>start and i<stop:
-            if (j>l-1 or a_starts_slice[j]!=i) : return False
+            if (j>l-1 or a_starts_slice[j]!=i) :
+                return False
             j+=1
-    if j!=l-1 : return False
+    if j!=l : 
+        return False
     
     
     a_stops_slice=[];
@@ -136,11 +138,23 @@ def compatible(a,b):
     l=len(a_stops_slice);
     for i in b.exon_stops:
         if i>start and i<stop:
-            if (j>l-1 or a_stops_slice[j]!=i) : return False
+            if (j>l-1 or a_stops_slice[j]!=i) : 
+                return False
             j+=1
-    if j!=l-1 : return False
+    if j!=l : 
+        return False
     return True 
 
+def compatible_with_transcript(read,transcript):
+    '''
+    if reads is compatible with the transcript( full length or longer than reads)
+    '''
+    # read must in the transcript
+    if read.start < transcript.start or read.stop > transcript.stop :
+        return False
+    else:
+        return compatible(read,transcript)
+    
 
 def cigar_to_coordinates(cigar,offset=0):
     '''

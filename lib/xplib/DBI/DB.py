@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-28-2013, 11:24:17 EDT
+# Last-modified: 08-28-2013, 14:36:43 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -251,7 +251,7 @@ class BamlistI(MetaDBI):
                     cds_start=start
                     cds_end=start
                     itemRgb="0,0,0"
-                    (block_starts,block_sizes)=Tools.cigar_to_coordinates(read.cigar,read.pos); 
+                    (block_starts,block_sizes)=Tools.cigar_to_coordinates(read.cigar); 
                     bed=Bed12([chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts])
                     yield bed
         elif method=='pileup':

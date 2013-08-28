@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03 Oct 2012 16:49:10
+# Last-modified: 08-28-2013, 14:37:27 EDT
 import types
 import pysam
 from xplib.Annotation import Bed,Bed12
@@ -99,6 +99,6 @@ def BamToBed12Iterator(handle,**kwargs):
         cds_start=start
         cds_end=start
         itemRgb="0,0,0"
-        (block_starts,block_sizes)=Tools.cigar_to_coordinates(i.cigar,i.pos);
+        (block_starts,block_sizes)=Tools.cigar_to_coordinates(i.cigar);
         bed=Bed12([chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts])
         yield bed
