@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 08-28-2013, 15:24:35 EDT
+# Last-modified: 08-28-2013, 16:03:37 EDT
 VERSION="0.3"
 '''
 xQuery.py is an example program for using xplib.DBI interface
@@ -36,10 +36,11 @@ def ParseArg():
     p.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
     p.add_argument('-i','--input',dest="input",type=str,default="stdin",help="input file")
     p.add_argument('-I','--format',dest="input_format",type=str,help="input file format",default="bed")
-    p.add_argument('-A','--dbformat',dest="dbformat",type=str,help="input file database format. {bed|genebed|tabix|bam}",default="bed")
+    p.add_argument('-A','--dbformat',dest="dbformat",type=str,help="input file database format. {bed|genebed|tabix|bam}",default="bam")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file")
     p.add_argument('-a','--annotations',dest="db",type=str,default="",required=True,help="query annotation files")
     p.add_argument('-m','--query_method',dest="query_method",type=str,help="query method : ( bamfile: pileup or fetch or fetch12 (splicing reads) ; bigwig: cDNA or not ; twobit: seq | cDNA | cds | utr3 | utr5 )")
+    p.add_argument('-s','--silence',dest="silence",action="store_ture",help="only report hits number")
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
@@ -87,30 +88,35 @@ def Main():
         compatible=0
         #print >>sys.stderr,type(results)
         if isinstance(results,numpy.ndarray) or isinstance(results,list):
-            print >>out,"HT\t",
-            for value in results:
-                print >>out,str(value)+",",
-            print >>out,""
+            if not args.silence:
+                print >>out,"HT\t",
+                for value in results:
+                    print >>out,str(value)+",",
+                print >>out,""
             hit=1
             hits_number+=1
         elif isinstance(results,str):
-            print >>out,"HT\t",
-            print >>out,results
+            if not args.silence:
+                print >>out,"HT\t",
+                print >>out,results
             hit=1
             hits_number+=1
 
         else:
             for j in results:
-                print >>out,"HT\t",j,
+                if not args.silence:
+                    print >>out,"HT\t",j,
                 hit=1
                 hits_number+=1
                 if isinstance(j,xplib.Annotation.Bed12) and isinstance(x,xplib.Annotation.Bed12):
                     compatible_binary=Tools.compatible_with_transcript(j,x)
-                    print >>out,"\tCompatible:",compatible_binary
+                    if not args.silence:
+                        print >>out,"\tCompatible:",compatible_binary
                     if compatible_binary:
                         compatible+=1
                 else:
-                    print >>out,""
+                    if not args.silence:
+                        print >>out,""
             print >>out,"TT\t",hits_number
             if compatible>0:
                 print >>out,"CP\t",compatible
