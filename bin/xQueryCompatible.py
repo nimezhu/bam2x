@@ -103,11 +103,14 @@ def Main():
             hits_number+=1
 
         else:
+            this_query_hits=0
             for j in results:
+                
                 if not args.silence:
                     print >>out,"HT\t",j,
                 hit=1
                 hits_number+=1
+                this_query_hits+=1
                 if isinstance(j,xplib.Annotation.Bed12) and isinstance(x,xplib.Annotation.Bed12):
                     compatible_binary=Tools.compatible_with_transcript(j,x)
                     if not args.silence:
@@ -117,7 +120,7 @@ def Main():
                 else:
                     if not args.silence:
                         print >>out,""
-            print >>out,"TT\t",hits_number
+            print >>out,"HN\t",this_query_hits
             if compatible>0:
                 print >>out,"CP\t",compatible
 
