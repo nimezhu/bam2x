@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 06-28-2013, 12:02:45 EDT
+#Last-modified: 08-29-2013, 11:31:11 EDT
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 
@@ -138,6 +138,7 @@ class GeneBed(Bed):
     '''
     Gene Bed Class
     Download gene annotation table from table browser of UCSC genome Browser
+    Should be Name as GenePred
     '''
     def __init__(self,x,**kwargs):
         try:
@@ -394,6 +395,8 @@ class GeneBed(Bed):
 
 
     def __str__(self):
+        return self.toGenePredString()
+    def toGenePredString(self):
         s=""
         s+=self.id+"\t"
         s+=self.chr+"\t"
