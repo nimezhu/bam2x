@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 08-30-2013, 14:37:52 EDT
+# Last-modified: 08-30-2013, 14:53:43 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -159,16 +159,20 @@ def compare(isoforms):
         reads_num+=1
 #        print >>sys.stderr,"debug",i
 
+
     '''
     compare two sets
     '''
-    while( float(len(selected_reads_set))/reads_num < 0.99):
-        no_more_isoform=find_max_compatible()
-        if no_more_isoform: break
-    print >>out,"SUMMARY\t",len(selected_reads_set) ,"/", reads_num ,
-    ratio=float(len(selected_reads_set))/reads_num,
-    print >>out,"(%.4f)"%ratio,
-    print >>out," reads were generated from ",len(selected_isoforms_set)," isoforms"
+    if reads_num==0:
+        print >>out,"SUMMARY\t0 / 0 (0.0%) reads were generated from", len(selected_isoforms_set), "isoforms"
+    else:
+        while( float(len(selected_reads_set))/reads_num < 0.99):
+            no_more_isoform=find_max_compatible()
+            if no_more_isoform: break
+        print >>out,"SUMMARY\t",len(selected_reads_set) ,"/", reads_num ,
+        ratio=float(len(selected_reads_set))/reads_num,
+        print >>out,"(%.4f)"%ratio,
+        print >>out," reads were generated from ",len(selected_isoforms_set)," isoforms"
     print >>out,"//"
 if __name__=="__main__":
     Main()
