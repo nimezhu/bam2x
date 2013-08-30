@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 08-30-2013, 13:42:17 EDT
+# Last-modified: 08-30-2013, 13:51:21 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -49,7 +49,7 @@ def find_max_compatible():
     for i in range(len(isoforms_set)):
         if s[maxi] < s[i] : maxi=i
 
-    if s[maxi]==0: return True   # break
+    #if s[maxi]==0: return True   # break
 
     new_reads_set=[]
     for j,y in enumerate(reads_set):
@@ -134,8 +134,8 @@ def Main():
     compare two sets
     '''
     while( float(len(selected_reads_set))/reads_num < 0.99):
-        zero=find_max_compatible()
-        if zero: break
+        no_more_isoform=find_max_compatible()
+        if no_more_isoform: break
     print >>out,"# ",len(selected_reads_set) ,"/", reads_num ,
     ratio=float(len(selected_reads_set))/reads_num,
     print >>out,"(%.4f)"%ratio,
