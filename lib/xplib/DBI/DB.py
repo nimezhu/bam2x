@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 08-28-2013, 14:36:43 EDT
+# Last-modified: 09-04-2013, 14:47:43 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -319,7 +319,6 @@ class BamI(BamlistI):
  
 
 
-import bx.bbi.bigwig_file
 class BigWigI(MetaDBI):
     '''
     A DBI for bigwig file
@@ -329,6 +328,10 @@ class BigWigI(MetaDBI):
         '''
         init bw file
         '''
+        try:
+            import bx.bbi.bigwig_file
+        except ImportError:
+            raise
         if type(bwfile)==type("string"):
             self.data=bx.bbi.bigwig_file.BigWigFile(open(bwfile,"rb"))
         else:
