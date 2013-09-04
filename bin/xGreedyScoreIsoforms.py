@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-04-2013, 13:04:06 EDT
+# Last-modified: 09-04-2013, 13:21:14 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -29,6 +29,7 @@ def ParseArg():
     p.add_argument('-b','--bam',dest="bam",type=str,help="bamfile which containes RNA-Seq reads, or bamlist file")
     p.add_argument('-f','--format',dest="format",choices=['bam','bamlist'],type=str,default='bam',help="bam format or bamlist format")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
+    p.add_argument('-s','--hit_only',dest="hit_only",default=False,action="store_true",help="only report hits")
     
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
@@ -58,8 +59,10 @@ def find_max_compatible():
             new_reads_set.append(y)
     reads_set=new_reads_set
     
-
-    print >>out,"ISOFORM\t",isoforms_set[maxi],"\t",s[maxi]
+    if s[maxi] > 0:
+        print >>out,"HT\t",isoforms_set[maxi],"\t",s[maxi]
+    else:
+        print >>out,"NT\t",isoforms_set[maxi],"\t",s[maxi]
     if s[maxi]>0:
         selected_isoforms_set.append(isoforms_set[maxi])
     del isoforms_set[maxi]
