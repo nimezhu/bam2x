@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 08-30-2013, 14:53:43 EDT
+# Last-modified: 09-04-2013, 13:04:06 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -20,15 +20,14 @@ Then remove this compativble reads from reads set,
 Compare the rest of isoforms with the new reads set,
 Find the isoform which have the most compatible reads in the new reads set and report it,
 and iterate the process until  99% ( or 95%) reads were compatible with with one of the isoform reported before.
-
-!!! the isoform should be sorted first
 '''
 def ParseArg():
     ''' This Function Parse the Argument '''
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : xplib')
     p.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
     p.add_argument('-i','--input',dest="input",default="stdin",type=str,help="input file DEFAULT: STDIN")
-    p.add_argument('-b','--bam',dest="bam",type=str,help="bamfile which containes RNA-Seq reads")
+    p.add_argument('-b','--bam',dest="bam",type=str,help="bamfile which containes RNA-Seq reads, or bamlist file")
+    p.add_argument('-f','--format',dest="format",choices=['bam','bamlist'],type=str,default='bam',help="bam format or bamlist format")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
     
     if len(sys.argv)==1:
@@ -101,26 +100,34 @@ def Main():
     print >>out,"# The command line is :"
     print >>out,"#\t"," ".join(sys.argv)
 
-    dbi=DBI.init(args.bam,"bam")
+    dbi=DBI.init(args.bam,args.format)
     '''
     reading all the isoforms
     '''
     isoforms=[]
+    
 
 
     iterator=TableIO.parse(fin,"bed")
-    bed=iterator.next()
+    beds=[]
+    for i in iterator:
+        beds.append(i)
+    beds.sort()
+    if len(beds)==0:
+        print >>sys.stderr,"error in reading file",args.input
+        exit(1)
+
+    bed=beds[0]
     chr=bed.chr
     min_start=bed.start
     max_stop=bed.stop
-    isoforms.append(bed)
     j=0
-    for i in iterator:
+    for i in beds:
         j+=1
         if (j%10==0): print >>sys.stderr,"processed %d entries\r"%j,
         if Tools.overlap(bed,i):
             if bed.stop < i.stop:
-                bed=i
+                bed.stop=i.stop
             isoforms.append(i)
         else:
             compare(isoforms)
