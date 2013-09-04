@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 08-27-2013, 14:50:34 EDT
+# Last-modified: 09-04-2013, 14:56:38 EDT
 '''
 This program convert bam format into bed format.
 it is a test program for TableIO.parse(file.bam,"bam2bed")
@@ -14,7 +14,7 @@ def ParseArg():
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : pysam')
     p.add_argument('-v','--version',action='version',version='%(prog)s 0.1')
     p.add_argument('-i','--input',dest="input",type=str,help="input file")
-    p.add_argument('-I','--converter',dest="format",type=str,help="converter: bed , bam2bed, bam2bed12, vcf ....")
+    p.add_argument('-I','--converter',dest="format",type=str,choices=TableIO.FormatToIterator.keys(),help="input format, converter: bed , bam2bed, bam2bed12, vcf ....")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file")
     
     if len(sys.argv)==1:
