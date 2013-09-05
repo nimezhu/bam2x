@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-04-2013, 11:32:34 EDT
+# Last-modified: 09-05-2013, 18:42:52 EDT
 VERSION="0.3"
 '''
 xQuery.py is an example program for using xplib.DBI interface
@@ -40,6 +40,7 @@ def ParseArg():
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file")
     p.add_argument('-a','--annotations',dest="db",type=str,default="",required=True,help="query annotation files")
     p.add_argument('-m','--query_method',dest="query_method",type=str,help="query method : ( bamfile: pileup or fetch or fetch12 (splicing reads) ; bigwig: cDNA or not ; twobit: seq | cDNA | cds | utr3 | utr5 )")
+    p.add_argument('-t','--tabix_format',dest="tabix_format",type=str,help="tabix format",default="simple")
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
@@ -64,9 +65,12 @@ def Main():
     print >>out,"in bam2x ( https://github.com/nimezhu/bam2x )"
     print >>out,"# Date: ",time.asctime()
     print >>out,"# The command line is :\n#\t"," ".join(argv)
+    init_dict={}
     if args.query_method:
         dict["method"]=args.query_method
-    dbi=DBI.init(args.db,args.dbformat)
+    if args.tabix_format:
+        init_dict["tabix"]=args.tabix_format
+    dbi=DBI.init(args.db,args.dbformat,**init_dict)
     hits=0
     query=0
     if args.input=="stdin":
@@ -83,7 +87,9 @@ def Main():
         hit=0
         query+=1
         query_length+=len(x)
+        #print dbi;#debug
         results=dbi.query(x,**dict)
+        #results=dbi.query(x) #DEBUG
         #print >>sys.stderr,type(results)
         if isinstance(results,numpy.ndarray) or isinstance(results,list):
             print >>out,"HT\t",
