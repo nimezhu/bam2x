@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 08-27-2013, 11:20:33 EDT
+# Last-modified: 09-05-2013, 19:06:36 EDT
 
 hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
@@ -181,3 +181,19 @@ def cigar_to_coordinates(cigar,offset=0):
                exon_starts[-1]+=i[1]
            state=0
     return (exon_starts,exon_lengths)
+
+
+def parse_string_to_bed(string):
+    x=string.split(":")
+    if len(x)!=2:
+        print >>sys.stderr,"String Format should be\n chromsome:start-end"
+        exit(1)
+    chr=x[0]
+    y=x[1].split("-")
+    if len(y)!=2:
+        print >>sys.stderr,"String Format should be\n chromsome:start-end"
+        exit(1)
+    start=int(y[0])-1
+    end=int(y[1])
+    return Bed([chr,start,end])
+
