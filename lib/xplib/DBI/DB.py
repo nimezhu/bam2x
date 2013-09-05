@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-05-2013, 18:36:23 EDT
+# Last-modified: 09-05-2013, 18:53:49 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -96,7 +96,6 @@ class TabixI(MetaDBI):
         '''
         yield the overlap feature in tabix index files
         '''
-        print kwargs
         tabix_format="simple"
         if self.dict.has_key("tabix"):
             tabix_format=self.dict["tabix"]
