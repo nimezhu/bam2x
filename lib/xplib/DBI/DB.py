@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-06-2013, 10:26:07 EDT
+# Last-modified: 09-06-2013, 10:28:49 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -91,7 +91,7 @@ class TabixI(MetaDBI):
             #print >>sys.stderr,self.header
         self.tabix_format="simple"
         if self.dict.has_key("tabix"):
-            tabix_format=self.dict["tabix"]
+            self.tabix_format=self.dict["tabix"]
            
 
 
