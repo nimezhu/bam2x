@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 09-06-2013, 13:56:29 EDT
+# Last-modified: 09-06-2013, 14:17:16 EDT
 from string import upper,lower
 hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
@@ -14,6 +14,7 @@ suffixToFormat={
     'fq':'fastq',
     'genetab':'genebed',
     'bw':'bigwig',
+    'tab':'genebed'
 
 }
 
