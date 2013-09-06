@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 09-05-2013, 19:06:36 EDT
+# Last-modified: 09-06-2013, 13:41:11 EDT
 
 hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
@@ -197,3 +197,6 @@ def parse_string_to_bed(string):
     end=int(y[1])
     return Bed([chr,start,end])
 
+def suffix(string):
+    x=string.split('.')
+    return x[-1]
