@@ -1,13 +1,21 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 09-06-2013, 13:41:11 EDT
-
+# Last-modified: 09-06-2013, 13:56:29 EDT
+from string import upper,lower
 hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
           'g':2,'G':2,
           't':3,'T':3
          }
 Nt=['A','C','G','T']
+
+suffixToFormat={
+    'fa':'fasta',
+    'fq':'fastq',
+    'genetab':'genebed',
+    'bw':'bigwig',
+
+}
 
     
 def rc(seq):
@@ -200,3 +208,16 @@ def parse_string_to_bed(string):
 def suffix(string):
     x=string.split('.')
     return x[-1]
+
+
+def guess_format(string):
+    
+    x=string.split(".")
+    suffix=lower(x[-1])
+    if x[-1]=="gz":
+        suffix=lower(x[-2])
+    if suffixToFormat.has_key(suffix):
+        return suffixToFormat[suffix]
+    else:
+        return suffix
+

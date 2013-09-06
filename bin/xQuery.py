@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-05-2013, 18:42:52 EDT
+# Last-modified: 09-06-2013, 14:09:37 EDT
 VERSION="0.3"
 '''
 xQuery.py is an example program for using xplib.DBI interface
@@ -22,9 +22,8 @@ Example:
 '''
 import os,sys,argparse
 from xplib.Annotation import Bed
-from xplib import TableIO
+from xplib import TableIO,Tools,DBI
 import pysam
-from xplib import DBI
 import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
 import time
@@ -35,8 +34,8 @@ def ParseArg():
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -i file.snp -a file.vcf.gz -A tabix -o output.file', epilog='Library dependency : pysam xplib')
     p.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
     p.add_argument('-i','--input',dest="input",type=str,default="stdin",help="input file")
-    p.add_argument('-I','--format',dest="input_format",type=str,choices=TableIO.FormatToIterator.keys(),help="input file format",default="bed")
-    p.add_argument('-A','--dbformat',dest="dbformat",type=str,choices=DBI.FormatToDBI.keys(),help="input file database format. {bed|genebed|tabix|bam}",default="bed")
+    p.add_argument('-I','--format',dest="input_format",type=str,choices=TableIO.FormatToIterator.keys(),help="input file format",default="guess")
+    p.add_argument('-A','--dbformat',dest="dbformat",type=str,choices=DBI.FormatToDBI.keys(),help="input file database format. {bed|genebed|tabix|bam}",default="guess")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file")
     p.add_argument('-a','--annotations',dest="db",type=str,default="",required=True,help="query annotation files")
     p.add_argument('-m','--query_method',dest="query_method",type=str,help="query method : ( bamfile: pileup or fetch or fetch12 (splicing reads) ; bigwig: cDNA or not ; twobit: seq | cDNA | cds | utr3 | utr5 )")
@@ -66,10 +65,18 @@ def Main():
     print >>out,"# Date: ",time.asctime()
     print >>out,"# The command line is :\n#\t"," ".join(argv)
     init_dict={}
+    if args.dbformat=="guess":
+        if Tools.suffix(args.db)=="gz": 
+            args.dbformat="tabix"
+            args.tabix_format=Tools.guess_format(args.db)
+        else:
+            args.dbformat=Tools.guess_format(args.db)
+
     if args.query_method:
         dict["method"]=args.query_method
     if args.tabix_format:
         init_dict["tabix"]=args.tabix_format
+
     dbi=DBI.init(args.db,args.dbformat,**init_dict)
     hits=0
     query=0
@@ -80,6 +87,8 @@ def Main():
 
     query_length=0
     hits_number=0
+    if (args.input_format=="guess"):
+        args.input_format=Tools.guess_format(args.input)
     for (i0,x) in enumerate(TableIO.parse(input,args.input_format)):
         if i0%100==0:
             print >>sys.stderr,"query ",i0," entries\r",
