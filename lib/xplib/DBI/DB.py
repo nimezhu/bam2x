@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-05-2013, 18:53:49 EDT
+# Last-modified: 09-06-2013, 10:26:07 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -89,18 +89,18 @@ class TabixI(MetaDBI):
             fh=TableIO.parse(dict["header"])
             self.header=fh.next()
             #print >>sys.stderr,self.header
-            
+        self.tabix_format="simple"
+        if self.dict.has_key("tabix"):
+            tabix_format=self.dict["tabix"]
+           
 
 
     def query(self,x,**kwargs):
         '''
         yield the overlap feature in tabix index files
         '''
-        tabix_format="simple"
-        if self.dict.has_key("tabix"):
-            tabix_format=self.dict["tabix"]
         try:
-            for item in TableIO.parse(self.data.fetch(x.chr,x.start,x.stop),format=tabix_format,header=self.header):
+            for item in TableIO.parse(self.data.fetch(x.chr,x.start,x.stop),format=self.tabix_format,header=self.header):
                 yield item
         except:
            raise StopIteration
