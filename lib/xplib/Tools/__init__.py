@@ -1,7 +1,10 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 09-06-2013, 14:45:00 EDT
+# Last-modified: 09-10-2013, 11:09:11 EDT
 from string import upper,lower
+
+__all__=["IO","codon"]
+
 hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
           'g':2,'G':2,
