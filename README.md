@@ -6,4 +6,6 @@ extract information from  bam (sequence alignment)  files and generate tables fo
 =====
 Library Dependent:
 pysam
-twobitreader
+twobitreader  ( needed for query 2bit file)
+bxpython (optional, needed for query bigwig file)
+ghmm (optional for xbam2trans.py)
