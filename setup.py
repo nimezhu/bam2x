@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 08-30-2013, 16:42:25 EDT
+# Last-modified: 09-10-2013, 11:55:47 EDT
 import os
 import sys
 from distutils.core import setup
@@ -21,7 +21,8 @@ def main():
                     "xplib.Stats",
                     "xplib.Struct",
                     "xplib.TableIO",
-                    "xplib.Tools"
+                    "xplib.Tools",
+                    "xplib.Tools.IO",
                     ],
           package_dir={"":"lib"},
           scripts=["bin/xQuery.py"],
