@@ -2,7 +2,7 @@
 # email: nimezhu@163.com
 import sys
 
-#Last-modified: 09-11-2013, 12:04:15 EDT
+#Last-modified: 09-11-2013, 15:26:44 EDT
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 class Bed(object):
@@ -457,9 +457,9 @@ class Bed12(GeneBed):
         return self.toBedString()
 
         
-class Fragment(Bed):
+class Fragment:
     '''
-    Paired End Data
+    Paired End Raw Data
     '''
     def __init__(self,read,mate=None,**kwargs):
         self.reads=[]
@@ -472,8 +472,8 @@ class Fragment(Bed):
             else:
                 self.reads.append(mate)
                 self.reads.append(read)
-        if kwargs.has_key("ref"):
-            self.tid2chr=kwargs["ref"]
+        if kwargs.has_key("chr"):
+            self.chr=kwargs["chr"]
     def __str__(self):
         s=""
         for i,x in enumerate(self.reads):

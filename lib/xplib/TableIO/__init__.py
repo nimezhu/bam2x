@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-11-2013, 11:23:40 EDT
+# Last-modified: 09-11-2013, 14:22:15 EDT
 import BedIO
 import GeneBedIO
 import SimpleIO
@@ -47,6 +47,16 @@ def parse(handle,format="simple",**dict):
         i=iterator_generator(handle,**dict)
     for r in i:
         yield r
+def convert(item,format="bam2bed12",**dict):
+    items=[item]
+    a=parse(items,format,**dict)
+    try:
+        b=a.next()
+        a.close()
+        return b
+    except:
+        return None
+
 def format_string(x):
     s=""
     for i in x:

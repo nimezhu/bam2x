@@ -1,9 +1,11 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 09-10-2013, 11:09:11 EDT
+# Last-modified: 09-11-2013, 16:25:56 EDT
 from string import upper,lower
+from xplib.Annotation import Fragment,Bed,Bed12
+import xplib
 
-__all__=["IO","codon"]
+# __all__=["IO","codon"]
 
 hNtToNum={'a':0,'A':0,
           'c':1,'C':1,
@@ -103,7 +105,7 @@ def find_nearest(bed,dbi,extends=50000,**dict):
         return (d,nearest,strand)
 
 
-def compatible(a,b):
+def compatible(a,b,**kwargs):
     '''
     VERSION: TEST
     if a and b are compatible return true
@@ -112,6 +114,7 @@ def compatible(a,b):
        the overlap region should be same transcript structure.
     '''
     if (not overlap(a,b)): return True; 
+    if (a.strand!=b.strand): return False;
     '''
     if two bed is not overlap, they are compatible.
     '''
@@ -157,16 +160,40 @@ def compatible(a,b):
     if j!=l : 
         return False
     return True 
-
-def compatible_with_transcript(read,transcript):
+def reverse_strand(i):
+    if i=="+": return "-"
+    if i=="-": return "+"
+    if i==".": return "."
+    if type(i)==type(1): return -i
+def compatible_with_transcript(read,transcript,**kwargs): 
     '''
     if reads is compatible with the transcript( full length or longer than reads)
+    
+    !!! if read is fragment, then need add "references"= bamfile.references
     '''
     # read must in the transcript
-    if read.start < transcript.start or read.stop > transcript.stop :
-        return False
+    if isinstance(read,Fragment):
+        for i0,i in enumerate(xplib.TableIO.parse(read.reads,"bam2bed12",**kwargs)):
+            if i.start < transcript.start or i.stop > transcript.stop :
+                return False
+            else:
+                if kwargs.has_key("strand"): 
+                    if kwargs["strand"]=="read1":
+                        if read.reads[i0].is_read2:
+                            i.strand=reverse_strand(i.strand)
+                    elif kwargs["strand"]=="read2":
+                        if read.reads[i0].is_read1:
+                            i.strand=reverse_strand(i.strand)
+                if not compatible(i,transcript,**kwargs):
+                    return False
+        return True
     else:
-        return compatible(read,transcript)
+        if kwargs.has_key("strand") and kwargs["strand"]==True:
+            if read.strand != transcript.strand: return False
+        if read.start < transcript.start or read.stop > transcript.stop :
+            return False
+        else:
+            return compatible(read,transcript,**kwargs)
     
 
 def cigar_to_coordinates(cigar,offset=0):

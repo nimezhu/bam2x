@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-10-2013, 11:02:03 EDT
+# Last-modified: 09-11-2013, 14:09:20 EDT
 VERSION="0.1"
 import os,sys,argparse
 import gzip
 import time
-
+import pysam
+import xplib.Tools as Tools
 def open_output(output):
     out=None
     if output=="stdout":
@@ -38,6 +39,8 @@ def open_input(input):
 def fopen(file,mode="r",**kwargs):
     '''
     '''
+    if Tools.guess_format(file)=="bam" and mode=="r":
+        return pysam.Samfile(file,"rb")
     if mode=="w":
         return open_output(file)
     if mode=="r":

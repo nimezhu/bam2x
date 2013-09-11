@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-11-2013, 11:40:00 EDT
+# Last-modified: 09-11-2013, 15:30:06 EDT
 import types
 import pysam
 from xplib.Annotation import Bed,Bed12,Fragment
@@ -19,8 +19,13 @@ def BamIterator(filename,**kwargs):
         for i in TableIO.parse(filename,"bam"):
             print i
     '''
-    f=pysam.Samfile(filename,"rb")
+    if type(filename)==type("str"):
+        f=pysam.Samfile(filename,"rb")
+
+    else:
+        f=filename
     for i in f:
+        #print i #debug
         yield i
 def SamIterator(filename,**kwargs):
     '''
@@ -35,7 +40,10 @@ def SamIterator(filename,**kwargs):
         for i in TableIO.parse(filename,"sam"):
             print i
     '''
-    f=pysam.Samfile(filename,"r")
+    if type(filename)==type("str"):
+        f=pysam.Samfile(filename,"r")
+    else:
+        f=filename
     for i in f:
         yield i
 def BamToBedIterator(filename,**kwargs):
@@ -76,6 +84,7 @@ def BamToBed12Iterator(handle,**kwargs):
     if type(handle)==type("string"):
         handle=pysam.Samfile(handle,"rb");
     for i in handle:
+        #print i #debug
         if i.tid<0: continue
         strand="+"
         if i.is_reverse:
@@ -99,6 +108,16 @@ def BamToBed12Iterator(handle,**kwargs):
         cds_start=start
         cds_end=start
         itemRgb="0,0,0"
+        '''
+        debug
+        import sys
+        if i.cigar is None:
+            print >>sys.stderr,"why cigar is Nonetype?"
+            print >>sys.stderr,i
+            exit(0)
+        end of debug
+        '''
+        if i.cigar==None: continue # IGNORE THIS READS?
         (block_starts,block_sizes)=Tools.cigar_to_coordinates(i.cigar);
         bed=Bed12([chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts])
         yield bed
