@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-11-2013, 17:04:43 EDT
+# Last-modified: 09-11-2013, 17:07:13 EDT
 VERSION="0.11"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -35,7 +35,7 @@ def ParseArg():
     p.add_argument('-t','--threshold',dest="threshold",type=float,default=0.01,help="Isoform Proportion larger than threshold is reported as HT (hit). other isoforms are reported as NT (no hit). default: 0.01")
     p.add_argument('-B','--BYY',dest="BYY",default=False,action="store_true",help="Using BYY HardCut")
     p.add_argument('-s','--hits_only',dest="hits_only",default=False,action="store_true",help="only report hits")
-    p.add_argument('-S','--strand',dest="strand",default="read1",choices=["read1","read2"],help="only report hits")
+    p.add_argument('-S','--strand',dest="strand",default="read1",choices=["read1","read2"],help="which read represent the transcript strand")
     
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
