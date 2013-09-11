@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-06-2013, 10:28:49 EDT
+# Last-modified: 09-11-2013, 11:54:19 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -254,6 +254,10 @@ class BamlistI(MetaDBI):
                     (block_starts,block_sizes)=Tools.cigar_to_coordinates(read.cigar); 
                     bed=Bed12([chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts])
                     yield bed
+        elif method=="paired_end":
+            for bamfile in self.bamfiles:
+                for fragment in TableIO.parse(bamfile.fetch(x.chr,x.start,x.stop),"bam2fragment",bam=bamfile):
+                    yield fragment
         elif method=='pileup':
             s=[[0,0,0,0] for row in range(x.stop-x.start)]
             for bamfile in self.bamfiles:

@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-28-2013, 16:10:09 EDT
+# Last-modified: 09-11-2013, 11:23:40 EDT
 import BedIO
 import GeneBedIO
 import SimpleIO
@@ -28,6 +28,7 @@ FormatToIterator = { "bed":BedIO.BedIterator,
                      "gtf":gtfIO.GTFIterator,
                      "fimo":IO.FimoIterator,
                      "bam2bed12":BamIO.BamToBed12Iterator,
+                     "bam2fragment":BamIO.BamToFragmentIterator,
                    }
 def parse(handle,format="simple",**dict):
     """

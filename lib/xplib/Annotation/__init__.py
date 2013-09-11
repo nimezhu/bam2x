@@ -1,10 +1,10 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 08-29-2013, 11:31:11 EDT
+
+#Last-modified: 09-11-2013, 12:04:15 EDT
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
-
 class Bed(object):
     '''
     Genome Annotation Format.
@@ -457,7 +457,30 @@ class Bed12(GeneBed):
         return self.toBedString()
 
         
-
+class Fragment(Bed):
+    '''
+    Paired End Data
+    '''
+    def __init__(self,read,mate=None,**kwargs):
+        self.reads=[]
+        if mate is None:
+            self.reads.append(read)
+        else:
+            if read.is_read1:
+                self.reads.append(read)
+                self.reads.append(mate)
+            else:
+                self.reads.append(mate)
+                self.reads.append(read)
+        if kwargs.has_key("ref"):
+            self.tid2chr=kwargs["ref"]
+    def __str__(self):
+        s=""
+        for i,x in enumerate(self.reads):
+            s+="READ"+str(i)+"\t"+str(x)+"\n"
+        return s
+        
+    
                    
 class VCF(Bed):
     '''
