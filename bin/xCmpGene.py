@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-17-2013, 15:49:45 EDT
+# Last-modified: 09-12-2013, 16:42:57 EDT
 VERSION="0.1"
 import os,sys,argparse
-from xplib.Annotation import Bed
-from xplib import TableIO
+from xplib.Annotation import Bed,Bed12,GeneBed
+from xplib import TableIO,Tools
 from xplib import DBI
 import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
@@ -17,10 +17,10 @@ def ParseArg():
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : xplib')
     p.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
     p.add_argument('-i','--input',dest="input",default="stdin",type=str,help="input file DEFAULT: STDIN")
-    p.add_argument('-I','--input_format',dest="format",default="bed",type=str,help="input file format")
+    p.add_argument('-I','--input_format',dest="format",choices=["bed","genepred"],default="guess",type=str,help="input file format")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
     p.add_argument('-g','--gene',dest="genetab",type=str,help="Gene Tab")
-    p.add_argument('-G','--geneformat',dest="gene_format",type=str,default="genepred",help="gene format: [genepred or bed] DEFAULT: genepred")
+    p.add_argument('-G','--geneformat',dest="gene_format",type=str,choices=["bed","genepred"],default="genepred",help="gene format: [genepred or bed] DEFAULT: genepred")
     p.add_argument('-u','--upstream',dest="upstream",type=int,default=3000,help="upstream bp number , default: 3000")
     p.add_argument('-d','--downstream',dest="downstream",type=int,default=3000,help="downstream bp number , default: 3000")
     
@@ -88,8 +88,20 @@ def Main():
     utr5=DBI.init(utr5_list,"genebed")
 
 
-    print >>out,"#chr\tstart\tend\tname\tscore\tstrand\tgene\tupstream\tdownstream\texon\tintron\tutr3\tutr5"
-    for i in TableIO.parse(fin,args.format):
+
+    if args.format=="guess":
+        args.format=Tools.guess_format(args.input)
+    for (i0,i) in enumerate(TableIO.parse(fin,args.format)):
+        if i0==0:
+            if isinstance(i,Bed12):
+                print >>out,"#chr\tstart\tend\tname\tscore\tstrand\tthick_start\tthick_end\titem_rgb\tblock_count\tblock_sizes\tblock_starts\tgene\tupstream\tdownstream\texon\tintron\tutr3\tutr5"
+            elif isinstance(i,GeneBed):
+                print >>out,"#name\tchr\tstrand\tstart\tend\tcds_start\texon_count\texon_starts\texont_ends\tgene\tupstream\tdownstream\texon\tintron\tutr3\tutr5"
+            else:
+                print >>out,"#chr\tstart\tend\tname\tscore\tstrand\tgene\tupstream\tdownstream\texon\tintron\tutr3\tutr5"
+        
+
+
         print >>out,i,
         print >>out,"\t",toIDs(gene.query(i)),
 
