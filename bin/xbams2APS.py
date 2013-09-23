@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 10 Oct 2012 16:31:37
+# Last-modified: 09-23-2013, 17:29:31 EDT
 '''
 This program calculate the Allele Preference Score for Specific SNPs or Specific Regions or whole genome.
 
@@ -56,6 +56,7 @@ def ParseArg():
     p.add_argument('-A','--annotation_format',dest="annotation_format",type=str,action="store",default="bed",help="Region Annotation File Format {bed,vcf,genebed}")
     p.add_argument('-g','--chromsize',dest="chromsize",type=str,action="store",default="/data/zhuxp/Data/hg19.chrom.25.sizes",help="get chromosome sizes")
     p.add_argument('-n','--no_filter',dest="no_filter",action="store_true",default=False,help="No Filter, Report all the sites, ignore the coverage cutoff")
+    p.add_argument('--chr_prefix',dest="chr_prefix",action="store",default="",help="if vcf file chromosome name is 1,2,3 etc. , need change to chr1, chr2, chr3. assign chr_prefix to chr")
    
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
@@ -166,6 +167,7 @@ def Main():
         Query Regions in Bed file or VCF file etc.
         '''
         for i in TableIO.parse(args.annotations,args.annotation_format):
+            i.chr=args.chr_prefix+i.chr
             for aps in QueryBed(i,dbi_A,dbi_B):
                 print >>out,aps
     elif args.chromsize:
