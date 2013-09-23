@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-11-2013, 11:54:19 EDT
+# Last-modified: 09-23-2013, 14:44:51 EDT
 
 import os,sys
 from xplib.Annotation import *
@@ -226,6 +226,7 @@ class BamlistI(MetaDBI):
             for bamfile in self.bamfiles:
                 for read in bamfile.fetch(x.chr,x.start,x.stop):
                     if read.tid<0:continue
+                    if read.mapq==0:continue
                     strand='+'
                     if read.is_reverse:
                         strand='-'
@@ -240,6 +241,7 @@ class BamlistI(MetaDBI):
             for bamfile in self.bamfiles:
                 for read in bamfile.fetch(x.chr,x.start,x.stop):
                     if read.tid<0:continue
+                    if read.mapq==0:continue
                     chr=bamfile.references[read.tid]
                     strand='+'
                     if read.is_reverse:
