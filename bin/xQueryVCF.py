@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-25-2013, 08:59:54 EDT
+# Last-modified: 09-25-2013, 09:09:26 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -45,10 +45,12 @@ def Main():
     for i,bam in enumerate(args.bams):
         print >>out,"# No."+str(i+1)+" BAM File:",bam
         dbi.append(DBI.init(bam,"bam"))
-    for i in TableIO.parse(fin,"vcf"):
-        print >>out,i,
+    for i,vcf in enumerate(TableIO.parse(fin,"vcf")):
+        if(i%100==0):
+            print sys.stderr,"processing",i,"vcf\r",
+        print >>out,vcf,
         for d in dbi:
-            print >>out,"\t",dbi.query(i)
+            print >>out,"\t",dbi.query(vcf)
 
 def format(vcf,result,method=0):
     pass
