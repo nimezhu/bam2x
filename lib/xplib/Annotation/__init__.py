@@ -2,7 +2,7 @@
 # email: nimezhu@163.com
 import sys
 
-#Last-modified: 09-11-2013, 15:26:44 EDT
+#Last-modified: 09-25-2013, 09:36:15 EDT
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 class Bed(object):
@@ -518,7 +518,9 @@ class VCF(Bed):
                 pass
         for key in kwargs.keys():
             setattr(self,key,kwargs[key])
-
+    @staticmethod
+    def header():
+        return "CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT"
     def _parse_infos(self):
         x=self.info.split(";")
         for i in x:
