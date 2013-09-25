@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-25-2013, 09:38:38 EDT
+# Last-modified: 09-25-2013, 09:48:53 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed,VCF
@@ -18,7 +18,7 @@ def ParseArg():
     p.add_argument('-i','--input',dest="input",default="stdin",type=str,help="input file DEFAULT: STDIN")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
     p.add_argument('-b','--bam', dest="bams",type=str,nargs="+",help="bam files")
-    p.add_argument('-p','--chr_prefix', dest="chr_prefix",type=str,help="if vcf file chr is 1,2,3... instead of chr1,chr2,chr3... , while bam file is chr1,chr2,chr3. please set this option to 'chr'")
+    p.add_argument('-p','--chr_prefix', dest="chr_prefix",type=str,default="",help="if vcf file chr is 1,2,3... instead of chr1,chr2,chr3... , while bam file is chr1,chr2,chr3. please set this option to 'chr'")
     
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
