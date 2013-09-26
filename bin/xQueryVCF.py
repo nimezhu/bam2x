@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-25-2013, 09:48:53 EDT
+# Last-modified: 09-26-2013, 15:12:14 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed,VCF
@@ -40,7 +40,6 @@ def Main():
     print >>out,"# Date: ",time.asctime()
     print >>out,"# The command line is :"
     print >>out,"#\t"," ".join(sys.argv)
-    print >>out,args.bams
 
     dbi=[];
     for i,bam in enumerate(args.bams):
