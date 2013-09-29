@@ -3,6 +3,8 @@ bam2x
 
 extract information from  bam (sequence alignment)  files and generate tables for further analysis.  
 
+[bam2x wikipedia](http://bam2xwiki.appspot.com/)
+powered by google app engine
 =====
 Library Dependent:
 pysam
