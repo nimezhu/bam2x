@@ -1,7 +1,7 @@
 bam2x
 =====
+bam2x provide universal interface to query and read NGS and related data based on choromsome coordinates.
 
-extract information from  bam (sequence alignment)  files and generate tables for further analysis.  
 
 [bam2x wikipedia](http://bam2xwiki.appspot.com/)
 powered by google app engine
