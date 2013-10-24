@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-10-2013, 12:27:39 EDT
+# Last-modified: 10-24-2013, 18:27:26 EDT
 import os
 import sys
 from distutils.core import setup
@@ -24,7 +24,12 @@ def main():
                     "xplib.Tools",
                     ],
           package_dir={"":"lib"},
-          scripts=["bin/xQuery.py"],
+          scripts=["bin/xQuery.py",
+                   "bin/xRead.py",
+                   "bin/xCmpGene.py",
+                   "bin/xGetSeq.py",
+                   "bin/xbams2APS.py",
+                   ],
           requires=["pysam","twobitreader","bx"],
           )
 
