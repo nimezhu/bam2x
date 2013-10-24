@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 10-24-2013, 19:23:01 EDT
+# Last-modified: 10-24-2013, 19:40:06 EDT
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -17,7 +17,7 @@ def ParseArg():
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : xplib')
     p.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
     p.add_argument('-i','--input',dest="input",default="stdin",type=str,help="input annotation file in gene table format or bed DEFAULT: STDIN")
-    p.add_argument('-I','--format',dest="format",default="bed",type=str,help="input format DEFAULT: bed CHOICES:{bed,genebed}")
+    p.add_argument('-I','--format',dest="format",default="bed",type=str,help="input format DEFAULT: bed CHOICES:{bed,genepred}")
     p.add_argument('-g','--genome',dest="genome",type=str,help="chromosome.2bit file")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
     p.add_argument('-l','--line',dest="line",action="store_true",default=False,help="no wrapper")
