@@ -2,7 +2,7 @@
 # email: nimezhu@163.com
 import sys
 
-#Last-modified: 09-25-2013, 09:36:15 EDT
+#Last-modified: 11-06-2013, 15:58:51 EST
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 class Bed(object):
@@ -114,6 +114,18 @@ class Bed(object):
         else:
             pos=self.start 
         return Bed([self.chr,pos,pos+1,self.id+"_tts",self.strand,0])
+    def head(self,bp=2):
+        '''return the head 2(default) bp of simple bed'''
+        if self.strand=="+":
+            return Bed([self.chr,self.start,self.start+bp,self.id+"_head"+str(bp)+"bp",0,self.strand])
+        if self.strand=="-":
+            return Bed([self.chr,self.stop-bp,self.stop,self.id+"_head"+str(bp)+"bp",0,self.strand])
+    def tail(self,bp=2):
+        '''return the tail 2(default) bp of simple bed'''
+        if self.strand=="+":
+            return Bed([self.chr,self.stop-bp,self.stop,self.id+"_tail"+str(bp)+"bp",0,self.strand])
+        if self.strand=="-":
+            return Bed([self.chr,self.start,self.start+2,self.id+"_tail"+str(bp)+"bp",0,self.strand])
     def strand_cmp(self,bed):
         '''
         return if the compare bed is in the same strand or different strand

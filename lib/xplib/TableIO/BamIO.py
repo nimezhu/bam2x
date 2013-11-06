@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-11-2013, 15:30:06 EDT
+# Last-modified: 11-06-2013, 13:50:18 EST
 import types
 import pysam
 from xplib.Annotation import Bed,Bed12,Fragment
@@ -101,7 +101,13 @@ def BamToBed12Iterator(handle,**kwargs):
                  chr=handle.references[i.tid];
             except:
                  chr="chr"
-        
+        if kwargs.has_key("strand"):
+            if kwargs["strand"]=="read1" or kwargs["strand"]=="firstMate":
+                read1=True
+            else:
+                read1=False
+        else:
+            read1=True   
         start=i.pos
         end=i.aend
         name=i.qname
@@ -119,6 +125,10 @@ def BamToBed12Iterator(handle,**kwargs):
         '''
         if i.cigar==None: continue # IGNORE THIS READS?
         (block_starts,block_sizes)=Tools.cigar_to_coordinates(i.cigar);
+        if i.is_read1 and not read1:
+            strand=Tools.reverse_strand(strand)
+        elif i.is_read2 and read1:
+            strand=Tools.reverse_strand(strand)
         bed=Bed12([chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts])
         yield bed
 
