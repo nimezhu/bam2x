@@ -1,9 +1,10 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 09-11-2013, 16:25:56 EDT
+# Last-modified: 11-13-2013, 16:28:52 EST
 from string import upper,lower
 from xplib.Annotation import Fragment,Bed,Bed12
 import xplib
+import copy
 
 # __all__=["IO","codon"]
 
@@ -65,6 +66,44 @@ def translate_coordinate(A,B):
         if B.strand=="-":strand="+"
         if B.strand=="+":strand="-"
         return (A.stop-B.stop,A.stop-B.start,strand)
+def translate_coordinates(A,B): # B is Bed12 format
+    '''
+    Translate Bed12 Object B based on simple annotation A
+    '''
+    chr=A.id
+    id=B.id
+    (start,stop,strand)=translate_coordinate(A,B)
+    score=B.score
+    (cds_start,cds_stop,cds_strand)=translate_coordinate(A,Bed([B.chr,B.cds_start,B.cds_stop]))
+    itemRgb=B.itemRgb
+    blockCount=B.blockCount
+    
+    blockSizes=copy.copy(B.blockSizes)
+    if A.strand=="-": 
+        blockSizes=blockSizes[::-1]
+
+    blockStarts=copy.copy(B.blockStarts)
+    if A.strand=="+" or A.strand==".":
+        for i,x in enumerate(blockStarts):
+            blockStarts[i]=blockStarts[i]
+    elif A.strand=="-":
+        for i,x in enumerate(blockStarts):
+            blockStarts[i]+=blockSizes[i]
+        blockStarts=blockStarts[::-1]
+        for i,x in enumerate(blockStarts):
+            print blockStarts[i]
+            blockStarts[i]=B.stop-(blockStarts[i]+B.start)
+    '''
+    print A
+    print B
+    print chr,start,stop,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,blockSizes,blockStarts
+    '''
+    return Bed12([chr,start,stop,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,blockSizes,blockStarts])
+
+        
+
+
+
 
 def overlap(A,B):
     '''
