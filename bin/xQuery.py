@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-06-2013, 14:09:37 EDT
+# Last-modified: 11-13-2013, 10:26:47 EST
 VERSION="0.3"
 '''
 xQuery.py is an example program for using xplib.DBI interface
@@ -40,6 +40,7 @@ def ParseArg():
     p.add_argument('-a','--annotations',dest="db",type=str,default="",required=True,help="query annotation files")
     p.add_argument('-m','--query_method',dest="query_method",type=str,help="query method : ( bamfile: pileup or fetch or fetch12 (splicing reads) ; bigwig: cDNA or not ; twobit: seq | cDNA | cds | utr3 | utr5 )")
     p.add_argument('-t','--tabix_format',dest="tabix_format",type=str,help="tabix format",default="simple")
+    p.add_argument('-H','--tabix_header',dest="tabix_header",type=str,help="tabix header file [ override tabix format , using metabed ]")
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
@@ -76,6 +77,9 @@ def Main():
         dict["method"]=args.query_method
     if args.tabix_format:
         init_dict["tabix"]=args.tabix_format
+    if args.tabix_header:
+        init_dict["tabix"]="metabed"
+        init_dict["header"]=args.tabix_header
 
     dbi=DBI.init(args.db,args.dbformat,**init_dict)
     hits=0
