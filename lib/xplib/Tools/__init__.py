@@ -1,8 +1,8 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 11-13-2013, 16:54:09 EST
+# Last-modified: 11-13-2013, 16:54:40 EST
 from string import upper,lower
-from xplib.Annotation import Fragment,Bed,Bed12
+from xplib.Annotation import Fragment,Bed,Bed12,GeneBed
 import xplib
 import copy
 
