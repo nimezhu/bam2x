@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 11-13-2013, 16:54:40 EST
+# Last-modified: 11-13-2013, 17:17:12 EST
 from string import upper,lower
 from xplib.Annotation import Fragment,Bed,Bed12,GeneBed
 import xplib
@@ -103,6 +103,7 @@ def translate_coordinates(A,B): # B is Bed12 format
         C.chr=chr
         C.start=start
         C.stop=stop
+        C.end=stop
         C.strand=strand
         if B.__dict__.has_key('pos'):
             C.pos=C.start+1  # position is 1  index
