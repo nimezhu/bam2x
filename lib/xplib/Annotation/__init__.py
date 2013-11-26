@@ -1,8 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-
-#Last-modified: 11-06-2013, 15:58:51 EST
+#Last-modified: 11-26-2013, 01:35:29 EST
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 class Bed(object):
@@ -196,9 +195,6 @@ class GeneBed(Bed):
             pass
         for key in kwargs.keys():
             setattr(self,key,kwargs[key])
-        
-  #  def __str__(self):
-  #      return self.string
     def _exon(self,i):
         '''internal fucntion to call the exon position'''
         if i > self.exon_count:
@@ -491,6 +487,16 @@ class Fragment:
         for i,x in enumerate(self.reads):
             s+="READ"+str(i)+"\t"+str(x)+"\n"
         return s
+    def toBed12(self,chr="chr",strand="read2"):
+        '''
+        test now
+        '''
+        from xplib import TableIO
+        x=list()
+        for i in TableIO.parse(self.reads,"bam2bed12",references=chr,strand=strand):
+            x.append(i)
+        return x
+        
         
     
                    

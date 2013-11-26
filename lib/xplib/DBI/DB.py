@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-23-2013, 14:44:51 EDT
+# Last-modified: 11-26-2013, 01:32:56 EST
 
 import os,sys
 from xplib.Annotation import *
@@ -221,7 +221,7 @@ class BamlistI(MetaDBI):
                     print >>sys.stderr,"WARNING: Can't init the bam file",bamfile
             self.bamfiles.append(bamfile)
 
-    def query(self,x,method='pileup'):
+    def query(self,x,method='pileup',**dict):
         if method=='fetch':
             for bamfile in self.bamfiles:
                 for read in bamfile.fetch(x.chr,x.start,x.stop):
@@ -260,6 +260,13 @@ class BamlistI(MetaDBI):
             for bamfile in self.bamfiles:
                 for fragment in TableIO.parse(bamfile.fetch(x.chr,x.start,x.stop),"bam2fragment",bam=bamfile):
                     yield fragment
+        elif method=="bam2": # yield bed12
+            for bamfile in self.bamfiles:
+                for fragment in TableIO.parse(bamfile.fetch(x.chr,x.start,x.stop),"bam2fragment",bam=bamfile):
+                    if dict.has_key("strand"):
+                        yield fragment.toBed12(chr=x.chr,strand=dict["strand"])
+                    else:
+                        yield fragment.toBed12(chr=x.chr)
         elif method=='pileup':
             s=[[0,0,0,0] for row in range(x.stop-x.start)]
             for bamfile in self.bamfiles:

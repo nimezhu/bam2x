@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 11-12-2013, 15:58:01 EST
+# Last-modified: 11-14-2013, 10:38:09 EST
+
+from xplib.Annotation import *
+from bitarray import bitarray
 def method():
     print "aha"
 
@@ -29,3 +32,27 @@ def twobitarray_and(bitarrayA,bitarrayB):
         b1=bitarrayB[i+1]
         if (a0!=b0 and a1!=b1): return False
     return True
+
+def bitarray_and(bitarrayA,bitarrayB):
+    l1=len(bitarrayA)
+    l2=len(bitarrayB)
+    if l1!=l2: return None
+    C=bitarray(l1)
+    for i in range(l1):
+        C[i]=bitarrayA[i] and bitarrayB[i]
+    return C
+
+
+
+def TuringFactory(bed12):
+    import xplib.Turing.TuringCodeBook as cb
+    from xplib.Turing import TuringCode, TuringGraph
+    g=[]
+    g.append(TuringCode(bed12.start,cb.ON))
+    g.append(TuringCode(bed12.stop,cb.OFF))
+    if isinstance(bed12,Bed12) or isinstance(bed12,GeneBed):
+        for i in bed12.Exons():
+            g.append(TuringCode(i.start,cb.BLOCKON))
+            g.append(TuringCode(i.stop,cb.BLOCKOFF))
+    g.sort()
+    return TuringGraph(g)

@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 11-12-2013, 16:04:00 EST
+# Last-modified: 11-26-2013, 00:52:25 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
@@ -19,10 +19,6 @@ class TuringCode:
         return cmp(self.pos,other.pos) or cmp(self.code,other.code)
 
 
-'''
-class TuringPath(TuringGraph):
-    pass
-'''
 
 
 class TuringGraph:
@@ -32,6 +28,7 @@ class TuringGraph:
         self.state=cb.BLOCKON
         self.states_register=[]
         self.cid=cb.DEFAULT_CID
+        self.codes.sort()
         for key in kwargs.keys():
             setattr(self,key,kwargs[key])
     def set_cid(self,cid):
@@ -68,7 +65,19 @@ class TuringGraph:
             for x in self.iter_all_path(i+1): yield x
         elif self.codes[i].code==cb.BLOCKOFF and self.state==cb.BLOCKOFF:
             for x in self.iter_all_path(i+1): yield x
-        
+    def count_paths_number(self):
+        '''
+        test version
+        count the number of paths
+        '''
+        count_on=0
+        count_off=1
+        for code in self.codes:
+            if code.code==cb.BLOCKON:
+               count_on=count_on+count_off 
+            elif code.code==cb.BLOCKOFF:
+               count_off=count_off+count_on
+        return count_off 
 
 
     def add(path):
@@ -80,6 +89,52 @@ class TuringGraph:
         for i in self.codes:
             s+=str(i.pos)+":"+str(i.code)+"\n"
         return s
+    def graph_str(self,scale=60):
+        s=""
+        l=self.codes[-1].pos-self.codes[0].pos
+        if scale > l:
+            scale=l
+        for i in range(scale+1):
+            s+="-";
+        list_s=list(s)
+        
+        for i in self.codes:
+            position=i.pos-self.codes[0].pos
+            index=position*scale/l;
+            print index
+            if i.code==cb.BLOCKON and list_s[index]=="-": list_s[index]='^'
+            if i.code==cb.BLOCKOFF and list_s[index]=="-" : list_s[index]='v'
+            if i.code==cb.BLOCKON and list_s[index]=="v": list_s[index]='x'
+            if i.code==cb.BLOCKOFF and list_s[index]=="^": list_s[index]='x'
+        return "".join(list_s)
+    def path_str(self,path,scale=60):
+        s=""
+        l=self.codes[-1].pos-self.codes[0].pos
+        if scale > l:
+            scale=l
+        for i in range(scale+1):
+            s+=" ";
+        list_s=list(s)
+        
+        for i in path.codes:
+            position=i.pos-self.codes[0].pos
+            index=position*scale/l;
+            print index
+            if i.code==cb.BLOCKON and list_s[index]==" ": list_s[index]='^'
+            if i.code==cb.BLOCKOFF and list_s[index]==" " : list_s[index]='v'
+            if i.code==cb.BLOCKON and list_s[index]==" ": list_s[index]='x'
+            if i.code==cb.BLOCKOFF and list_s[index]==" ": list_s[index]='x'
+        return "".join(list_s)
+ 
+
+    def __len__(self):
+        d={}
+        for i in self.codes:
+            if d.has_key(i.pos):
+                d[i.pos]+=1
+            else:
+                d[i.pos]=1
+        return len(d.values())
     def score_path(path):
         #TO DO
         pass
@@ -100,16 +155,18 @@ class TuringGraph:
         cbstate=cb.BLOCKOFF
         pstate=cb.OFF
         pbstate=cb.BLOCKOFF
-        output=bitarray([ True for i in range(2*len(c))])
+        #output=bitarray([ True for i in range(2*len(c))])
+        output=bitarray(len(self)*2)
+        output.setall(True)
         
         for i in p:
             c.append(i)
         c.sort()
-        j=0
-        last_pos=0
+        j=-1
+        last_pos=-1
 
         for i in c:
-            print i.cid,i
+            #print i.cid,i
             if (i.pos!=last_pos):
                 if pstate==cb.ON:
                     if pbstate==cb.BLOCKON:
@@ -121,9 +178,9 @@ class TuringGraph:
                             output[2*j]=False
                 elif pstate==cb.OFF:
                     pass
-                if i.cid==ccid:
+                if(i.cid==ccid):
                     j+=1
-                last_pos=i.pos
+                    last_pos=i.pos
 
             if i.cid==pcid: ## process path
                 if i.code==cb.ON: 
@@ -171,7 +228,8 @@ def test():
     g= TuringGraph(codes)
     p= TuringGraph(paths)
 
-    print g; 
+    print g;
+    print g.graph_str();
     for i in g.iter_all_path(0):
         print "yield:",i
         l=[]

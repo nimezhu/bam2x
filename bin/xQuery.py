@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 11-13-2013, 10:26:47 EST
+# Last-modified: 11-26-2013, 01:37:53 EST
 VERSION="0.3"
 '''
 xQuery.py is an example program for using xplib.DBI interface
@@ -119,7 +119,12 @@ def Main():
 
         else:
             for j in results:
-                print >>out,"HT\t",j
+                if isinstance(j,list):
+                    for y in j:
+                        print >>out,"HT\t",y
+                    print >>out,""
+                else:
+                    print >>out,"HT\t",j
                 hit=1
                 hits_number+=1
 

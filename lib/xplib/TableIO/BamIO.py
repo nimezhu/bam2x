@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 11-06-2013, 13:50:18 EST
+# Last-modified: 11-26-2013, 01:14:17 EST
 import types
 import pysam
 from xplib.Annotation import Bed,Bed12,Fragment
@@ -95,7 +95,10 @@ def BamToBed12Iterator(handle,**kwargs):
         test
         '''
         if kwargs.has_key("references"):
-            chr=kwargs["references"][i.tid];
+            if isinstance(kwargs["references"],str):
+                chr=kwargs["references"]  
+            else:
+                chr=kwargs["references"][i.tid];
         else:
             try:
                  chr=handle.references[i.tid];
