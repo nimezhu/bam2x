@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 11-13-2013, 17:17:12 EST
+# Last-modified: 11-26-2013, 15:23:25 EST
 from string import upper,lower
 from xplib.Annotation import Fragment,Bed,Bed12,GeneBed
 import xplib
@@ -80,8 +80,6 @@ def translate_coordinates(A,B): # B is Bed12 format
         itemRgb=B.itemRgb
         blockCount=B.blockCount
         blockSizes=copy.copy(B.blockSizes)
-        if A.strand=="-": 
-            blockSizes=blockSizes[::-1]
         blockStarts=copy.copy(B.blockStarts)
         if A.strand=="+" or A.strand==".":
             for i,x in enumerate(blockStarts):
@@ -91,8 +89,9 @@ def translate_coordinates(A,B): # B is Bed12 format
                 blockStarts[i]+=blockSizes[i]
             blockStarts=blockStarts[::-1]
             for i,x in enumerate(blockStarts):
-                print blockStarts[i]
+                #print blockStarts[i]
                 blockStarts[i]=B.stop-(blockStarts[i]+B.start)
+            blockSizes=blockSizes[::-1]
         return Bed12([chr,start,stop,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,blockSizes,blockStarts])
     elif isinstance(B,GeneBed):
         C1=Bed12(B.toBedString())

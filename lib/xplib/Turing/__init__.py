@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 11-26-2013, 00:52:25 EST
+# Last-modified: 11-26-2013, 13:30:49 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
@@ -101,7 +101,7 @@ class TuringGraph:
         for i in self.codes:
             position=i.pos-self.codes[0].pos
             index=position*scale/l;
-            print index
+            #print index
             if i.code==cb.BLOCKON and list_s[index]=="-": list_s[index]='^'
             if i.code==cb.BLOCKOFF and list_s[index]=="-" : list_s[index]='v'
             if i.code==cb.BLOCKON and list_s[index]=="v": list_s[index]='x'
@@ -202,7 +202,13 @@ class TuringGraph:
                 elif i.code==cb.BLOCKOFF:
                     cbstate=cb.BLOCKOFF
         return output 
-    
+    def translate_paths_into_bits(self,paths):
+        a=[]
+        output=bitarray(len(self)*2)
+        output.setall(True)
+        for i in paths:
+            output=bitarray_and(output,self.translate_path_into_bits(i))
+        return output
 
 
 def test():
