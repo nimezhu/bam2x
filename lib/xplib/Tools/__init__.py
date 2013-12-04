@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 11-26-2013, 15:23:25 EST
+# Last-modified: 12-04-2013, 17:19:36 EST
 from string import upper,lower
 from xplib.Annotation import Fragment,Bed,Bed12,GeneBed
 import xplib
@@ -54,61 +54,82 @@ def distance(A,B):
     if( m > abs(A.stop-B.stop)): m = abs(A.stop-B.stop)
     if( m > abs(A.stop-B.start)): m = abs(A.stop-B.start)
     return m
-def translate_coordinate(A,B):
+def translate_coordinate(coord,bed,reverse=False):
     '''
-    translate B's coordiante based on A
+    translate bed's coordiante based on coord
+    if reverse is True:
+        bed is in coord's coordinates and translate it back to the chromosome coordinates
     '''
-    if A.chr!=B.chr: return None
-    if A.strand=="+" or A.strand==".":
-        return (B.start-A.start,B.stop-A.start,B.strand)
-    if A.strand=="-":
-        strand="."
-        if B.strand=="-":strand="+"
-        if B.strand=="+":strand="-"
-        return (A.stop-B.stop,A.stop-B.start,strand)
-def translate_coordinates(A,B): # B is Bed12 format
-    '''
-    Translate Bed12 Object B based on simple annotation A
-    '''
-    chr=A.id
-    id=B.id
-    (start,stop,strand)=translate_coordinate(A,B)
-    score=B.score
+    if reverse:
+        #TO TEST
+        chr=coord.chr
+        id=bed.id
+        if coord.strand=="+" or coord.strand==".":
+            return (coord.start+bed.start,coord.start+bed.stop,bed.strand)
+        else:
+            strand="."
+            if bed.strand=="-":strand="+"
+            if bed.strand=="+":strand="-"
+            return (coord.stop-bed.stop,coord.stop-bed.start,strand)
 
-    if isinstance(B,Bed12):
-        (cds_start,cds_stop,cds_strand)=translate_coordinate(A,Bed([B.chr,B.cds_start,B.cds_stop]))
-        itemRgb=B.itemRgb
-        blockCount=B.blockCount
-        blockSizes=copy.copy(B.blockSizes)
-        blockStarts=copy.copy(B.blockStarts)
-        if A.strand=="+" or A.strand==".":
+    else:
+        if coord.chr!=bed.chr: return None
+        if coord.strand=="+" or coord.strand==".":
+            return (bed.start-coord.start,bed.stop-coord.start,bed.strand)
+        if coord.strand=="-":
+            strand="."
+            if bed.strand=="-":strand="+"
+            if bed.strand=="+":strand="-"
+            return (coord.stop-bed.stop,coord.stop-bed.start,strand)
+def translate_coordinates(coord,bed,reverse=False): # bed is Bed12 format
+    '''
+    Translate Bed12 Object bed based on simple annotation coord
+
+    if reverse is True
+        bed is in coord's coordinates and translate it back to the chromosome coordinates.
+        TO TEST
+    '''
+    if reverse:
+        chr=coord.chr
+    else:
+        chr=coord.id
+    id=bed.id
+    (start,stop,strand)=translate_coordinate(coord,bed,reverse)
+    score=bed.score
+    if isinstance(bed,Bed12):
+        (cds_start,cds_stop,cds_strand)=translate_coordinate(coord,Bed([bed.chr,bed.cds_start,bed.cds_stop]),reverse)
+        itemRgb=bed.itemRgb
+        blockCount=bed.blockCount
+        blockSizes=copy.copy(bed.blockSizes)
+        blockStarts=copy.copy(bed.blockStarts)
+        
+        if coord.strand=="+" or coord.strand==".":
             for i,x in enumerate(blockStarts):
                 blockStarts[i]=blockStarts[i]
-        elif A.strand=="-":
+        elif coord.strand=="-":
             for i,x in enumerate(blockStarts):
                 blockStarts[i]+=blockSizes[i]
             blockStarts=blockStarts[::-1]
             for i,x in enumerate(blockStarts):
                 #print blockStarts[i]
-                blockStarts[i]=B.stop-(blockStarts[i]+B.start)
+                blockStarts[i]=bed.stop-(blockStarts[i]+bed.start)
             blockSizes=blockSizes[::-1]
         return Bed12([chr,start,stop,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,blockSizes,blockStarts])
-    elif isinstance(B,GeneBed):
-        C1=Bed12(B.toBedString())
-        C2=translate_coordinates(A,C1)
+    elif isinstance(bed,GeneBed):
+        C1=Bed12(bed.toBedString())
+        C2=translate_coordinates(coord,C1)
         return GeneBed(C2.toGenePredString())
     else:
-        C=copy.copy(B)
+        C=copy.copy(bed)
         C.chr=chr
         C.start=start
         C.stop=stop
         C.end=stop
         C.strand=strand
-        if B.__dict__.has_key('pos'):
+        if bed.__dict__.has_key('pos'):
             C.pos=C.start+1  # position is 1  index
         return C
         
-
         
 
 

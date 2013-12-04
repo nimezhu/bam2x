@@ -1,10 +1,11 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 11-26-2013, 13:30:49 EST
+# Last-modified: 12-04-2013, 17:21:30 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
+from xplib.Annotation import Bed12
 class TuringCode:
     def __init__(self,pos,code,**kwargs):
         self.pos=pos
@@ -31,6 +32,14 @@ class TuringGraph:
         self.codes.sort()
         for key in kwargs.keys():
             setattr(self,key,kwargs[key])
+    def set_id(self,id):
+        self.id=id
+    def get_id(self):
+        if self.__dict__.has_key("id"):
+            return self.id
+        else:
+            return "noname"
+
     def set_cid(self,cid):
         self.cid=cid
         for i in range(len(self.codes)):
@@ -65,6 +74,14 @@ class TuringGraph:
             for x in self.iter_all_path(i+1): yield x
         elif self.codes[i].code==cb.BLOCKOFF and self.state==cb.BLOCKOFF:
             for x in self.iter_all_path(i+1): yield x
+    def iter_turing_paths(self):
+        for i in self.iter_all_path(0):
+            l=[]
+            for j in i:
+                l.append(TuringCode(self.codes[j].pos,self.codes[j].code))
+            g2=TuringGraph(l)
+            yield g2
+    
     def count_paths_number(self):
         '''
         test version
@@ -141,7 +158,6 @@ class TuringGraph:
     def translate_path_into_bits(self,path):
         #TO DO
         c=list(self.codes)
-
         p=list(path.codes)
         ccid=c[0].cid
         #print "ccid:",ccid
@@ -181,7 +197,6 @@ class TuringGraph:
                 if(i.cid==ccid):
                     j+=1
                     last_pos=i.pos
-
             if i.cid==pcid: ## process path
                 if i.code==cb.ON: 
                     pstate=cb.ON
@@ -209,6 +224,60 @@ class TuringGraph:
         for i in paths:
             output=bitarray_and(output,self.translate_path_into_bits(i))
         return output
+    def translate_bits_into_bed(self,bits,id="noname"):
+        chr=self.get_id()
+        last_pos=-1
+        blockStarts=[]
+        blockSizes=[]
+        blockCount=0
+        itemRgb="0,0,0"
+        score=0
+        id=id
+        i=0
+        exon_state=False
+        for x in self.codes:
+            if x.pos!=last_pos:
+                last_pos=x.pos
+                #print "debug last pos:",last_pos
+                if bits[2*i]==True and bits[2*i+1]==False:
+                    if not exon_state:
+                        exon_state=True
+                        blockStarts.append(last_pos)
+                        blockCount+=1
+                elif bits[2*i]==False and bits[2*i+1]==True:
+                    if exon_state:
+                        exon_state=False
+                        #print "last pos:",last_pos
+                        #print "minus:",blockStarts[-1]
+                        blockSizes.append(last_pos-blockStarts[-1])
+                elif bits[2*i]==True and bits[2*i+1]==True:
+                    if x.code==cb.BLOCKOFF:
+                        if exon_state:
+                            exon_state=False
+                            blockSizes.append(last_pos-blockStarts[-1])
+                    if x.code==cb.BLOCKON:
+                        if not exon_state:
+                            exon_state=True
+                            blockStarts.append(last_pos)
+                            blockCount+=1
+                i+=1
+        if blockCount>0:
+            start=blockStarts[0]
+            stop=blockStarts[-1]+blockSizes[-1]
+        else:
+            start=0
+            stop=0
+        cds_start=start
+        cds_stop=start
+        for i,x in enumerate(blockStarts):
+            blockStarts[i]-=start
+        strand="+"
+        return Bed12([chr,start,stop,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,blockSizes,blockStarts])
+
+
+
+
+
 
 
 def test():
@@ -229,8 +298,8 @@ def test():
     paths.append( TuringCode(1,cb.BLOCKON))
     paths.append( TuringCode(100,cb.BLOCKOFF))
     paths.append( TuringCode(200,cb.BLOCKON))
-    paths.append( TuringCode(220,cb.BLOCKOFF))
-    paths.append( TuringCode(220,cb.OFF))
+    paths.append( TuringCode(300,cb.BLOCKOFF))
+    paths.append( TuringCode(300,cb.OFF))
     g= TuringGraph(codes)
     p= TuringGraph(paths)
 
@@ -242,21 +311,27 @@ def test():
         for j in i:
             print j
             l.append(TuringCode(g.codes[j].pos,g.codes[j].code))
-        print TuringGraph(l)
-        print g.translate_path_into_bits(TuringGraph(l))
-        a.append(g.translate_path_into_bits(TuringGraph(l)))
-        h[g.translate_path_into_bits(TuringGraph(l))]=1
+        g2=TuringGraph(l)
+        print g2
+        print g2.graph_str()
+        print g.translate_path_into_bits(g2)
+        print g.translate_bits_into_bed(g.translate_path_into_bits(g2))
+    #    a.append(g.translate_path_into_bits(TuringGraph(l)))
+    #    h[g.translate_path_into_bits(TuringGraph(l))]=1
 
-
+    for x in g.codes: print x
     print g.translate_path_into_bits(p)
 
+    print g.translate_bits_into_bed(g.translate_path_into_bits(p))
 
+    '''
     for i,x in enumerate(a):
         for j,y in enumerate(a):
             print i,j
             print x,y
             print twobitarray_and(x,y)
     print h
+    '''
 
 
 
