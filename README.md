@@ -2,7 +2,7 @@ bam2x
 =====
 bam2x provide universal interface to query and read NGS and related data based on choromsome coordinates.
 
-[bam2x wikipedia](http://bam2xwiki.appspot.com/)
+- [bam2x wikipedia](http://bam2xwiki.appspot.com/)
 
 
 Library Dependent:
