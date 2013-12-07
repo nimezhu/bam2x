@@ -6,7 +6,7 @@ bam2x provide universal interface to query and read NGS and related data based o
 
 
 Library Dependent:
-pysam
-twobitreader  ( needed for query 2bit file)
-bxpython (optional, needed for query bigwig file)
-ghmm (optional for xbam2trans.py)
+- pysam
+- twobitreader  ( needed for query 2bit file)
+- bxpython (optional, needed for query bigwig file)
+- ghmm (optional for xbam2trans.py)
