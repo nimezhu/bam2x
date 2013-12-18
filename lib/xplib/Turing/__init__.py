@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-04-2013, 17:21:30 EST
+# Last-modified: 12-18-2013, 18:07:35 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
@@ -17,7 +17,7 @@ class TuringCode:
         s=str(self.pos)+":"+str(self.code)
         return s
     def __cmp__(self,other):
-        return cmp(self.pos,other.pos) or cmp(self.code,other.code)
+        return cmp(self.pos,other.pos) or cmp(self.code,other.code) or cmp(self.cid,other.cid)
 
 
 
@@ -155,16 +155,17 @@ class TuringGraph:
     def score_path(path):
         #TO DO
         pass
-    def translate_path_into_bits(self,path):
-        #TO DO
+    def translate_path_into_bits(self,path,bp=5):
+        #TODO: tolerate the reads in +-5bp?
+        #TODO  unknown reads if less than given percetage?
         c=list(self.codes)
         p=list(path.codes)
         ccid=c[0].cid
         #print "ccid:",ccid
         pcid=p[0].cid
         #print "pcid:",pcid
-        if ccid==pcid:
-            pcid+=1
+        if ccid >= pcid:
+            pcid=ccid+1
             for i,x in enumerate(p):
                 p[i].cid=pcid
         cstate=cb.OFF
@@ -174,13 +175,37 @@ class TuringGraph:
         #output=bitarray([ True for i in range(2*len(c))])
         output=bitarray(len(self)*2)
         output.setall(True)
-        
         for i in p:
             c.append(i)
         c.sort()
+
+        '''
+        revise the mis aligned position for path
+        '''
+        buff=[]
+        last_pos=0
+        last_code=cb.ON
+        for i,x in enumerate(c):
+            if c[i].cid==pcid:
+                buff.append(i)
+            if c[i].cid==ccid:
+                for j in buff:
+                    if c[j].code%2 ==last_code%2 and abs(c[j].pos-last_pos)<=bp:
+                        c[j].pos=last_pos
+                    if c[j].code%2==c[i].code%2 and abs(c[j].pos-c[i].pos)<=bp:
+                        c[j].pos=c[i].pos
+                buff=[]
+                last_pos=c[i].pos
+                last_code=c[i].code
+        for j in buff:
+            if c[j].code==last_code and abs(c[j].pos-last_pos)<=bp:
+                c[j].pos=last_pos
+        '''
+        end of revise position
+        '''
         j=-1
         last_pos=-1
-
+        c.sort()
         for i in c:
             #print i.cid,i
             if (i.pos!=last_pos):
@@ -217,12 +242,12 @@ class TuringGraph:
                 elif i.code==cb.BLOCKOFF:
                     cbstate=cb.BLOCKOFF
         return output 
-    def translate_paths_into_bits(self,paths):
+    def translate_paths_into_bits(self,paths,bp=5):
         a=[]
         output=bitarray(len(self)*2)
         output.setall(True)
         for i in paths:
-            output=bitarray_and(output,self.translate_path_into_bits(i))
+            output=bitarray_and(output,self.translate_path_into_bits(i,bp))
         return output
     def translate_bits_into_bed(self,bits,id="noname"):
         chr=self.get_id()

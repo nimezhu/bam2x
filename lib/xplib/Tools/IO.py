@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 09-11-2013, 14:09:20 EDT
+# Last-modified: 12-10-2013, 16:27:35 EST
 VERSION="0.1"
 import os,sys,argparse
 import gzip
 import time
 import pysam
 import xplib.Tools as Tools
+from xplib import TableIO
 def open_output(output):
     out=None
     if output=="stdout":
@@ -48,6 +49,9 @@ def fopen(file,mode="r",**kwargs):
     return None
     
 
-
-
+def read_config(file,sep=":"):
+    config={}
+    for i in TableIO.parse(file,sep=sep):
+        config[i[0]]=i[1]
+    return config
 

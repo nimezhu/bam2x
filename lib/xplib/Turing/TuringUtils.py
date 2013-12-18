@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 11-14-2013, 10:38:09 EST
+# Last-modified: 12-17-2013, 23:53:03 EST
 
 from xplib.Annotation import *
 from bitarray import bitarray
@@ -42,7 +42,18 @@ def bitarray_and(bitarrayA,bitarrayB):
         C[i]=bitarrayA[i] and bitarrayB[i]
     return C
 
-
+def bitarray_to_intron_number(bitarray):
+    l=len(bitarray)
+    s=0
+    state=0
+    for i in range(0,l,2):
+        if bitarray[i] and (not bitarray[i+1]):
+            state=1
+        if (not bitarray[i]) and bitarray[i+1]:
+            if state!=-1:
+                s+=1
+            state=-1
+    return s    
 
 def TuringFactory(bed12):
     import xplib.Turing.TuringCodeBook as cb
