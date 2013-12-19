@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-19-2013, 18:01:33 EST
+# Last-modified: 12-20-2013, 07:14:35 CST
 import os
 import sys
 from distutils.core import setup
@@ -28,8 +28,8 @@ metadata = {
                    "bin/xGetSeq.py",
                    "bin/xbams2APS.py",
                    ],
-          'requires':['pysam (>=0.7.5)','twobitreader (>=2.9)','bx (>=0.7.1)',],
-          'install_requires':['pysam>=0.7.5','twobitreader>=2.9','bx>=0.7.1',]
+          #'requires':['pysam (>=0.7.5)','twobitreader (>=2.9)',],
+          'install_requires':['pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1']
 
 
 }
