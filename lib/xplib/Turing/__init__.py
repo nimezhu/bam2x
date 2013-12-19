@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-18-2013, 18:07:35 EST
+# Last-modified: 12-19-2013, 10:55:14 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
@@ -17,7 +17,7 @@ class TuringCode:
         s=str(self.pos)+":"+str(self.code)
         return s
     def __cmp__(self,other):
-        return cmp(self.pos,other.pos) or cmp(self.code,other.code) or cmp(self.cid,other.cid)
+        return cmp(self.pos,other.pos) or cmp(self.cid,other.cid) or cmp(self.code,other.code)
 
 
 

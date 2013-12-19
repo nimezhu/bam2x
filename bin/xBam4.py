@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-04-2013, 16:49:21 EST
+# Last-modified: 12-05-2013, 13:46:05 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -66,7 +66,7 @@ def Main():
     dbi_bam=DBI.init(args.bam,"bam",method="bam2")
 
 
-    for i in TableIO.parse(fin,args.format):
+    for i0,i in enumerate(TableIO.parse(fin,args.format)):
         print >>out,"QR\t",i
         l=list()
         l.append(TuringCode(0,cb.ON))
@@ -87,7 +87,7 @@ def Main():
         g=TuringGraph(l)
         bitarray_path=bitarray(2*len(g))
         bitarray_path.setall(True)
-        print >>sys.stderr,"processing",i
+        print >>sys.stderr,"processing",i0," entry:",i
         print >>out,"path figure:",g.graph_str(600)
         paths_number=g.count_paths_number()
         print >>out,"path number:",paths_number
@@ -118,15 +118,27 @@ def Main():
         if paths_number > MAX_ITER_PATH_NUMBER:
             find_cliques()
         else:
+            
+            print "QR:\t",i
             for j in g.iter_turing_paths():
+                print 
+                print 
                 print j.graph_str(600)
                 bits=g.translate_path_into_bits(j)
                 print bits
                 bed=g.translate_bits_into_bed(bits)
+                s=0
+                for key in hc.keys():
+                    if isCompatible(hc[key],bits):
+                        s+=h[key]
+                bed.score=s
                 print bed
-                print i
                 bed2=Tools.translate_coordinates(i,bed,True)
                 print bed2
+                    
+
+
+
         
 
 def find_cliques():
