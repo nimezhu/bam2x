@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-17-2013, 23:53:03 EST
+# Last-modified: 12-20-2013, 13:48:01 EST
 
 from xplib.Annotation import *
 from bitarray import bitarray
@@ -55,6 +55,16 @@ def bitarray_to_intron_number(bitarray):
             state=-1
     return s    
 
+def bitarray_to_rep(bitstr):
+    s=""
+    for i in range(0,len(bitstr),2):
+        if bitstr[i] and (not bitstr[i+1]):
+            s+="E"
+        elif (not bitstr[i]) and bitstr[i+1]:
+            s+="i"
+        else:
+            s+="_"
+    return s
 def TuringFactory(bed12):
     import xplib.Turing.TuringCodeBook as cb
     from xplib.Turing import TuringCode, TuringGraph
@@ -67,3 +77,28 @@ def TuringFactory(bed12):
             g.append(TuringCode(i.stop,cb.BLOCKOFF))
     g.sort()
     return TuringGraph(g)
+
+def count_xor(path):
+    s=0
+    for i in range(0,len(path),2):
+        if path[i]^path[i+1]: s+=1 # ^ is xor 
+    return s        
+
+def isCompatible(pathA,pathB):  ##pathA and B shoulc be same length
+    for i in range(0,len(pathA),2):
+        if not (pathA[i]&pathB[i] | pathA[i+1]&pathB[i+1]):
+            return False
+    return True
+def isSelfIncompatible(pathA):
+    for i in range(0,len(pathA),2):
+        if not pathA[i]:
+            if not pathA[i+1]:
+                return True
+    return False
+
+def isOverlap(pathA,pathB):   ## Fir paired end reads overlap is not start > stop, overlap definition is not the same as overlap reades
+    for i in range(0,len(path),2):
+        if (pathA[i]^pathA[i+1]) and (pathB[i]^pathB[i+1]):
+            return True
+    return False
+

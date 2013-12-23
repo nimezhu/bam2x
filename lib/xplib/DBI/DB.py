@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 11-26-2013, 01:32:56 EST
+# Last-modified: 12-23-2013, 12:58:17 EST
 
 import os,sys
 from xplib.Annotation import *
@@ -256,9 +256,17 @@ class BamlistI(MetaDBI):
                     (block_starts,block_sizes)=Tools.cigar_to_coordinates(read.cigar); 
                     bed=Bed12([chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts])
                     yield bed
+        elif method=="bam1": #  
+            for bamfile in self.bamfiles:
+                strand="read1"
+                if dict.has_key("strand"):   # TODO: if bamfiles have different read1 or read2 ?
+                    strand=dict["strand"]
+                for bed in TableIO.parse(bamfile.fetch(x.chr,x.start,x.stop),"bam2bed12",references=x.chr,strand=strand):
+                    yield bed
+
         elif method=="paired_end":
             for bamfile in self.bamfiles:
-                for fragment in TableIO.parse(bamfile.fetch(x.chr,x.start,x.stop),"bam2fragment",bam=bamfile):
+               for fragment in TableIO.parse(bamfile.fetch(x.chr,x.start,x.stop),"bam2fragment",bam=bamfile):
                     yield fragment
         elif method=="bam2": # yield bed12
             for bamfile in self.bamfiles:
