@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-07-2014, 14:31:28 EST
+# Last-modified: 01-07-2014, 17:00:34 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -46,9 +46,44 @@ v20:
 v20a plan:
     TODO : get coverage and add splicing sites into it. ( memory save not considered , or speed is not considered , just a rash pack)  
     
+pv20b :
+   parrallel computing
+   splicing sites from query
 
 '''
-
+def sharpScore(l,n):
+    '''
+    minus nearby max score * fraction
+    '''
+    length=len(l)
+    l2=list(l) #copy l
+    print l,n
+    for i,x in enumerate(l):
+        near=nearby(i,n,length)
+        max_nearby=0.0
+        max_nearby_index=near[0]
+        for j in near:
+            if max_nearby < l2[j] and j!=i:
+                max_nearby=l2[j]
+                max_nearby_index=j
+        if max_nearby > l2[i]:
+            l[i]=l2[i]-float(n-abs(max_nearby_index-i))/n*max_nearby
+        else:
+            l[i]=l2[i]+float(n-abs(max_nearby_index-i))/n*max_nearby
+        if l[i]<0: 
+            l[i]=0.0
+    '''
+    for i,j in zip(l,l2):
+        print i,j
+    '''
+    return
+    
+def nearby(i,n,length):
+    start=i-n
+    if start<0: start=0
+    end=i+n
+    if end>length: end=length
+    return xrange(start,end)
 
 def ParseArg():
     ''' This Function Parse the Argument '''
@@ -63,7 +98,7 @@ def ParseArg():
     # p.add_argument('-t','--threshold',dest="threshold",type=float,default=0.95,help="cutoff for interpret fragments percentage, default: 0.95 ")
     p.add_argument('-m','--min_uniq_percentage',dest="min_uniq",type=float,default=0.02,help="min uniq percentage [ add an isoform only if it can interpret more than min uniq percentage fragments ], DEFAULT: %(default)f ")
     p.add_argument('-f','--min_uniq_fpk_increase',dest="min_uniq_fpk_increase",type=float,default=0.2,help="default: %(default)f ")
-    p.add_argument('-p','--merge_mismatch_bp',dest="merge_bp",type=float,default=0.2,help="default: %(default)f ")
+    p.add_argument('-p','--merge_mismatch_bp',dest="merge_bp",type=int,default=5,help="default: %(default)f ")
     p.add_argument('--sort_model',dest="sort_model",type=int,default=0,choices=[0,1,2],help="model 0: sort by abundance*intron number, model 1: sort by intron number, model 2: sort by abundance, default: %(default)i ")
     p.add_argument('-g','--genome',dest="genome",type=str,help="genome sequence in 2bit format, e.g. mm9.2bit")
     p.add_argument('-n','--num_cores',dest="num_cores",type=int, default=4 ,help="number of cpu cores , DEFAULT: %(default)i")
@@ -142,7 +177,7 @@ def query(i,dbi_bam,genome): # i is query iteem
     retv="" #RETURN VALUE
     retv+="BEGIN\nQR\t"+str(i)+"\n"
     '''
-    PART: adding splicing sites
+    PART A: scoring and adding splicing sites
     '''
     l=list()
     l.append(TuringCode(0,cb.ON))
@@ -151,9 +186,9 @@ def query(i,dbi_bam,genome): # i is query iteem
     l.append(TuringCode(len(i),cb.BLOCKOFF))
     
     length=len(i)
-    array=[0 for j in xrange(length)]
-    donorSitesScore=[0 for j in xrange(length+1)]
-    acceptorSitesScore=[0 for j in xrange(length+1)]
+    array=[0.0 for j in xrange(length)]
+    donorSitesScore=[0.0 for j in xrange(length+1)]
+    acceptorSitesScore=[0.0 for j in xrange(length+1)]
 
     seq=genome.get_seq(i)
     
@@ -185,7 +220,14 @@ def query(i,dbi_bam,genome): # i is query iteem
             gt[j]=1
         elif seq[j]=="A" and seq[j+1]=="G":
             ag[j]=1
+    '''
+    Score SplicingScores
+    '''
     
+    sharpScore(donorSitesScore,args.merge_bp)
+    sharpScore(acceptorSitesScore,args.merge_bp)
+
+
     for j in xrange(len(i)):
         if donorSitesScore[j] > MIN_SPLICING_SITES_SCORE:
             l.append(TuringCode(j,cb.BLOCKOFF))
@@ -199,7 +241,7 @@ def query(i,dbi_bam,genome): # i is query iteem
 
 
     '''
-    PART: adding wig
+    PART B : Report wig
     '''
     retv+="WIG"+"\n"
     retv+= "index\tnt\tcoverage\tdonorSitesScore\tacceptorSitesScore\tGT\tAG\n"
@@ -211,7 +253,10 @@ def query(i,dbi_bam,genome): # i is query iteem
     
     
     
+    '''
+    PART C: GREEDY ADDING ISOFORMS
     
+    '''
     
     g=TuringGraph(l)
     bitarray_path=bitarray(2*len(g))
@@ -320,7 +365,6 @@ def query(i,dbi_bam,genome): # i is query iteem
             if uniq_fpk  < max_uniq_fpk * MIN_FPK_RATIO:
                 print >>sys.stderr,"ignore due to fpk",bed,"\tuniq_fpk:",uniq_fpk,"\t current max:",max_uniq_fpk
                 continue
-            
             rgb=255-uniq_score*240/total_frag  
             cumulative_score+=uniq_score
             j0+=1
