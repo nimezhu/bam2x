@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-07-2014, 11:42:36 EST
+# Last-modified: 01-07-2014, 13:56:12 EST
 VERSION="0.2"
 '''
 pQuery.py is an example program for using xplib.DBI interface
@@ -74,7 +74,7 @@ def Main():
     query_num=0
     for i,x in enumerate(reader):
         query_lists[i%args.processor].append(x)
-    query_num=i
+    query_num=i+1
 
     '''
     p=[]
