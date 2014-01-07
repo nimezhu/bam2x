@@ -18,7 +18,7 @@ def show_help():
     print >>sys.stderr,"Options:"
     print >>sys.stderr,"   -h,--help          show this help message"
     print >>sys.stderr,"   --bam bamlistfile"
-    print >>sys.stderr,"   "
+    print >>sys.stderr,"   -n,                processor number"
 
 
 
@@ -29,10 +29,11 @@ def Main():
     if len(sys.argv)<2:
         show_help()
         exit
-    opts,restlist = getopt(sys.argv[1:],"hb:",\
-                        ["help","bam="])
+    opts,restlist = getopt(sys.argv[1:],"hb:n:",\
+                        ["help","bam=","number="])
     File_reads_number={}
     ifBamFileList=0
+    n=4
     for o, a in opts:                       
         if o in ("-h","--help"): 
             show_help()
@@ -40,6 +41,8 @@ def Main():
         if o in ("--bam"):
             ifBamFileList=1
             BamFileList=a
+        if o in ("-n","--number"):
+            n=int(a)
     processes=[]
     bamlist=[]
     if ifBamFileList:
@@ -53,7 +56,7 @@ def Main():
         a=i.split('.')
         if a[-1]=="bam": 
             bamlist.append(i)
-    pool = Pool(processes=4)
+    pool = Pool(processes=n)
     result=pool.map(count_read_number,bamlist)
     for i,x in zip(bamlist,result):
             print i+"\t"+str(x)
