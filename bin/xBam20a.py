@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-23-2013, 14:08:35 EST
+# Last-modified: 12-23-2013, 14:13:59 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -177,7 +177,7 @@ def Main():
                   
         print >>out,"WIG"
         for j in xrange(len(i)):
-            print >>out, j,array[j]
+            print >>out, j,seq[j],array[j],donorSitesScore[j],acceptorSitesScore[j]
         '''
         end of adding splicing sites
         '''

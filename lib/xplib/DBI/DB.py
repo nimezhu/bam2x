@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-23-2013, 12:58:17 EST
+# Last-modified: 01-09-2014, 13:12:15 EST
 
 import os,sys
 from xplib.Annotation import *
@@ -222,9 +222,24 @@ class BamlistI(MetaDBI):
             self.bamfiles.append(bamfile)
 
     def query(self,x,method='pileup',**dict):
+        if type(x)==type("str"):
+            x=x.split(":")
+            chrom=x[0]
+            start=None
+            end=None
+            if len(x)>1:
+                b=x[1].split("-")
+                if len(b)==2:
+                    start=int(b[0])-1
+                    end=int(b[1])
+        else:
+            chrom=x.chr
+            start=x.start
+            end=x.stop
+
         if method=='fetch':
             for bamfile in self.bamfiles:
-                for read in bamfile.fetch(x.chr,x.start,x.stop):
+                for read in bamfile.fetch(chrom,start,end):
                     if read.tid<0:continue
                     if read.mapq==0:continue
                     strand='+'
@@ -239,7 +254,7 @@ class BamlistI(MetaDBI):
             still test Tools.cigar_to_coordinates
             '''
             for bamfile in self.bamfiles:
-                for read in bamfile.fetch(x.chr,x.start,x.stop):
+                for read in bamfile.fetch(chrom,start,end):
                     if read.tid<0:continue
                     if read.mapq==0:continue
                     chr=bamfile.references[read.tid]
@@ -256,38 +271,38 @@ class BamlistI(MetaDBI):
                     (block_starts,block_sizes)=Tools.cigar_to_coordinates(read.cigar); 
                     bed=Bed12([chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts])
                     yield bed
-        elif method=="bam1": #  
+        elif method=="bam1": 
+        # fetch read from paired end with strand information  
             for bamfile in self.bamfiles:
                 strand="read1"
                 if dict.has_key("strand"):   # TODO: if bamfiles have different read1 or read2 ?
                     strand=dict["strand"]
-                for bed in TableIO.parse(bamfile.fetch(x.chr,x.start,x.stop),"bam2bed12",references=x.chr,strand=strand):
+                for bed in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2bed12",references=x.chr,strand=strand):
                     yield bed
 
         elif method=="paired_end":
             for bamfile in self.bamfiles:
-               for fragment in TableIO.parse(bamfile.fetch(x.chr,x.start,x.stop),"bam2fragment",bam=bamfile):
+               for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
                     yield fragment
         elif method=="bam2": # yield bed12
             for bamfile in self.bamfiles:
-                for fragment in TableIO.parse(bamfile.fetch(x.chr,x.start,x.stop),"bam2fragment",bam=bamfile):
+                for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
                     if dict.has_key("strand"):
-                        yield fragment.toBed12(chr=x.chr,strand=dict["strand"])
+                        yield fragment.toBed12(chr=chrom,strand=dict["strand"])
                     else:
-                        yield fragment.toBed12(chr=x.chr)
+                        yield fragment.toBed12(chr=chrom)
         elif method=='pileup':
-            s=[[0,0,0,0] for row in range(x.stop-x.start)]
+            s=[[0,0,0,0] for row in range(end-start)]
             for bamfile in self.bamfiles:
                 try:
-                    A=bamfile.pileup(x.chr,x.start,x.stop)
-
+                    A=bamfile.pileup(chrom,start,end)
                 except:
-                    print >>sys.stderr,"Can't pile up",x.chr,x.start,x.stop
+                    print >>sys.stderr,"Can't pile up",chrom,start,end
                     raise StopIteration 
                 for pileupcolumn in A:
-                    j=pileupcolumn.pos-x.start
+                    j=pileupcolumn.pos-start
                     if j<0: continue
-                    if j>x.stop-x.start: break
+                    if j>end-start: break
                     for pileupread in pileupcolumn.pileups:
                         try:
                             if pileupread.is_del: continue

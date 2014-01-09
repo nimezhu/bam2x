@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 12-18-2013, 12:25:19 EST
+#Last-modified: 01-01-2014, 20:05:35 EST
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 class Bed(object):
@@ -587,7 +587,7 @@ class Repeat(Bed):
         sep="\t"
         if kwargs.has_key("sep"):
             sep=kwargs["sep"]
-        if type(x)==type(str):
+        if type(x)==type("str"):
             x=x.split(sep)
         if x is not None:
             try:
@@ -702,6 +702,67 @@ class Fimo(Bed):
         s+=str(self.match_seq)
         return s
     
+class Psl(Bed):
+    def __init__(self,x,**dict):
+        if type(x)==type("str"):
+            x=x.split("\t")
+        self.matches=int(x[0])
+        self.misMatches=int(x[1])
+        self.repMathces=int(x[2])
+        self.nCount=int(x[3])
+        self.qNumInsert=int(x[4])
+        self.qBaseInsert=int(x[5])
+        self.tNumInsert=int(x[6])
+        self.tBaseInsert=int(x[7])
+        #TODO strand split 
+        self.strand=x[8].strip()
+        self.qName=x[9].strip()
+        self.qSize=int(x[10])
+        self.qStart=int(x[11])
+        self.qEnd=int(x[12])
+        self.tName=x[13].strip()
+        self.tSize=int(x[14])
+        self.tStart=int(x[15])
+        self.tEnd=int(x[16])
+        self.blockCount=int(x[17])
+        if type(x[18])==type("str"):
+            self.blockSizes=x[18].strip().strip(",").split(",")
+        else:
+            self.blockSizes=x[18]
+        if type(x[19])==type("str"):
+            self.qStarts=x[19].strip().strip(",").split(",")
+        else:
+            self.qStarts=x[19]
+        if type(x[20])==type("str"):
+            self.tStarts=x[20].strip().strip(",").split(",")
+        else:
+            self.qStarts=x[20]
+        for i in range(self.BlockSizes):
+            self.blockSizes[i]=int(self.blockSizes[i])
+            self.tStarts[i]=int(self.tStarts[i])
+            self.qStarts[i]=int(self.qStarts[i])
+        self.chr=self.tName
+        self.start=self.tStart
+        self.stop=self.tEnd
+    def __str__(self):
+        """
+        s=""
+        s+=str(self.matches)+"\t"
+        s+=str(self.misMatches)+"\t"
+        s+=str(self.repMatches)+"\t"
+        s+=str(self.nCount)+"\t"
+        
+        """
+        #TODO
+
+        return self.qName
+    def __len__(self):
+        s=0
+        for i in self.blockSizes:
+            s+=i
+        return s
+
+
 
 ###################### Below is Private Format
 class Peak(Bed):
