@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-09-2014, 13:12:15 EST
+# Last-modified: 01-09-2014, 13:29:38 EST
 
 import os,sys
 from xplib.Annotation import *
@@ -277,7 +277,7 @@ class BamlistI(MetaDBI):
                 strand="read1"
                 if dict.has_key("strand"):   # TODO: if bamfiles have different read1 or read2 ?
                     strand=dict["strand"]
-                for bed in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2bed12",references=x.chr,strand=strand):
+                for bed in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2bed12",references=chrom,strand=strand):
                     yield bed
 
         elif method=="paired_end":
@@ -315,6 +315,17 @@ class BamlistI(MetaDBI):
                             pass
             for i in s:
                 yield i
+        elif method=='count':
+            s=0
+            for bamfile in self.bamfiles:
+                s+=bamfile.count(chrom,start,end)
+            yield s
+        elif method=='count_fragment':
+            s=0
+            for bamfile in self.bamfiles:
+               for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
+                   s+=1
+            yield s
 
 
 
