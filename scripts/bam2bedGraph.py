@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-10-2014, 11:14:15 EST
+# Last-modified: 01-10-2014, 11:25:50 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -21,7 +21,7 @@ def ParseArg():
     p.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
     p.add_argument('-i','--input',dest="input",default="stdin",type=str,help="input file DEFAULT: STDIN")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
-    p.add_argument('-n','--num_cpus',dest="num_cpus",type=str,default=4,help="number of cpus DEFAULT: %(default)i")
+    p.add_argument('-n','--num_cpus',dest="num_cpus",type=int,default=4,help="number of cpus DEFAULT: %(default)i")
     p.add_argument('-s','--strand',dest="strand",type=str,choices=["read1","read2"],default="read2",help="read1 or read2 is the positive strand , default: %(default)s")
     p.add_argument('--prefix',dest="prefix",type=str,default="R",help="prefix for bed name default: %(default)s")
     p.add_argument('--cutoff',dest="cutoff",type=int,default=1,help="only report region covrage >= cutoff : %(default)i")
