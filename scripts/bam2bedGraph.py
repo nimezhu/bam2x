@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-10-2014, 11:25:50 EST
+# Last-modified: 01-10-2014, 11:30:37 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -98,7 +98,7 @@ def process_chrom(chrom):
                 f=tempfile.TemporaryFile()
                 negative_data.append(codes_from_file_iterator(f))
                 codes_write_to_file(negative_data[0],f)
-                f.seenegative_k(0)
+                f.seek(0)
                 negative_data[0]=[]
                 negative_k=0
 
