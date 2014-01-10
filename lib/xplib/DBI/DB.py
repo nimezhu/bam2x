@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-09-2014, 13:29:38 EST
+# Last-modified: 01-09-2014, 19:04:04 EST
 
 import os,sys
 from xplib.Annotation import *
@@ -221,7 +221,7 @@ class BamlistI(MetaDBI):
                     print >>sys.stderr,"WARNING: Can't init the bam file",bamfile
             self.bamfiles.append(bamfile)
 
-    def query(self,x,method='pileup',**dict):
+    def query(self,x=None,method='pileup',**dict):
         if type(x)==type("str"):
             x=x.split(":")
             chrom=x[0]
@@ -232,7 +232,7 @@ class BamlistI(MetaDBI):
                 if len(b)==2:
                     start=int(b[0])-1
                     end=int(b[1])
-        else:
+        elif x is not None:
             chrom=x.chr
             start=x.start
             end=x.stop
@@ -326,6 +326,12 @@ class BamlistI(MetaDBI):
                for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
                    s+=1
             yield s
+        elif method=="references":
+            for i in self.bamfiles[0].references:
+                yield i
+        elif method=="lengths":
+            for i in self.bamfiles[0].lengths:
+                yield i
 
 
 
