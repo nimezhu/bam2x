@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-13-2014, 17:05:57 EST
+# Last-modified: 01-13-2014, 17:09:59 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -131,7 +131,7 @@ class TuringSortingArray():
             a.fromstring(f.read(4000))
             if not a:
                 break
-            print str(f),"DEBUG",len(a)
+            #print str(f),"DEBUG",len(a)
             for i in range(0,len(a),2):
                 yield TuringCode(a[i],a[i+1])
     @staticmethod
@@ -146,7 +146,8 @@ class TuringSortingArray():
 def process_chrom(chrom):
     retv=list()
     a=[]
-    positive_data=TuringSortingArray(None,500)
+    #positive_data=TuringSortingArray(None,500)
+    positive_data=TuringSortingArray()
     negative_data=TuringSortingArray()
     k=0
     negative_k=0
