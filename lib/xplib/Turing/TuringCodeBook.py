@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 11-12-2013, 14:40:45 EST
+# Last-modified: 01-14-2014, 14:32:37 EST
 BLOCKON=3
 BLOCKOFF=2
 ON=1
@@ -9,6 +9,7 @@ OFF=4
 DEFAULT_CID=100  ##code machine id  // classify the codw
 
 
+NORMAL_CODES_ARRAY_HEADER=3721
+COMPRESS_CODES_ARRAY_HEADER=9981
 
-
-
+BEDGRAPH_CODES_ARRAY_HEADER=4416

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-13-2014, 17:09:59 EST
+# Last-modified: 01-13-2014, 17:47:15 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -87,7 +87,7 @@ from xplib.Turing import TuringCodeBook as cb
 class TuringSortingArray():
     def __init__(self,a=None,MAX_ARRAY_SIZE=500000):
         self.data=[[]]
-        self.files=[[]]
+        self.files=[]
         self.size=0
         self.index=0
         self.MAX_ARRAY_SIZE=MAX_ARRAY_SIZE

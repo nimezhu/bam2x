@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-13-2014, 17:09:59 EST
+# Last-modified: 01-13-2014, 17:46:55 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -87,7 +87,7 @@ from xplib.Turing import TuringCodeBook as cb
 class TuringSortingArray():
     def __init__(self,a=None,MAX_ARRAY_SIZE=500000):
         self.data=[[]]
-        self.files=[[]]
+        self.files=[]
         self.size=0
         self.index=0
         self.MAX_ARRAY_SIZE=MAX_ARRAY_SIZE
@@ -122,6 +122,7 @@ class TuringSortingArray():
         if not self.has_sorted:
             self.sort()
             self.has_sorted=True
+        self.seek0()
         for i in heapq.merge(*self.data):
             yield i
     @staticmethod    
@@ -149,8 +150,6 @@ def process_chrom(chrom):
     #positive_data=TuringSortingArray(None,500)
     positive_data=TuringSortingArray()
     negative_data=TuringSortingArray()
-    k=0
-    negative_k=0
     for i in dbi.query(chrom,method="bam1",strand=args.strand):
         if i.strand=="+" or i.strand==".": 
             positive_data.append(TuringCode(i.start,cb.ON))
