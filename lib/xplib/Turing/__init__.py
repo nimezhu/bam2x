@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-14-2014, 15:01:20 EST
+# Last-modified: 01-14-2014, 15:46:14 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
@@ -343,7 +343,7 @@ class TuringSortingArray:
         self.has_sorted=True
     def seek0(self):
         for f in self.files:
-            f.seed(0)
+            f.seek(0)
     def iter(self):
         #yield "test"
         if not self.has_sorted:
