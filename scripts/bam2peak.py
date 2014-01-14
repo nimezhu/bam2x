@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-14-2014, 14:54:14 EST
+# Last-modified: 01-14-2014, 16:36:40 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -35,7 +35,7 @@ def Main():
     '''
     IO TEMPLATE
     '''
-    global args,out,dbi,exon_cutoff,intron_cutoff
+    global args,out,exon_cutoff,intron_cutoff
     args=ParseArg()
     dbi=DBI.init(args.input,"bam")
     out=IO.fopen(args.output,"w")
@@ -56,13 +56,15 @@ def Main():
     p=mp.Pool(processes=args.num_cpus)    
     bedgraphs=p.map(process_chrom,chrs)
     #output(results)
-    
+    #TODO
+    # BUG : coverage now related with cutoff
     coverages=p.map(count_coverage,bedgraphs)
     s=0.0  # 1000.0
     l=long(0)
     for i in range(len(chrs)):
         s+=coverages[i]
         l+=lengths[i]
+    l=l*2 # Double Strand
     coverage=s/l*1000.0
     threshold=1
     while 1:
@@ -87,12 +89,13 @@ from xplib.Turing import TuringSortingArray
 
 
 def process_chrom(chrom):
+    local_dbi=DBI.init(args.input,"bam")
     retv=list()
     a=[]
     #positive_data=TuringSortingArray(None,500)
     positive_data=TuringSortingArray()
     negative_data=TuringSortingArray()
-    for i in dbi.query(chrom,method="bam1",strand=args.strand):
+    for i in local_dbi.query(chrom,method="bam1",strand=args.strand):
         if i.strand=="+" or i.strand==".": 
             positive_data.append(TuringCode(i.start,cb.ON))
             positive_data.append(TuringCode(i.stop,cb.OFF))
@@ -113,6 +116,7 @@ def process_chrom(chrom):
         name=args.prefix+"_"+chrom+"_n"+str(i)
         retv.append(Bed([chrom,x[0],x[1],name,x[2],"-"]))
     retv.sort()
+    local_dbi.close()
     return retv
 def codesToBedGraph(iter,cutoff=1.0):
     a=iter.next()

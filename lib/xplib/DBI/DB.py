@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-09-2014, 19:04:04 EST
+# Last-modified: 01-14-2014, 16:38:12 EST
 
 import os,sys
 from xplib.Annotation import *
@@ -104,6 +104,8 @@ class TabixI(MetaDBI):
                 yield item
         except:
            raise StopIteration
+    def close(self):
+        self.data.close()
 class FormatTabixI():
     def __init__(self,format,tabixfile):
         pass
@@ -220,6 +222,9 @@ class BamlistI(MetaDBI):
                 except:
                     print >>sys.stderr,"WARNING: Can't init the bam file",bamfile
             self.bamfiles.append(bamfile)
+    def close(self):
+        for i in self.bamfiles:
+            i.close()
 
     def query(self,x=None,method='pileup',**dict):
         if type(x)==type("str"):
