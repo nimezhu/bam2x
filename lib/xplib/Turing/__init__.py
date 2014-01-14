@@ -1,11 +1,12 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-14-2014, 10:58:25 EST
+# Last-modified: 01-14-2014, 15:01:20 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
 from xplib.Annotation import Bed12
+__all__=["TuringCode","TuringGraph","TuringSortingArray"]
 class TuringCode:
     def __init__(self,pos,code,**kwargs):
         self.pos=pos
@@ -307,7 +308,7 @@ import xplib.Stats.prob as prob
 import itertools
 assert array.array('i').itemsize==4
 
-class TuringSortingArray():
+class TuringSortingArray:
     def __init__(self,a=None,MAX_ARRAY_SIZE=500000,**dict):
         self.data=[[]]
         self.files=[]

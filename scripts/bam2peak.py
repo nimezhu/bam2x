@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-13-2014, 17:46:55 EST
+# Last-modified: 01-14-2014, 14:54:14 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -83,65 +83,7 @@ def output(s):
 
 from xplib.Turing import TuringCode
 from xplib.Turing import TuringCodeBook as cb
-
-class TuringSortingArray():
-    def __init__(self,a=None,MAX_ARRAY_SIZE=500000):
-        self.data=[[]]
-        self.files=[]
-        self.size=0
-        self.index=0
-        self.MAX_ARRAY_SIZE=MAX_ARRAY_SIZE
-        if a is not None:
-            for i in a:
-                heapq.heappush(self.data[0],i)
-        self.sort()
-        self.has_sorted=True
-    def append(self,x):
-        self.has_sorted=False
-        if (self.index<self.MAX_ARRAY_SIZE):
-            heapq.heappush(self.data[0],x)
-            self.index+=1
-        else:
-            self.data[0].sort()
-            f=tempfile.TemporaryFile()
-            self.data.append(TuringSortingArray.file_reader(f))
-            TuringSortingArray.write_file(self.data[0],f)
-            f.seek(0)
-            self.files.append(f)
-            self.data[0]=[x]
-            self.index=1
-
-    def sort(self):
-        self.data[0].sort()
-        self.has_sorted=True
-    def seek0(self):
-        for f in self.files:
-            f.seed(0)
-    def iter(self):
-        #yield "test"
-        if not self.has_sorted:
-            self.sort()
-            self.has_sorted=True
-        self.seek0()
-        for i in heapq.merge(*self.data):
-            yield i
-    @staticmethod    
-    def file_reader(f):
-        while True:
-            a = array.array("i")
-            a.fromstring(f.read(4000))
-            if not a:
-                break
-            #print str(f),"DEBUG",len(a)
-            for i in range(0,len(a),2):
-                yield TuringCode(a[i],a[i+1])
-    @staticmethod
-    def write_file(a,f):
-        b=array.array("i")
-        for i in a:
-            b.append(i.pos)
-            b.append(i.code)
-        b.tofile(f)
+from xplib.Turing import TuringSortingArray
 
 
 def process_chrom(chrom):
