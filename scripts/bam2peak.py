@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-14-2014, 16:36:40 EST
+# Last-modified: 01-14-2014, 21:10:40 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -16,6 +16,30 @@ import array,tempfile,heapq
 import xplib.Stats.prob as prob
 import itertools
 assert array.array('i').itemsize==4
+'''
+V3:
+DONE: mv sorting array to Turing Module
+TODO: correct the coverage calculation
+
+'''
+EXON_GROUP_CODE=1
+INTRON_GROUP_CODE=0
+class Bed7(Bed):
+    def __init__(self,x):
+        Bed.__init__(self,x)
+        self.group=x[6]
+    def isExon(self):
+        if self.group==EXON_GROUP_CODE:
+            return True
+        else:
+            return False
+    def isIntron(self):
+        if self.group==INTRON_GROUP_CODE:
+            return True
+        else:
+            return False
+
+
 def ParseArg():
     ''' This Function Parse the Argument '''
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : xplib')
@@ -54,11 +78,17 @@ def Main():
     for i in dbi.query(method="lengths"):
         lengths.append(i)
     p=mp.Pool(processes=args.num_cpus)    
-    bedgraphs=p.map(process_chrom,chrs)
+    process_chrom("chr1")
+    coverage_bedgraphs=p.map(process_chrom,chrs)
     #output(results)
     #TODO
     # BUG : coverage now related with cutoff
-    coverages=p.map(count_coverage,bedgraphs)
+    # coverages=p.map(count_coverage,bedgraphs)
+    bedgraphs=[]
+    coverages=[]
+    for i in range(len(chrs)):
+        bedgraphs.append(coverage_bedgraphs[i][1])
+        coverages.append(coverage_bedgraphs[i][0])
     s=0.0  # 1000.0
     l=long(0)
     for i in range(len(chrs)):
@@ -91,10 +121,15 @@ from xplib.Turing import TuringSortingArray
 def process_chrom(chrom):
     local_dbi=DBI.init(args.input,"bam")
     retv=list()
+    intron_retv=list()
     a=[]
     #positive_data=TuringSortingArray(None,500)
     positive_data=TuringSortingArray()
     negative_data=TuringSortingArray()
+    
+    positive_intron_data=TuringSortingArray()
+    negative_intron_data=TuringSortingArray()
+
     for i in local_dbi.query(chrom,method="bam1",strand=args.strand):
         if i.strand=="+" or i.strand==".": 
             positive_data.append(TuringCode(i.start,cb.ON))
@@ -102,30 +137,60 @@ def process_chrom(chrom):
             for j in i.Exons():
                 positive_data.append(TuringCode(j.start,cb.BLOCKON))
                 positive_data.append(TuringCode(j.stop,cb.BLOCKOFF))
+            for j in i.Introns():
+                positive_intron_data.append(TuringCode(j.start,cb.BLOCKON))
+                positive_intron_data.append(TuringCode(j.stop,cb.BLOCKOFF))
         else:
             negative_data.append(TuringCode(i.start,cb.ON))
             negative_data.append(TuringCode(i.stop,cb.OFF))
             for j in i.Exons():
                 negative_data.append(TuringCode(j.start,cb.BLOCKON))
                 negative_data.append(TuringCode(j.stop,cb.BLOCKOFF))
+            for j in i.Introns():
+                negative_intron_data.append(TuringCode(j.start,cb.BLOCKON))
+                negative_intron_data.append(TuringCode(j.stop,cb.BLOCKOFF))
     cutoff=args.cutoff
-    for i,x in enumerate(codesToBedGraph(positive_data.iter(),cutoff)):
-        name=args.prefix+"_"+chrom+"_p"+str(i)
-        retv.append(Bed([chrom,x[0],x[1],name,x[2],"+"]))
-    for i,x in enumerate(codesToBedGraph(negative_data.iter(),cutoff)):
-        name=args.prefix+"_"+chrom+"_n"+str(i)
-        retv.append(Bed([chrom,x[0],x[1],name,x[2],"-"]))
+    i0=0
+    coverage=0.0
+    for i,x in enumerate(codesToBedGraph(positive_data.iter())):
+        if x[2] >= cutoff:
+            name=args.prefix+"_E_"+chrom+"_p"+str(i0)
+            retv.append(Bed7([chrom,x[0],x[1],name,x[2],"+",EXON_GROUP_CODE]))
+            i0+=1
+        coverage+=float(x[1]-x[0])*x[2]/1000.0
+
+    i0=0
+    for i,x in enumerate(codesToBedGraph(negative_data.iter())):
+        if x[2] >= cutoff:
+            name=args.prefix+"_E_"+chrom+"_n"+str(i0)
+            retv.append(Bed7([chrom,x[0],x[1],name,x[2],"-",EXON_GROUP_CODE]))
+            i0+=1
+        coverage+=float(x[1]-x[0])*x[2]/1000.0
+    i0=0
+    INTRON_CUTOFF=1.0
+    for i,x in enumerate(codesToBedGraph(positive_intron_data.iter())):
+        if x[2] >= INTRON_CUTOFF:
+            name=args.prefix+"_I_"+chrom+"_p"+str(i0)
+            retv.append(Bed7([chrom,x[0],x[1],name,x[2],"+",INTRON_GROUP_CODE]))
+            i0+=1
+
+    i0=0
+    for i,x in enumerate(codesToBedGraph(negative_intron_data.iter())):
+        if x[2] >= INTRON_CUTOFF:
+            name=args.prefix+"_I_"+chrom+"_n"+str(i0)
+            retv.append(Bed7([chrom,x[0],x[1],name,x[2],"-",INTRON_GROUP_CODE]))
+            i0+=1
+
     retv.sort()
     local_dbi.close()
-    return retv
-def codesToBedGraph(iter,cutoff=1.0):
+    return coverage,retv
+def codesToBedGraph(iter):
     a=iter.next()
     last_pos=a.pos
     counter=0
     for i in iter:
         if i.pos!=last_pos:
-            if counter >= cutoff:
-                yield (last_pos,i.pos,counter)
+            yield (last_pos,i.pos,counter)
             last_pos=i.pos
         if i.code==cb.BLOCKON:
             counter+=1
@@ -134,15 +199,6 @@ def codesToBedGraph(iter,cutoff=1.0):
     raise StopIteration
 
 
-
-def count_coverage(bedgraph):
-    '''
-    return the total number nt in this bedgraph.
-    '''
-    s=0.0 # float inw5q3ne or 
-    for i in bedgraph:
-        s+=float (len(i)*i.score) / 1000.0
-    return s
 def call_peaks_star(a_b):
     return call_peaks(*a_b)
     
@@ -154,29 +210,49 @@ def call_peaks(bedgraph,exon_cutoff):
     peaks=[]
     i_p=0
     i_n=0
+    last_pos_stop=0
+    last_neg_stop=0
     for i in bedgraph:
         if i.strand=="+" or i.strand==".":
-            if i.score >= exon_cutoff:
-                if len(pos_beds)>0:
-                    if i.chr==pos_beds[-1].chr and i.start-pos_beds[-1].stop < gap:
+            if i.isExon():
+                if i.score >= exon_cutoff:
+                    if len(pos_beds)>0:
+                        if  i.start-last_pos_stop < gap or last_pos_stop==0:
+                            pos_beds.append(i)
+                            if last_pos_stop < i.stop:
+                                last_pos_stop=i.stop
+                        else:
+                            peaks.append(bedsToPeak(pos_beds,"p_"+str(i_p)))
+                            i_p+=1
+                            pos_beds=[i]
+                            last_pos_stop=i.stop
+                    else:
+                        last_pos_stop=i.stop
                         pos_beds.append(i)
-                    else:
-                        peaks.append(bedsToPeak(pos_beds,"p_"+str(i_p)))
-                        i_p+=1
-                        pos_beds=[i]
-                else:
-                    pos_beds.append(i)
+            elif i.isIntron():
+                if last_pos_stop < i.stop:
+                    last_pos_stop=i.stop
+                pos_beds.append(i)
         else:
-            if i.score >= exon_cutoff:
-                if len(neg_beds)>0:
-                    if i.chr==neg_beds[-1].chr and i.start-neg_beds[-1].stop < gap:
-                        neg_beds.append(i)
+            if i.isExon():
+                if i.score >= exon_cutoff:
+                    if len(neg_beds)>0:
+                        if  i.start-last_neg_stop < gap or last_neg_stop==0:
+                            neg_beds.append(i)
+                            if last_neg_stop < i.stop:
+                                last_neg_stop=i.stop
+                        else:
+                            peaks.append(bedsToPeak(neg_beds,"n_"+str(i_n)))
+                            i_n+=1
+                            neg_beds=[i]
+                            last_neg_stop=i.stop
                     else:
-                        peaks.append(bedsToPeak(neg_beds,"n_"+str(i_n)))
-                        i_n+=1
-                        neg_beds=[i]
-                else:
-                    neg_beds.append(i)
+                        neg_beds.append(i)
+                        last_neg_stop=i.stop
+            elif i.isIntron():
+                if last_neg_stop < i.stop:
+                    last_neg_stop=i.stop
+                pos_beds.append(i)
 
     if len(pos_beds)>0:
         peaks.append(bedsToPeak(pos_beds,"p_"+str(i_p)))
@@ -188,8 +264,12 @@ def call_peaks(bedgraph,exon_cutoff):
 def bedsToPeak(ibeds,id):
     peak=Bed([ibeds[0].chr,ibeds[0].start,ibeds[0].stop,id,float(ibeds[0].score),ibeds[0].strand])
     for i in ibeds[1:]:
-        peak.score=float(peak.score*len(peak)+i.score*len(i))/(len(peak)+len(i))
-        peak.stop=i.stop
+        if i.isExon():
+            peak.score=float(peak.score*len(peak)+i.score*len(i))/(len(peak)+len(i))
+            peak.stop=i.stop
+    print "META",peak
+    for i in ibeds:
+        print "IN",i
     return peak
 
 
