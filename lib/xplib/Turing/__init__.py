@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-16-2014, 14:50:56 EST
+# Last-modified: 01-16-2014, 16:20:36 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
@@ -395,7 +395,7 @@ class TuringTupleSortingArray:
             self.data[0].sort(key=itemgetter(0,1))
             f=tempfile.TemporaryFile(dir=self.tempdir)
             self.data.append(TuringSortingArray.tempfile_reader(f))
-            TuringSortingArray.write_tempfile(self.data[0],f)
+            TuringTupleSortingArray.write_tempfile(self.data[0],f)
             f.seek(0)
             self.files.append(f)
             self.data[0]=[x]
@@ -413,6 +413,7 @@ class TuringTupleSortingArray:
             self.has_sorted=True
         self.seek0()
         for i in heapq.merge(*self.data):
+            #TODO test custom sort?
             yield i
     @staticmethod    
     def tempfile_reader(f):
