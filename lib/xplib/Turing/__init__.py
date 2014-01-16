@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-14-2014, 15:46:14 EST
+# Last-modified: 01-16-2014, 14:50:56 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
@@ -306,6 +306,7 @@ class TuringGraph:
 import array,tempfile,heapq
 import xplib.Stats.prob as prob
 import itertools
+from operator import itemgetter
 assert array.array('i').itemsize==4
 
 class TuringSortingArray:
@@ -317,7 +318,7 @@ class TuringSortingArray:
         self.MAX_ARRAY_SIZE=MAX_ARRAY_SIZE
         if a is not None:
             for i in a:
-                heapq.heappush(self.data[0],i)
+                self.append(i)
         self.sort()
         self.has_sorted=True
         if dict.has_key("tempdir"):
@@ -368,6 +369,67 @@ class TuringSortingArray:
         for i in a:
             b.append(i.pos)
             b.append(i.code)
+        b.tofile(f)
+class TuringTupleSortingArray:
+    def __init__(self,a=None,MAX_ARRAY_SIZE=500000,**dict):
+        self.data=[[]]
+        self.files=[]
+        self.size=0
+        self.index=0
+        self.MAX_ARRAY_SIZE=MAX_ARRAY_SIZE
+        if a is not None:
+            for i in a:
+                self.append(i)
+        self.sort()
+        self.has_sorted=True
+        if dict.has_key("tempdir"):
+            self.tempdir=dict["tempdir"]
+        else:
+            self.tempdir=None
+    def append(self,x):
+        self.has_sorted=False
+        if (self.index<self.MAX_ARRAY_SIZE):
+            heapq.heappush(self.data[0],x)
+            self.index+=1
+        else:
+            self.data[0].sort(key=itemgetter(0,1))
+            f=tempfile.TemporaryFile(dir=self.tempdir)
+            self.data.append(TuringSortingArray.tempfile_reader(f))
+            TuringSortingArray.write_tempfile(self.data[0],f)
+            f.seek(0)
+            self.files.append(f)
+            self.data[0]=[x]
+            self.index=1
+    def sort(self):
+        self.data[0].sort(key=itemgetter(0,1))
+        self.has_sorted=True
+    def seek0(self):
+        for f in self.files:
+            f.seek(0)
+    def iter(self):
+        #yield "test"
+        if not self.has_sorted:
+            self.sort()
+            self.has_sorted=True
+        self.seek0()
+        for i in heapq.merge(*self.data):
+            yield i
+    @staticmethod    
+    def tempfile_reader(f):
+        while True:
+            a = array.array("i")
+            a.fromstring(f.read(4000))
+            if not a:
+                break
+            #print str(f),"DEBUG",len(a)
+            for i in range(0,len(a),2):
+                yield (a[i],a[i+1])
+    @staticmethod
+    def write_tempfile(a,f):
+        b=array.array("i")
+        for i in a:
+            b.append(i[0])
+            b.append(i[1])
         b.tofile(f)
     
 

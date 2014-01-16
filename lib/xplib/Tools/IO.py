@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-10-2013, 16:27:35 EST
+# Last-modified: 01-16-2014, 13:25:06 EST
 VERSION="0.1"
 import os,sys,argparse
 import gzip
@@ -48,6 +48,17 @@ def fopen(file,mode="r",**kwargs):
         return open_input(file)
     return None
     
+def formatter(metabed,attr):
+    '''
+    format output of MetaBed3
+    example:
+        print formatter(metabed,["chr","start","stop"])
+    '''
+    s=""
+    for i in attr:
+        s+=str(metabed.__dict__[i])+"\t"
+    s.strip('\t')
+    return s
 
 def read_config(file,sep=":"):
     config={}

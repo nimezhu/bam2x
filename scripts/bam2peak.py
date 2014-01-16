@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-14-2014, 21:10:40 EST
+# Last-modified: 01-16-2014, 15:49:29 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -19,25 +19,34 @@ assert array.array('i').itemsize==4
 '''
 V3:
 DONE: mv sorting array to Turing Module
-TODO: correct the coverage calculation
+V4:
+DONE: correct the coverage calculation
+DONE: report link exon and intron
 
+V5:
+TODO: same memory using numarray instead of bed?
+      only using array?
+      rm bed class?
+      list of list ?
+      bedgraph sorting array?
+TODO: report if peak has intron and the possible cDNA length and gene length.
+TODO: compare with known gene
+TODO: trim the last intron or extend the exon? ( KEY PROBLEM. how to define the end )
 '''
 EXON_GROUP_CODE=1
 INTRON_GROUP_CODE=0
-class Bed7(Bed):
-    def __init__(self,x):
-        Bed.__init__(self,x)
-        self.group=x[6]
-    def isExon(self):
-        if self.group==EXON_GROUP_CODE:
-            return True
-        else:
-            return False
-    def isIntron(self):
-        if self.group==INTRON_GROUP_CODE:
-            return True
-        else:
-            return False
+HAS_INTRON=20
+NOT_HAS_INTRON=10
+
+POSITIVE_STRAND=1
+NEGATIVE_STRAND=-1
+
+START_INDEX=0
+STOP_INDEX=1
+SCORE_INDEX=2
+STRAND_INDEX=3
+GROUP_INDEX=4
+OTHER_INDEX=5
 
 
 def ParseArg():
@@ -78,7 +87,11 @@ def Main():
     for i in dbi.query(method="lengths"):
         lengths.append(i)
     p=mp.Pool(processes=args.num_cpus)    
-    process_chrom("chr1")
+    '''
+    a=process_chrom("chr1")
+    for i in a:
+        print i
+    '''
     coverage_bedgraphs=p.map(process_chrom,chrs)
     #output(results)
     #TODO
@@ -104,6 +117,7 @@ def Main():
     intron_cutoff=2 #TODO revise it
     print >>out,"# MEAN COVERAGE:",coverage
     print >>out,"# EXON COVERAGE CUTOFF:",exon_cutoff
+    #call_peaks(bedgraphs[0],1)
     peaks=p.map(call_peaks_star,itertools.izip(bedgraphs,itertools.repeat(exon_cutoff)))
     output(peaks)
 
@@ -111,12 +125,14 @@ def Main():
 def output(s):
     for i in s:
         for j in i:
-            print >>out,j
+            print >>out,nice_format(j)
 
+def nice_format(a):
+    return "\t".join("%s"%item for item in a)
 from xplib.Turing import TuringCode
 from xplib.Turing import TuringCodeBook as cb
-from xplib.Turing import TuringSortingArray
-
+from xplib.Turing import TuringTupleSortingArray
+from operator import itemgetter
 
 def process_chrom(chrom):
     local_dbi=DBI.init(args.input,"bam")
@@ -124,77 +140,64 @@ def process_chrom(chrom):
     intron_retv=list()
     a=[]
     #positive_data=TuringSortingArray(None,500)
-    positive_data=TuringSortingArray()
-    negative_data=TuringSortingArray()
+    positive_data=TuringTupleSortingArray()
+    negative_data=TuringTupleSortingArray()
     
-    positive_intron_data=TuringSortingArray()
-    negative_intron_data=TuringSortingArray()
+    positive_intron_data=TuringTupleSortingArray()
+    negative_intron_data=TuringTupleSortingArray()
 
     for i in local_dbi.query(chrom,method="bam1",strand=args.strand):
         if i.strand=="+" or i.strand==".": 
-            positive_data.append(TuringCode(i.start,cb.ON))
-            positive_data.append(TuringCode(i.stop,cb.OFF))
+            positive_data.append((i.start,cb.ON))
+            positive_data.append((i.stop,cb.OFF))
             for j in i.Exons():
-                positive_data.append(TuringCode(j.start,cb.BLOCKON))
-                positive_data.append(TuringCode(j.stop,cb.BLOCKOFF))
+                positive_data.append((j.start,cb.BLOCKON))
+                positive_data.append((j.stop,cb.BLOCKOFF))
             for j in i.Introns():
-                positive_intron_data.append(TuringCode(j.start,cb.BLOCKON))
-                positive_intron_data.append(TuringCode(j.stop,cb.BLOCKOFF))
+                positive_intron_data.append((j.start,cb.BLOCKON))
+                positive_intron_data.append((j.stop,cb.BLOCKOFF))
         else:
-            negative_data.append(TuringCode(i.start,cb.ON))
-            negative_data.append(TuringCode(i.stop,cb.OFF))
+            negative_data.append((i.start,cb.ON))
+            negative_data.append((i.stop,cb.OFF))
             for j in i.Exons():
-                negative_data.append(TuringCode(j.start,cb.BLOCKON))
-                negative_data.append(TuringCode(j.stop,cb.BLOCKOFF))
+                negative_data.append((j.start,cb.BLOCKON))
+                negative_data.append((j.stop,cb.BLOCKOFF))
             for j in i.Introns():
-                negative_intron_data.append(TuringCode(j.start,cb.BLOCKON))
-                negative_intron_data.append(TuringCode(j.stop,cb.BLOCKOFF))
+                negative_intron_data.append((j.start,cb.BLOCKON))
+                negative_intron_data.append((j.stop,cb.BLOCKOFF))
     cutoff=args.cutoff
-    i0=0
     coverage=0.0
     for i,x in enumerate(codesToBedGraph(positive_data.iter())):
-        if x[2] >= cutoff:
-            name=args.prefix+"_E_"+chrom+"_p"+str(i0)
-            retv.append(Bed7([chrom,x[0],x[1],name,x[2],"+",EXON_GROUP_CODE]))
-            i0+=1
+        if x[SCORE_INDEX] >= cutoff:
+            retv.append((x[0],x[1],x[2],POSITIVE_STRAND,EXON_GROUP_CODE))
         coverage+=float(x[1]-x[0])*x[2]/1000.0
-
-    i0=0
     for i,x in enumerate(codesToBedGraph(negative_data.iter())):
-        if x[2] >= cutoff:
-            name=args.prefix+"_E_"+chrom+"_n"+str(i0)
-            retv.append(Bed7([chrom,x[0],x[1],name,x[2],"-",EXON_GROUP_CODE]))
-            i0+=1
+        if x[SCORE_INDEX] >= cutoff:
+            retv.append((x[0],x[1],x[2],NEGATIVE_STRAND,EXON_GROUP_CODE))
         coverage+=float(x[1]-x[0])*x[2]/1000.0
-    i0=0
     INTRON_CUTOFF=1.0
     for i,x in enumerate(codesToBedGraph(positive_intron_data.iter())):
-        if x[2] >= INTRON_CUTOFF:
-            name=args.prefix+"_I_"+chrom+"_p"+str(i0)
-            retv.append(Bed7([chrom,x[0],x[1],name,x[2],"+",INTRON_GROUP_CODE]))
-            i0+=1
-
-    i0=0
+        if x[SCORE_INDEX] >= INTRON_CUTOFF:
+            retv.append((x[0],x[1],x[2],POSITIVE_STRAND,INTRON_GROUP_CODE))
     for i,x in enumerate(codesToBedGraph(negative_intron_data.iter())):
-        if x[2] >= INTRON_CUTOFF:
-            name=args.prefix+"_I_"+chrom+"_n"+str(i0)
-            retv.append(Bed7([chrom,x[0],x[1],name,x[2],"-",INTRON_GROUP_CODE]))
-            i0+=1
-
-    retv.sort()
+        if x[SCORE_INDEX] >= INTRON_CUTOFF:
+            retv.append((x[0],x[1],x[2],NEGATIVE_STRAND,INTRON_GROUP_CODE))
+    retv.sort(key=itemgetter(0,1,2))
+    #TODO how to sort!
     local_dbi.close()
     return coverage,retv
 def codesToBedGraph(iter):
     a=iter.next()
-    last_pos=a.pos
+    last_pos=a[0]
     counter=0
     for i in iter:
-        if i.pos!=last_pos:
-            yield (last_pos,i.pos,counter)
-            last_pos=i.pos
-        if i.code==cb.BLOCKON:
+        if i[0]!=last_pos:
+            #TODO using more efficient data structure
+            yield (last_pos,i[0],counter)
+            last_pos=i[0]
+        if i[1]==cb.BLOCKON:
             counter+=1
-        if i.code==cb.BLOCKOFF:
+        if i[1]==cb.BLOCKOFF:
             counter-=1
     raise StopIteration
 
@@ -213,45 +216,45 @@ def call_peaks(bedgraph,exon_cutoff):
     last_pos_stop=0
     last_neg_stop=0
     for i in bedgraph:
-        if i.strand=="+" or i.strand==".":
-            if i.isExon():
-                if i.score >= exon_cutoff:
+        if i[STRAND_INDEX]==POSITIVE_STRAND:
+            if i[GROUP_INDEX]==EXON_GROUP_CODE:
+                if i[SCORE_INDEX] >= exon_cutoff:
                     if len(pos_beds)>0:
-                        if  i.start-last_pos_stop < gap or last_pos_stop==0:
+                        if  i[START_INDEX]-last_pos_stop < gap or last_pos_stop==0:
                             pos_beds.append(i)
-                            if last_pos_stop < i.stop:
-                                last_pos_stop=i.stop
+                            if last_pos_stop < i[STOP_INDEX]:
+                                last_pos_stop=i[STOP_INDEX]
                         else:
                             peaks.append(bedsToPeak(pos_beds,"p_"+str(i_p)))
                             i_p+=1
                             pos_beds=[i]
-                            last_pos_stop=i.stop
+                            last_pos_stop=i[STOP_INDEX]
                     else:
-                        last_pos_stop=i.stop
+                        last_pos_stop=i[STOP_INDEX]
                         pos_beds.append(i)
-            elif i.isIntron():
-                if last_pos_stop < i.stop:
-                    last_pos_stop=i.stop
+            elif i[GROUP_INDEX]==INTRON_GROUP_CODE:
+                if last_pos_stop < i[STOP_INDEX]:
+                    last_pos_stop=i[STOP_INDEX]
                 pos_beds.append(i)
         else:
-            if i.isExon():
-                if i.score >= exon_cutoff:
+            if i[GROUP_INDEX]==EXON_GROUP_CODE:
+                if i[SCORE_INDEX] >= exon_cutoff:
                     if len(neg_beds)>0:
-                        if  i.start-last_neg_stop < gap or last_neg_stop==0:
+                        if  i[START_INDEX]-last_neg_stop < gap or last_neg_stop==0:
                             neg_beds.append(i)
-                            if last_neg_stop < i.stop:
-                                last_neg_stop=i.stop
+                            if last_neg_stop < i[STOP_INDEX]:
+                                last_neg_stop=i[STOP_INDEX]
                         else:
                             peaks.append(bedsToPeak(neg_beds,"n_"+str(i_n)))
                             i_n+=1
                             neg_beds=[i]
-                            last_neg_stop=i.stop
+                            last_neg_stop=i[STOP_INDEX]
                     else:
                         neg_beds.append(i)
-                        last_neg_stop=i.stop
-            elif i.isIntron():
-                if last_neg_stop < i.stop:
-                    last_neg_stop=i.stop
+                        last_neg_stop=i[STOP_INDEX]
+            elif i[GROUP_INDEX]==INTRON_GROUP_CODE:
+                if last_neg_stop < i[STOP_INDEX]:
+                    last_neg_stop=i[STOP_INDEX]
                 pos_beds.append(i)
 
     if len(pos_beds)>0:
@@ -260,17 +263,23 @@ def call_peaks(bedgraph,exon_cutoff):
         peaks.append(bedsToPeak(neg_beds,"n_"+str(i_n)))
     peaks.sort()
     return peaks
-
+def length(x):
+    return x[STOP_INDEX]-x[START_INDEX]
 def bedsToPeak(ibeds,id):
-    peak=Bed([ibeds[0].chr,ibeds[0].start,ibeds[0].stop,id,float(ibeds[0].score),ibeds[0].strand])
+    peak=[ibeds[0][START_INDEX],ibeds[0][STOP_INDEX],float(ibeds[0][SCORE_INDEX]),ibeds[0][STRAND_INDEX],NOT_HAS_INTRON,0,id]
+    cdna_length=length(peak)
     for i in ibeds[1:]:
-        if i.isExon():
-            peak.score=float(peak.score*len(peak)+i.score*len(i))/(len(peak)+len(i))
-            peak.stop=i.stop
-    print "META",peak
-    for i in ibeds:
-        print "IN",i
-    return peak
+        if i[GROUP_INDEX]==EXON_GROUP_CODE:
+            peak[SCORE_INDEX]=float(peak[SCORE_INDEX]*cdna_length+i[SCORE_INDEX]*length(i))/(length(peak)+length(i))
+            peak[STOP_INDEX]=i[STOP_INDEX]
+            cdna_length+=length(i)
+        else:
+            peak[GROUP_INDEX]=HAS_INTRON
+    peak[OTHER_INDEX]=cdna_length
+    #print "META",peak
+    #for i in ibeds:
+    #    print "IN",i
+    return tuple(peak)
 
 
 

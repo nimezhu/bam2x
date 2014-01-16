@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 01-01-2014, 20:05:35 EST
+#Last-modified: 01-16-2014, 15:29:26 EST
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 class Bed(object):
@@ -668,39 +668,51 @@ class MetaBed(Bed):
         for i in self.attr:
             s.append(str(self.__dict__[i]))
         return "\t".join(s)
+        #return '\t'.join("%s" % item for item in vars(self).items())
     def __cmp__(self,other):
 	return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) 
-        
-class Fimo(Bed):
+class MetaBed3(object):
     '''
-    FIMO - Motif search tool
+    3 means only chr,start,end
+    save memory , release the attr
+    please using formatter to print
     '''
-    def __init__(self,x,**dict):
-        if dict.has_key("sep"): sep=dict["sep"]
-        else:   sep="\t"
-        if isinstance(x,str): x=x.split(sep)
-        self.pattern=x[0]
-        self.chr=x[1]
-        self.seqname=x[1]
-        self.start=int(x[2])-1
-        self.stop=int(x[3])
-        self.strand=x[4]
-        self.score=float(x[5])
-        self.pvalue=float(x[6])
-        self.qvalue=float(x[7])
-        self.match_seq=x[8]
+    def __init__(self,**dict):
+        attr=dict["attr"]
+        for i in range(len(attr)):
+            attr[i]=attr[i].strip()
+        #self.attr=dict["attr"]
+        value=dict["value"]
+        if len(value)!=len(attr): 
+            print >>sys.stderr,"length of value and attr are not the same"
+            exit(0)
+        for i in range(len(attr)):
+            self.__setattr__(attr[i],value[i])
+        if self.__dict__.has_key('pos'):
+            if not self.__dict__.has_key('start'):
+                self.__setattr__('start',self.pos-1)
+                self.__setattr__('stop',self.pos)
+                self.__setattr__('end',self.pos)
+        if not self.__dict__.has_key('chr'):
+            if self.__dict__.has_key('chromosome'):
+                self.__setattr__('chr',self.chromosome)
+            if self.__dict__.has_key('chrom'):
+                self.__setattr__('chr',self.chrom)
+        if not self.__dict__.has_key('stop'):
+            if self.__dict__.has_key('end'):
+                self.__setattr__('stop',self.end)
     def __str__(self):
-        s=""
-        s+=self.pattern+"\t"
-        s+=self.chr+"\t"
-        s+=str(self.start+1)+"\t"
-        s+=str(self.stop)+"\t"
-        s+=self.strand+"\t"
-        s+=str(self.score)+"\t"
-        s+=str(self.pvalue)+"\t"
-        s+=str(self.qvalue)+"\t"
-        s+=str(self.match_seq)
-        return s
+        '''
+        s=[]
+        for i in vars(self):
+            s.append(str(self.__dict__[i]))
+        return "\t".join(s)
+        '''
+        return ','.join(" %s : %s " % item for item in vars(self).items())
+    def __cmp__(self,other):
+	return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) 
+    def __len__(self):
+        return self.stop-self.start
     
 class Psl(Bed):
     def __init__(self,x,**dict):
@@ -762,8 +774,37 @@ class Psl(Bed):
             s+=i
         return s
 
-
-
+class Fimo(Bed):
+    '''
+    FIMO - Motif search tool
+    '''
+    def __init__(self,x,**dict):
+        if dict.has_key("sep"): sep=dict["sep"]
+        else:   sep="\t"
+        if isinstance(x,str): x=x.split(sep)
+        self.pattern=x[0]
+        self.chr=x[1]
+        self.seqname=x[1]
+        self.start=int(x[2])-1
+        self.stop=int(x[3])
+        self.strand=x[4]
+        self.score=float(x[5])
+        self.pvalue=float(x[6])
+        self.qvalue=float(x[7])
+        self.match_seq=x[8]
+    def __str__(self):
+        s=""
+        s+=self.pattern+"\t"
+        s+=self.chr+"\t"
+        s+=str(self.start+1)+"\t"
+        s+=str(self.stop)+"\t"
+        s+=self.strand+"\t"
+        s+=str(self.score)+"\t"
+        s+=str(self.pvalue)+"\t"
+        s+=str(self.qvalue)+"\t"
+        s+=str(self.match_seq)
+        return s
+    
 ###################### Below is Private Format
 class Peak(Bed):
     '''
