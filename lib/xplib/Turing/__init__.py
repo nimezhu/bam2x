@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-16-2014, 16:20:36 EST
+# Last-modified: 01-16-2014, 16:24:54 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
@@ -394,7 +394,7 @@ class TuringTupleSortingArray:
         else:
             self.data[0].sort(key=itemgetter(0,1))
             f=tempfile.TemporaryFile(dir=self.tempdir)
-            self.data.append(TuringSortingArray.tempfile_reader(f))
+            self.data.append(TuringTupleSortingArray.tempfile_reader(f))
             TuringTupleSortingArray.write_tempfile(self.data[0],f)
             f.seek(0)
             self.files.append(f)
