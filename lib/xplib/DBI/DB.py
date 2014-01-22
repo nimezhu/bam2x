@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-14-2014, 16:38:12 EST
+# Last-modified: 01-22-2014, 15:28:49 EST
 
 import os,sys
 from xplib.Annotation import *
@@ -10,6 +10,7 @@ import pysam
 from xplib.Tools import rc
 from xplib import Tools
 from twobitreader import *
+from xplib.Tuple.Bed12Tuple import *
 '''
 BASIC QUERY FUNCTIONS
 '''
@@ -237,6 +238,10 @@ class BamlistI(MetaDBI):
                 if len(b)==2:
                     start=int(b[0])-1
                     end=int(b[1])
+        elif isinstance(x,tuple):
+            chrom=x[CHROM]
+            start=x[CHROMSTART]
+            end=x[CHROMEND]
         elif x is not None:
             chrom=x.chr
             start=x.start
@@ -296,6 +301,28 @@ class BamlistI(MetaDBI):
                         yield fragment.toBed12(chr=chrom,strand=dict["strand"])
                     else:
                         yield fragment.toBed12(chr=chrom)
+        elif method=="bam1tuple":
+            for bamfile in self.bamfiles:
+                strand="read1"
+                if dict.has_key("strand"):   # TODO: if bamfiles have different read1 or read2 ?
+                    strand=dict["strand"]
+                for bed in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2bed12tuple",references=chrom,strand=strand):
+                    yield bed
+        elif method=="bam2tuple":
+            for bamfile in self.bamfiles:
+                for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
+                    if dict.has_key("strand"):
+                        yield fragment.toBed12Tuple(chr=chrom,strand=dict["strand"])
+                    else:
+                        yield fragment.toBed12Tuple(chr=chrom)
+        
+        elif method=="bam2tuple_fast":
+            for bamfile in self.bamfiles:
+                for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment"):
+                    if dict.has_key("strand"):
+                        yield fragment.toBed12Tuple(chr=chrom,strand=dict["strand"])
+                    else:
+                        yield fragment.toBed12Tuple(chr=chrom)
         elif method=='pileup':
             s=[[0,0,0,0] for row in range(end-start)]
             for bamfile in self.bamfiles:

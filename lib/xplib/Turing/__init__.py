@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-16-2014, 16:24:54 EST
+# Last-modified: 01-16-2014, 18:49:02 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
@@ -206,7 +206,7 @@ class TuringGraph:
         '''
         j=-1
         last_pos=-1
-        c.sort()
+        #c.sort()
         for i in c:
             #print i.cid,i
             if (i.pos!=last_pos):

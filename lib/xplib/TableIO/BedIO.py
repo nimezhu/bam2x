@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:
-# Last-modified: 06-12-2013, 13:13:51 EDT
+# Last-modified: 01-22-2014, 12:17:23 EST
 from xplib.Annotation import Bed,Bed12
 import types
 import gzip
@@ -24,5 +24,32 @@ def BedIterator(handle,**dict):
             yield Bed12(i)
         else:
             yield Bed(i)
+
+    
+from xplib.Tuple.Bed12Tuple import *
+def BedTupleIterator(handle,**dict):
+    '''
+    Bed file Tuple iterator
+    Usage Example:
+        from xplib.TableIO.BedIO import BedTupleIterator
+        for bed in BedIterator(file or filename):
+            print bed
+    Usage:
+        for i in TableIO.parse(file or filename,"bed2tuple"):
+            print bed
+        
+    '''
+    for x in SimpleIO.SimpleIterator(handle,**dict):
+        l=[]
+        if len(x)==12:
+            x[BLOCKSIZES]=x[BLOCKSIZES].strip(",").split(",")
+            x[BLOCKSTARTS]=x[BLOCKSTARTS].strip(",").split(",")
+            for i in range(x[BLOCKCOUNT]):
+                x[BLOCKSIZES][i]=int(x[BLOCKSIZES][i])
+                x[BLOCKSTARTS][i]=int(x[BLOCKSTARTS][i])
+            x[BLOCKSIZES]=tuple(x[BLOCKSIZES])
+            x[BLOCKSTARTS]=tuple(x[BLOCKSTARTS])
+        yield tuple(x)
+    
 
     

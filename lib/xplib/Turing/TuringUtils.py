@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-14-2014, 15:06:27 EST
+# Last-modified: 01-22-2014, 15:04:30 EST
 
 from xplib.Annotation import *
 from bitarray import bitarray
@@ -78,6 +78,19 @@ def TuringFactory(bed12):
             g.append(TuringCode(i.stop,cb.BLOCKOFF))
     g.sort()
     return TuringGraph(g)
+def TupleTuringFactory(bed12):
+    import xplib.Turing.TuringCodeBook as cb
+    from xplib.Turing import TuringCode, TuringGraph
+    from xplib.Tuple.Bed12Tuple import CHROMSTART,CHROMEND,get_exons
+    g=[]
+    g.append((bed12[CHROMSTART],cb.ON))
+    g.append((bed12[CHROMEND],cb.OFF))
+    if len(bed12)==12:
+        for i in get_exons(bed12):
+            g.append((i[CHROMSTART],cb.BLOCKON))
+            g.append((i[CHROMEND],cb.BLOCKOFF))
+    g.sort()
+    return g
 
 def count_xor(path):
     s=0
@@ -86,11 +99,14 @@ def count_xor(path):
     return s        
 
 def isCompatible(pathA,pathB):  ##pathA and B shoulc be same length
+    #print "debug pathA",pathA
+    #print "debug pathB",pathB
     for i in range(0,len(pathA),2):
         if not (pathA[i]&pathB[i] | pathA[i+1]&pathB[i+1]):
             return False
     return True
 def isSelfIncompatible(pathA):
+    #print "debug",pathA
     for i in range(0,len(pathA),2):
         if not pathA[i]:
             if not pathA[i+1]:

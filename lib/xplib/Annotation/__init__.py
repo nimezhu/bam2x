@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 01-16-2014, 15:29:26 EST
+#Last-modified: 01-21-2014, 18:57:25 EST
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 class Bed(object):
@@ -497,6 +497,15 @@ class Fragment:
         from xplib import TableIO
         x=list()
         for i in TableIO.parse(self.reads,"bam2bed12",references=chr,strand=strand):
+            x.append(i)
+        return x
+    def toBed12Tuple(self,chr="chr",strand="read2"):
+        '''
+        test now
+        '''
+        from xplib import TableIO
+        x=list()
+        for i in TableIO.parse(self.reads,"bam2bed12tuple",references=chr,strand=strand):
             x.append(i)
         return x
         

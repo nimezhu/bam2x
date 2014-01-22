@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 11-26-2013, 01:14:17 EST
+# Last-modified: 01-22-2014, 12:00:05 EST
 import types
 import pysam
 from xplib.Annotation import Bed,Bed12,Fragment
@@ -133,6 +133,51 @@ def BamToBed12Iterator(handle,**kwargs):
         elif i.is_read2 and read1:
             strand=Tools.reverse_strand(strand)
         bed=Bed12([chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts])
+        yield bed
+def BamToBed12TupleIterator(handle,**kwargs):
+    '''
+    handle is an bam iterator
+    need references hash if handle is not filename.
+    '''
+    if type(handle)==type("string"):
+        handle=pysam.Samfile(handle,"rb");
+    for i in handle:
+        #print i #debug
+        if i.tid<0: continue
+        strand="+"
+        if i.is_reverse:
+            strand="-"
+        score=i.mapq
+        if kwargs.has_key("references"):
+            if isinstance(kwargs["references"],str):
+                chr=kwargs["references"]  
+            else:
+                chr=kwargs["references"][i.tid];
+        else:
+            try:
+                 chr=handle.references[i.tid];
+            except:
+                 chr="chr"
+        if kwargs.has_key("strand"):
+            if kwargs["strand"]=="read1" or kwargs["strand"]=="firstMate":
+                read1=True
+            else:
+                read1=False
+        else:
+            read1=True   
+        start=i.pos
+        end=i.aend
+        name=i.qname
+        cds_start=start
+        cds_end=start
+        itemRgb="0,0,0"
+        if i.cigar==None: continue # IGNORE THIS READS?
+        (block_starts,block_sizes)=Tools.cigar_to_coordinates(i.cigar);
+        if i.is_read1 and not read1:
+            strand=Tools.reverse_strand(strand)
+        elif i.is_read2 and read1:
+            strand=Tools.reverse_strand(strand)
+        bed=(chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),tuple(block_sizes),tuple(block_starts))
         yield bed
 
 

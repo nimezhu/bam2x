@@ -1,10 +1,11 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 12-04-2013, 17:19:36 EST
+# Last-modified: 01-22-2014, 13:52:57 EST
 from string import upper,lower
 from xplib.Annotation import Fragment,Bed,Bed12,GeneBed
 import xplib
 import copy
+from xplib.Tuple.Bed12Tuple import *
 
 # __all__=["IO","codon"]
 
@@ -129,6 +130,67 @@ def translate_coordinates(coord,bed,reverse=False): # bed is Bed12 format
         if bed.__dict__.has_key('pos'):
             C.pos=C.start+1  # position is 1  index
         return C
+def tuple_translate_coordinate(coord,bed,reverse=False):
+    '''
+    translate bed's coordiante based on coord
+    if reverse is True:
+        bed is in coord's coordinates and translate it back to the chromosome coordinates
+    '''
+    if reverse:
+        #TO TEST
+        chr=coord[CHROM]
+        id=bed[NAME]
+        if coord[STRAND]=="+" or coord[STRAND]==".":
+            return (coord[CHROMSTART]+bed[CHROMESTART],coord[CHROMSTART]+bed[CHROMEND],bed[STRAND])
+        else:
+            strand="."
+            if bed[STRAND]=="-":strand="+"
+            if bed[STRAND]=="+":strand="-"
+            return (coord[CHROMEND]-bed[CHROMEND],coord[CHROMEND]-bed[CHROMSTART],strand)
+
+    else:
+        if coord[CHROM]!=bed[CHROM]: return None
+        if coord[STRAND]=="+" or coord[STRAND]==".":
+            return (bed[CHROMSTART]-coord[CHROMSTART],bed[CHROMEND]-coord[CHROMSTART],bed[STRAND])
+        if coord[STRAND]=="-":
+            strand="."
+            if bed[STRAND]=="-":strand="+"
+            if bed[STRAND]=="+":strand="-"
+            return (coord[CHROMEND]-bed[CHROMEND],coord[CHROMEND]-bed[CHROMSTART],strand)
+def tuple_translate_coordinates(coord,bed,reverse=False): # bed is Bed12 format
+    '''
+    Translate Bed12Tuple based on simple annotation coord
+
+    if reverse is True
+        bed is in coord's coordinates and translate it back to the chromosome coordinates.
+        TO TEST
+    '''
+    if reverse:
+        chr=coord[CHROM]
+    else:
+        chr=coord[NAME]
+    id=bed[NAME]
+    (start,stop,strand)=tuple_translate_coordinate(coord,bed,reverse)
+    score=bed[SCORE]
+    if len(bed)==12:
+        (cds_start,cds_stop,cds_strand)=tuple_translate_coordinate(coord,(bed[CHROM],bed[THICKSTART],bed[THICKEND],"noname",0.0,bed[STRAND]),reverse)
+        itemRgb=bed[ITEMRGB]
+        blockCount=bed[BLOCKCOUNT]
+        blockSizes=list(bed[BLOCKSIZES])
+        blockStarts=list(bed[BLOCKSTARTS])
+        
+        if coord[STRAND]=="+" or coord[STRAND]==".":
+            for i,x in enumerate(blockStarts):
+                blockStarts[i]=blockStarts[i]
+        elif coord[STRAND]=="-":
+            for i,x in enumerate(blockStarts):
+                blockStarts[i]+=blockSizes[i]
+            blockStarts=blockStarts[::-1]
+            for i,x in enumerate(blockStarts):
+                #print blockStarts[i]
+                blockStarts[i]=bed[CHROMEND]-(blockStarts[i]+bed[CHROMSTART])
+            blockSizes=blockSizes[::-1]
+        return (chr,start,stop,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,tuple(blockSizes),tuple(blockStarts))
         
         
 
