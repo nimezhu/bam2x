@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-23-2014, 15:08:08 EST
+# Last-modified: 01-23-2014, 15:09:39 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -470,19 +470,19 @@ def query(i,dbi_bam,genome): # i is query iteem
                 cliques[j].append(k)
         '''
         if float(uniq_score)/total_frag < args.min_uniq :
-            print >>sys.stderr,"ignore due to small uniq frags:",float(uniq_score)/total_frag
+            #print >>sys.stderr,"ignore due to small uniq frags:",float(uniq_score)/total_frag
             continue
         else:
             bed=translate_bits_into_bed(g,cliques_pattern[j])
             cdna_length=bed.cdna_length()
             if cdna_length==0:
-                print >>sys.stderr,"ignore due to cdna_length",bed
+                #print >>sys.stderr,"ignore due to cdna_length",bed
                 continue
             uniq_fpk=float(uniq_score)/cdna_length*1000.0
             if  uniq_fpk > max_uniq_fpk:
                 max_uniq_fpk=uniq_fpk
             if uniq_fpk  < max_uniq_fpk * MIN_FPK_RATIO:
-                print >>sys.stderr,"ignore due to fpk",bed,"\tuniq_fpk:",uniq_fpk,"\t current max:",max_uniq_fpk
+                #print >>sys.stderr,"ignore due to fpk",bed,"\tuniq_fpk:",uniq_fpk,"\t current max:",max_uniq_fpk
                 continue
             rgb=255-uniq_score*240/total_frag  
             cumulative_score+=uniq_score
