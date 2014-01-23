@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-23-2014, 15:05:15 EST
+# Last-modified: 01-23-2014, 15:08:08 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -61,11 +61,7 @@ TODO.tar.gz:
 def report_format(x,**kwargs):
     #TOD
     S=""
-    if len(x["QR"])==12:
-        qr=Bed12(x["QR"])
-    else:
-        qr=Bed(x["QR"])
-    S+="QR\t"+str(qr)+"\n"
+    S+="QR\t"+str(x["QR"])+"\n"
     S+="FIGURE %s\n"%x["FIGURE"]
     if x["QR"][2]-x["QR"][1] < 100:
         S+="SQ\t"+x["WIG_TABLE"][0]
