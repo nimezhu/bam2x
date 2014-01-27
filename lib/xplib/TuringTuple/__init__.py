@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-27-2014, 15:11:37 EST
+# Last-modified: 01-27-2014, 17:20:56 EST
 import xplib.Turing.TuringCodeBook as cb
 from bitarray import bitarray 
 from xplib.Turing.TuringUtils import *
@@ -73,7 +73,6 @@ def translate_path_into_bits(codes,codes_len,path,bp=5):
     for i in c:
         c2.append(i+(ccid,))
     for i in p:
-        #print "debug",i
         # print "debug",pcid
         p2.append(i+(pcid,))
     c=[i for i in heapq.merge(c2,p2)]
@@ -192,7 +191,9 @@ def translate_bits_into_bed(codes,bits,id="noname",chr="chr"):
     score=0
     i=0
     exon_state=False
+    #print "debug codes",codes
     for x in codes:
+        if x[I_CODE]!=cb.BLOCKON and x[I_CODE]!=cb.BLOCKOFF: continue
         if x[I_POS]!=last_pos:
             last_pos=x[I_POS]
             #print "debug i,",i,bits[2*i],bits[2*i+1]
