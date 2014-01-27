@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 12-20-2013, 07:14:35 CST
+# Last-modified: 01-27-2014, 09:59:20 EST
 import os
 import sys
 from distutils.core import setup
@@ -9,7 +9,7 @@ from distutils.core import setup
 metadata = {
 
           'name':"xplib",
-          'version':"0.01",
+          'version':"0.02",
           'description':"bionformatics python lib for query bam files",
           'author':"Xiaopeng Zhu",
           'author_email':"nimezhu@gmail.com",
@@ -20,6 +20,9 @@ metadata = {
                     "xplib.Struct",
                     "xplib.TableIO",
                     "xplib.Tools",
+                    "xplib.Turing",
+                    "xplib.Tuple",
+                    "xplib.TuringTuple"
                     ],
           'package_dir':{"":"lib"},
           'scripts':["bin/xQuery.py",
@@ -27,6 +30,7 @@ metadata = {
                    "bin/xCmpGene.py",
                    "bin/xGetSeq.py",
                    "bin/xbams2APS.py",
+                   "bin/pBam20e.py"
                    ],
           #'requires':['pysam (>=0.7.5)','twobitreader (>=2.9)',],
           'install_requires':['pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1']
