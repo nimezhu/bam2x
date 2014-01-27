@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-27-2014, 15:14:10 EST
+# Last-modified: 01-27-2014, 15:22:30 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -185,7 +185,7 @@ def Main():
     for i,x in enumerate(reader):
         query_lists[i%args.num_cores].append(x)
     query_num=i+1
-    querys(query_lists[0])
+    #querys(query_lists[0])
     pool=Pool(processes=args.num_cores)
     results=pool.map(querys,query_lists)
     #print results
