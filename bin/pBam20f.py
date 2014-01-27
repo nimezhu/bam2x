@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-23-2014, 15:23:35 EST
+# Last-modified: 01-27-2014, 15:14:10 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -53,6 +53,8 @@ pv20d :
     DONE : simple query bam paired end (ignore the reads are not in this region)
 pv20e :
     DONE: change result to json or xml
+pv20f: 
+    fix bugs of same location have two or more codes , revise codes length into correct one using hash [ only revise the tuple version now ] 
 TODO.tar.gz:    
     TODO : scan model                            ( get start and end          )  --> xbam2converage splicing sites!
     TODO : start and end sites detection
@@ -183,7 +185,7 @@ def Main():
     for i,x in enumerate(reader):
         query_lists[i%args.num_cores].append(x)
     query_num=i+1
-    #querys(query_lists[0])
+    querys(query_lists[0])
     pool=Pool(processes=args.num_cores)
     results=pool.map(querys,query_lists)
     #print results
@@ -390,11 +392,17 @@ def query(i,dbi_bam,genome): # i is query iteem
     hc={}
     j0=0;
     total_frag=0
+    #for j in g: print "debug g:",j
+    g_len=codes_length(g)
     for j in dbi_bam.query(i,method="bam2tuple_fast",strand=args.strand):
         p=[]
+        #print "debug",j
         for k in j:
             p.append(TupleTuringFactory(Tools.tuple_translate_coordinates(i,k))) #TODO check this
-        a=translate_paths_into_bits(g,p,args.merge_bp)
+        #print "debug glen:",g_len
+        a=translate_paths_into_bits(g,g_len,p,args.merge_bp)
+        #print "debug bits: ",a
+        #print "debug bed :",translate_bits_into_bed(g,a)
         if isSelfIncompatible(a): continue
         if h.has_key(a.tobytes()):
             h[a.tobytes()]+=1
@@ -419,13 +427,15 @@ def query(i,dbi_bam,genome): # i is query iteem
         sorted_keys.sort(lambda x,y:h[x]-h[y] or bitarray_to_intron_number(hc[x])-bitarray_to_intron_number(hc[y]), reverse=True) 
     clique=[]
     cliques=[clique]
-    bits=bitarray(len(g)*2-4)
+    bits=bitarray(g_len*2)
     bits.setall(True)
     cliques_pattern=[bits]
     ret_dict["PATTERNS"]=list()
     for j,key in enumerate(sorted_keys):
         #retv+="No."+str(j)+"\t"+str(bitarray_to_rep(hc[key]))+" "+str(h[key])+" "+str(bitarray_to_intron_number(hc[key]))+"\n"
         ret_dict["PATTERNS"].append((bitarray_to_rep(hc[key]),h[key],bitarray_to_intron_number(hc[key])))
+        #print "PATTERN debug",bitarray_to_rep(hc[key]),h[key],bitarray_to_intron_number(hc[key])
+        
         joined_clique=False
         for m,clique in enumerate(cliques):
             #print "debug cliques_patterns",m,cliques_pattern[m]
@@ -436,7 +446,7 @@ def query(i,dbi_bam,genome): # i is query iteem
                 break
         if not joined_clique:
             clique=[]
-            bits=bitarray(len(g)*2-4)
+            bits=bitarray(g_len*2)
             bits.setall(True)
             max_index=0
             clique.append(j)
@@ -506,6 +516,7 @@ def query(i,dbi_bam,genome): # i is query iteem
             pattern[-1]=True
             pattern[-2]=True
             bed=translate_bits_into_bed(g,pattern)
+            #print "debug,bed",bed
             '''
             end of need to revise
             '''
@@ -520,6 +531,7 @@ def query(i,dbi_bam,genome): # i is query iteem
             #retv+="FPK(SCORE)\t"+str(bed.score)+"\n"
             #retv+="TR\t"+str(bed)+"\n"
             ret_dict["CLIQUES"][-1]["BED_IN_QR_COORD"]=str(bed)
+            #print "debug",g,pattern,i,bed
             ret_dict["CLIQUES"][-1]["BED"]=str(Tools.translate_coordinates(Bed(i),bed,True))
             ret_dict["CLIQUES"][-1]["UNIQ_SCORE"]=uniq_score
             ret_dict["CLIQUES"][-1]["UNIQ_FPK"]=uniq_fpk

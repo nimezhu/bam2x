@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-22-2014, 17:15:01 EST
+# Last-modified: 01-27-2014, 15:11:37 EST
 import xplib.Turing.TuringCodeBook as cb
 from bitarray import bitarray 
 from xplib.Turing.TuringUtils import *
@@ -42,8 +42,17 @@ def turing_tuples_to_graph_string(x,scale=60):
         if i[I_CODE]==cb.OFF: list_s[index]=")"
     return "".join(list_s)
  
-
-def translate_path_into_bits(codes,path,bp=5):
+def codes_length(g):
+    h={}
+    s=0
+    for i in g:
+        #print "debug i in g",i
+        if i[I_CODE]==cb.BLOCKON or i[I_CODE]==cb.BLOCKOFF:
+            if not h.has_key(i[I_POS]):
+               h[i[I_POS]]=i[I_CODE]
+               s+=1
+    return s
+def translate_path_into_bits(codes,codes_len,path,bp=5):
     '''
     path and codes should be a sorted list of tuples
     path is the reads
@@ -84,7 +93,7 @@ def translate_path_into_bits(codes,path,bp=5):
     pstate=cb.OFF
     pbstate=cb.BLOCKOFF
     #output=bitarray([ True for i in range(2*len(c))])
-    output=bitarray(len(codes)*2-4)
+    output=bitarray(codes_len*2)
     output.setall(True)
     #print "debug",codes
     #print "debug",output
@@ -133,12 +142,11 @@ def translate_path_into_bits(codes,path,bp=5):
                     output[2*j]=True;
                     output[2*j+1]=False;
                 if pbstate==cb.BLOCKOFF:
-                    #print "debug",i[I_POS],j,pbstate,"BLOCKOFF"
                     if output[2*j]==True and output[2*j+1]==True:
                         output[2*j]=False
             elif pstate==cb.OFF:
                 pass
-            if(i[I_CID]==ccid):
+            if(i[I_CID]==ccid and last_pos!=i[I_POS] and (i[I_CODE]==cb.BLOCKON or i[I_CODE]==cb.BLOCKOFF)):
                 j+=1
                 last_pos=i[I_POS]
         if i[I_CID]==pcid: ## process path
@@ -163,11 +171,11 @@ def translate_path_into_bits(codes,path,bp=5):
     #print "debug output",output
     #print "return output",output
     return output 
-def translate_paths_into_bits(codes,paths,bp=5):
-    output=bitarray(len(codes)*2-4)
+def translate_paths_into_bits(codes,codes_len,paths,bp=5):
+    output=bitarray(codes_len*2)
     output.setall(True)
     for i in paths:
-        output=bitarray_and(output,translate_path_into_bits(codes,i,bp))
+        output=bitarray_and(output,translate_path_into_bits(codes,codes_len,i,bp))
     return output
 
 def translate_bits_into_bed(codes,bits,id="noname",chr="chr"):
@@ -193,7 +201,7 @@ def translate_bits_into_bed(codes,bits,id="noname",chr="chr"):
             if bits[2*i]==True and bits[2*i+1]==False:
                 if not exon_state and x[I_CODE]==cb.BLOCKON: # TODO : test if and after is right, debut the bug.bed
                     exon_state=True
-                #    print "debug adding exon start",last_pos
+                    #print "debug adding exon start",last_pos
 
                     blockStarts.append(last_pos)
                     blockCount+=1
