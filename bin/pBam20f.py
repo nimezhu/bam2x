@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-27-2014, 15:22:30 EST
+# Last-modified: 01-27-2014, 16:53:05 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -55,6 +55,7 @@ pv20e :
     DONE: change result to json or xml
 pv20f: 
     fix bugs of same location have two or more codes , revise codes length into correct one using hash [ only revise the tuple version now ] 
+TODO: strand correction
 TODO.tar.gz:    
     TODO : scan model                            ( get start and end          )  --> xbam2converage splicing sites!
     TODO : start and end sites detection
@@ -397,9 +398,11 @@ def query(i,dbi_bam,genome): # i is query iteem
     for j in dbi_bam.query(i,method="bam2tuple_fast",strand=args.strand):
         p=[]
         #print "debug",j
+        if j[0][STRAND]!=i[STRAND]: continue
         for k in j:
             p.append(TupleTuringFactory(Tools.tuple_translate_coordinates(i,k))) #TODO check this
         #print "debug glen:",g_len
+
         a=translate_paths_into_bits(g,g_len,p,args.merge_bp)
         #print "debug bits: ",a
         #print "debug bed :",translate_bits_into_bed(g,a)
