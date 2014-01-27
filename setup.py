@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-27-2014, 14:13:16 EST
+# Last-modified: 01-27-2014, 15:15:13 EST
 import os
 import sys
 from distutils.core import setup
@@ -30,7 +30,7 @@ metadata = {
                    "bin/xCmpGene.py",
                    "bin/xGetSeq.py",
                    "bin/xbams2APS.py",
-                   "bin/pBam20e.py",
+                   "bin/pBam20f.py",
                    "scripts/bam2rpkm.py",
                    "scripts/bamInfo.py"
                    ],
