@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-28-2014, 13:06:05 EST
+# Last-modified: 01-28-2014, 15:00:26 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -325,6 +325,7 @@ def query(i,dbi_bam,genome): # i is query iteem
             else:
                 sd=0.0
             return mean,sd
+
         (meanDonor,sdDonor)=mean_sd(hDonor.keys())
         (meanAcceptor,sdAcceptor)=mean_sd(hAcceptor.keys())
         #print meanDonor,sdDonor
@@ -338,8 +339,11 @@ def query(i,dbi_bam,genome): # i is query iteem
                 if hAcceptor.has_key(k): 
                     return k
             for k in nearbyIter(j,args.merge_bp,length):
-                if ag[k]==1:
-                    return k+2
+                try:
+                    if ag[k]==1:
+                        return k+2
+                except:
+                    pass
             return -1
         def correctToNearDonor(j):
             signal=0
@@ -347,9 +351,13 @@ def query(i,dbi_bam,genome): # i is query iteem
                 if hDonor.has_key(k): 
                     return k
             for k in nearbyIter(j,args.merge_bp,length):
-                if gt[k]==1:
-                    return k
+                try:
+                    if gt[k]==1:
+                        return k
+                except:
+                    pass
             return -1
+
 
         for j in range(length):
             #if diff[j]  > sdAcceptor + meanAcceptor:
@@ -359,9 +367,11 @@ def query(i,dbi_bam,genome): # i is query iteem
                     hAcceptor[k]=1
                     l.append((k,cb.BLOCKON))
                 # add to revise small fragrments ?
+                '''
                 elif k==-1 and diff[j] > meanAcceptor + 3 * sdAcceptor and not hAcceptor.has_key(j):
                     hAcceptor[j]=1
                     l.append((j,cb.BLOCKON))
+                '''
 
 
             #if  diff[j] < meanDonor - sdDonor:
@@ -370,12 +380,40 @@ def query(i,dbi_bam,genome): # i is query iteem
                 if k!=-1 and not hDonor.has_key(k):
                     hDonor[k]=1
                     l.append((k,cb.BLOCKOFF))
+                '''
                 elif k==-1 and diff[j] <  meanDonor - 3 * sdDonor and not hDonor.has_key(j):
                     hDonor[j]=1
                     l.append((j,cb.BLOCKOFF))
+                '''
+        if len(i)==12:
+            ti=Tools.tuple_translate_coordinates(i,i)
+            #print "debug ti:",ti
+            for j in ti[BLOCKSTARTS]:
+                k=correctToNearAcceptor(j)
+                if k!=-1 and not hAcceptor.has_key(k):
+                    hAcceptor[k]=1
+                    l.append((k,cb.BLOCKON))
+                if k==-1 and not hAcceptor.has_key(j):
+                    hAcceptor[j]=1
+                    l.append((j,cb.BLOCKON))
+    
+            for j,m in itertools.izip(ti[BLOCKSTARTS],ti[BLOCKSIZES]):
+                blockStop=j+m
+                #print "debug blockStop",blockStop
+                k=correctToNearDonor(blockStop)
+                if k!=-1 and not hDonor.has_key(k):
+                    hDonor[k]=1
+                    l.append((k,cb.BLOCKOFF))
+                elif k==-1 and not hDonor.has_key(blockStop):
+                    hDonor[blockStop]=1
+                    l.append((blockStop,cb.BLOCKOFF))
+            
+
+
 
 
     addCoverageAndSeqScore()
+
     l.sort()
     '''
     PART B : Report wig
