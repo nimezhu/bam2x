@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-28-2014, 17:09:32 EST
+# Last-modified: 01-28-2014, 17:28:41 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -321,6 +321,13 @@ def bedsToPeak(ibeds,id):
                 if exon_signal==0:
                     exon_start_point=i[START_INDEX]
                     exon_signal=1
+                elif i[START_INDEX]-exon_stop_index > MIN_GAP_IN_SAME_EXON:
+                    exonstarts.append(exon_start_point-peak[0])
+                    exonsizes.append(exon_stop_point-exon_start_point)
+                    #print "debug in intron"
+                    exon_start_point=i[START_INDEX]
+                    exon_stop_point=i[STOP_INDEX]
+
                 peak[SCORE_INDEX]=float(peak[SCORE_INDEX]*cdna_length+i[SCORE_INDEX]*length(i))/(length(peak)+length(i))
                 peak[STOP_INDEX]=i[STOP_INDEX]
                 cdna_length+=length(i)
