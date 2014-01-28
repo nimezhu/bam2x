@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-28-2014, 14:00:06 EST
+# Last-modified: 01-28-2014, 14:12:10 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -286,9 +286,13 @@ def call_peaks(bedgraph,exon_cutoff):
                 pos_beds.append(i)
 
     if len(pos_beds)>0:
-        peaks.append(bedsToPeak(pos_beds,"p_"+str(i_p)))
+        peak=bedsToPeak(pos_beds,"p_"+str(i_p))
+        if peak is not None:
+            peaks.append(peak)
     if len(neg_beds)>0:
-        peaks.append(bedsToPeak(neg_beds,"n_"+str(i_n)))
+        peak=bedsToPeak(neg_beds,"n_"+str(i_n))
+        if peak is not None:
+            peaks.append(peak)
     peaks.sort()
     return peaks
 def length(x):
