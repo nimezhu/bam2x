@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-28-2014, 15:38:35 EST
+# Last-modified: 01-28-2014, 16:28:52 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -122,7 +122,7 @@ def Main():
     print >>out,"# MEAN COVERAGE:",coverage
     print >>out,"# EXON COVERAGE CUTOFF:",exon_cutoff
     
-    # call_peaks(bedgraphs[0],1) #debug
+    #call_peaks(bedgraphs[0],1) #debug
     peaks=p.map(call_peaks_star,itertools.izip(bedgraphs,itertools.repeat(exon_cutoff)))
     output(chrs,peaks)
 
@@ -303,43 +303,50 @@ def call_peaks(bedgraph,exon_cutoff):
 def length(x):
     return x[STOP_INDEX]-x[START_INDEX]
 def bedsToPeak(ibeds,id):
-    while(ibeds[0][GROUP_INDEX]==INTRON_GROUP_CODE):
-        try:
-            ibeds=ibeds[1:]
-        except:
-            return None
-    peak=[ibeds[0][START_INDEX],ibeds[0][STOP_INDEX],float(ibeds[0][SCORE_INDEX]),ibeds[0][STRAND_INDEX],NOT_HAS_INTRON,0,id]
-    cdna_length=length(peak)
-    exonstarts=[]
-    exonsizes=[]
-    exon_start_point=ibeds[0][START_INDEX]
-    exon_stop_point=ibeds[0][STOP_INDEX]
-    exon_signal=1
-    for i in ibeds[1:]:
-        if i[GROUP_INDEX]==EXON_GROUP_CODE:
-            if exon_signal==0:
-                exon_start_point=i[START_INDEX]
-            peak[SCORE_INDEX]=float(peak[SCORE_INDEX]*cdna_length+i[SCORE_INDEX]*length(i))/(length(peak)+length(i))
-            peak[STOP_INDEX]=i[STOP_INDEX]
-            cdna_length+=length(i)
-            exon_stop_point=i[STOP_INDEX]
-        else:
-            peak[GROUP_INDEX]=HAS_INTRON
+    try:
+        while(ibeds[0][GROUP_INDEX]==INTRON_GROUP_CODE):
+            try:
+                ibeds=ibeds[1:]
+            except:
+                return None
+        peak=[ibeds[0][START_INDEX],ibeds[0][STOP_INDEX],float(ibeds[0][SCORE_INDEX]),ibeds[0][STRAND_INDEX],NOT_HAS_INTRON,0,id]
+        cdna_length=length(peak)
+        exonstarts=[]
+        exonsizes=[]
+        exon_start_point=ibeds[0][START_INDEX]
+        exon_stop_point=ibeds[0][STOP_INDEX]
+        exon_signal=1
+        for i in ibeds[1:]:
+            if i[GROUP_INDEX]==EXON_GROUP_CODE:
+                if exon_signal==0:
+                    exon_start_point=i[START_INDEX]
+                    exon_signal=1
+                peak[SCORE_INDEX]=float(peak[SCORE_INDEX]*cdna_length+i[SCORE_INDEX]*length(i))/(length(peak)+length(i))
+                peak[STOP_INDEX]=i[STOP_INDEX]
+                cdna_length+=length(i)
+                exon_stop_point=i[STOP_INDEX]
+            else:
+                peak[GROUP_INDEX]=HAS_INTRON
+                if exon_signal==1:
+                    exonstarts.append(exon_start_point)
+                    exonsizes.append(exon_stop_point-exon_start_point)
+                    #print "debug in intron"
+                    exon_signal=0
+        if exon_signal==1:
             exonstarts.append(exon_start_point)
             exonsizes.append(exon_stop_point-exon_start_point)
-            print "debug in intron"
             exon_signal=0
-    if exon_signal==1:
-        exonstarts.append(exon_start_point)
-        exonsizes.append(exon_stop_point-exon_start_point)
-        exon_signal=0
-    peak[OTHER_INDEX]=cdna_length
-    #print "META",peak
-    #for i in ibeds:
-    #    print "IN",i
-    peak.append(tuple(exonstarts))
-    peak.append(tuple(exonsizes))
-    return tuple(peak)
+        peak[OTHER_INDEX]=cdna_length
+        #print "META",peak
+        #for i in ibeds:
+        #    print "IN",i
+        peak.append(tuple(exonstarts))
+        peak.append(tuple(exonsizes))
+        #print "debug",tuple(peak)
+        return tuple(peak)
+    except:
+        # ibeds is zero.
+        return None
 
 
 
