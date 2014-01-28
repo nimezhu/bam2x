@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-28-2014, 15:28:15 EST
+# Last-modified: 01-28-2014, 15:32:56 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -313,10 +313,11 @@ def bedsToPeak(ibeds,id):
     exonstarts=[ibeds[0][START_INDEX]]
     exonsizes=[ibeds[0][STOP_INDEX]-ibeds[0][START_INDEX]]
     exon_start_point=ibeds[0][START_INDEX]
+    exon_stop_point=ibeds[0][STOP_INDEX]
     exon_signal=1
     for i in ibeds[1:]:
         if i[GROUP_INDEX]==EXON_GROUP_CODE:
-            if exon_singal==0:
+            if exon_signal==0:
                 exon_start_point=i[START_INDEX]
             peak[SCORE_INDEX]=float(peak[SCORE_INDEX]*cdna_length+i[SCORE_INDEX]*length(i))/(length(peak)+length(i))
             peak[STOP_INDEX]=i[STOP_INDEX]
@@ -327,7 +328,7 @@ def bedsToPeak(ibeds,id):
             exonstarts.append(exon_start_point)
             exonsizes.append(exon_stop_point-exon_start_point)
             exon_signal=0
-    if exon_singal==1:
+    if exon_signal==1:
         exonstarts.append(exon_start_point)
         exonsizes.append(exon_stop_point-exon_start_point)
         exonsignal=0
