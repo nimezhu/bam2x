@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-16-2014, 15:49:29 EST
+# Last-modified: 01-28-2014, 14:00:06 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -24,12 +24,16 @@ DONE: correct the coverage calculation
 DONE: report link exon and intron
 
 V5:
-TODO: same memory using numarray instead of bed?
+DONE: same memory using numarray instead of bed?
       only using array?
       rm bed class?
       list of list ?
       bedgraph sorting array?
-TODO: report if peak has intron and the possible cDNA length and gene length.
+DONE: report if peak has intron and the possible cDNA length and gene length.
+V6:
+    change format to Bed12
+    get rid of terminal introns
+
 TODO: compare with known gene
 TODO: trim the last intron or extend the exon? ( KEY PROBLEM. how to define the end )
 '''
@@ -47,7 +51,9 @@ SCORE_INDEX=2
 STRAND_INDEX=3
 GROUP_INDEX=4
 OTHER_INDEX=5
-
+ID_INDEX=6
+EXONSTARTS_INDEX=7
+EXONSIZES_INDEX=8
 
 def ParseArg():
     ''' This Function Parse the Argument '''
@@ -87,11 +93,9 @@ def Main():
     for i in dbi.query(method="lengths"):
         lengths.append(i)
     p=mp.Pool(processes=args.num_cpus)    
-    '''
-    a=process_chrom("chr1")
-    for i in a:
-        print i
-    '''
+    # a=process_chrom("chr1")
+    # for i in a:
+    #    print i
     coverage_bedgraphs=p.map(process_chrom,chrs)
     #output(results)
     #TODO
@@ -117,18 +121,42 @@ def Main():
     intron_cutoff=2 #TODO revise it
     print >>out,"# MEAN COVERAGE:",coverage
     print >>out,"# EXON COVERAGE CUTOFF:",exon_cutoff
-    #call_peaks(bedgraphs[0],1)
+    
+    # call_peaks(bedgraphs[0],1) #debug
     peaks=p.map(call_peaks_star,itertools.izip(bedgraphs,itertools.repeat(exon_cutoff)))
-    output(peaks)
+    output(chrs,peaks)
 
     #process_chrom("chr1")
-def output(s):
-    for i in s:
+def output(chrs,s):
+    for chrom,i in itertools.izip(chrs,s):
         for j in i:
-            print >>out,nice_format(j)
+            print >>out,nice_format(chrom,j)
 
-def nice_format(a):
-    return "\t".join("%s"%item for item in a)
+def nice_format(chrom,a):
+    s=chrom+"\t"
+    s+=str(a[START_INDEX])+"\t"
+    s+=str(a[STOP_INDEX])+"\t"
+    s+=str(a[ID_INDEX])+"\t"
+    s+=str(a[SCORE_INDEX])+"\t"
+    if a[STRAND_INDEX]==1:
+        s+="+\t"
+    elif a[STRAND_INDEX]==-1:
+        s+="-\t"
+    else:
+        s+=".\t"
+    s+=str(a[START_INDEX])+"\t" #cds_start
+    s+=str(a[START_INDEX])+"\t" #cds_stop
+    s+="0,0,0\t" #Rgb
+    s+=str(len(a[EXONSIZES_INDEX]))+"\t"
+    for i in a[EXONSIZES_INDEX]:
+        s+=str(i)+","
+    s+="\t"
+    for i in a[EXONSTARTS_INDEX]: 
+        s+=str(i)+","
+    
+    return s
+
+    #return "\t".join("%s"%item for item in a)
 from xplib.Turing import TuringCode
 from xplib.Turing import TuringCodeBook as cb
 from xplib.Turing import TuringTupleSortingArray
@@ -266,19 +294,30 @@ def call_peaks(bedgraph,exon_cutoff):
 def length(x):
     return x[STOP_INDEX]-x[START_INDEX]
 def bedsToPeak(ibeds,id):
+    while(ibeds[0][GROUP_INDEX]==INTRON_GROUP_CODE):
+        try:
+            ibeds=ibeds[1:]
+        except:
+            return None
     peak=[ibeds[0][START_INDEX],ibeds[0][STOP_INDEX],float(ibeds[0][SCORE_INDEX]),ibeds[0][STRAND_INDEX],NOT_HAS_INTRON,0,id]
     cdna_length=length(peak)
+    exonstarts=[ibeds[0][START_INDEX]]
+    exonsizes=[ibeds[0][STOP_INDEX]-ibeds[0][START_INDEX]]
     for i in ibeds[1:]:
         if i[GROUP_INDEX]==EXON_GROUP_CODE:
             peak[SCORE_INDEX]=float(peak[SCORE_INDEX]*cdna_length+i[SCORE_INDEX]*length(i))/(length(peak)+length(i))
             peak[STOP_INDEX]=i[STOP_INDEX]
             cdna_length+=length(i)
+            exonstarts.append(i[START_INDEX])
+            exonsizes.append(i[STOP_INDEX]-i[START_INDEX])
         else:
             peak[GROUP_INDEX]=HAS_INTRON
     peak[OTHER_INDEX]=cdna_length
     #print "META",peak
     #for i in ibeds:
     #    print "IN",i
+    peak.append(tuple(exonstarts))
+    peak.append(tuple(exonsizes))
     return tuple(peak)
 
 

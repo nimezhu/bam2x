@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-28-2014, 12:41:35 EST
+# Last-modified: 01-28-2014, 13:06:05 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -57,7 +57,7 @@ pv20f:
     DONE : fix bugs of same location have two or more codes , revise codes length into correct one using hash [ only revise the tuple version now ] 
     DONE : strand correction
 pv20g:
-    how to change stradegy for small high number reads?
+    adding exon structure in bam2peak?
 
 TODO.tar.gz:    
     TODO : scan model                            ( get start and end          )  --> xbam2converage splicing sites!

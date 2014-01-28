@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-23-2014, 15:23:35 EST
+# Last-modified: 01-23-2014, 15:09:39 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -459,9 +459,6 @@ def query(i,dbi_bam,genome): # i is query iteem
                 cliques_pattern[j]=bitarray_and(cliques_pattern[j],hc[y])
                 score+=h[y]
                 c.append(k)
-        '''
-        to debug this
-        '''
         cliques_pattern[j][-1]=True
         cliques_pattern[j][-2]=True
         uniq_score=0
