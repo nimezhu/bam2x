@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-28-2014, 15:32:56 EST
+# Last-modified: 01-28-2014, 15:38:35 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -310,8 +310,8 @@ def bedsToPeak(ibeds,id):
             return None
     peak=[ibeds[0][START_INDEX],ibeds[0][STOP_INDEX],float(ibeds[0][SCORE_INDEX]),ibeds[0][STRAND_INDEX],NOT_HAS_INTRON,0,id]
     cdna_length=length(peak)
-    exonstarts=[ibeds[0][START_INDEX]]
-    exonsizes=[ibeds[0][STOP_INDEX]-ibeds[0][START_INDEX]]
+    exonstarts=[]
+    exonsizes=[]
     exon_start_point=ibeds[0][START_INDEX]
     exon_stop_point=ibeds[0][STOP_INDEX]
     exon_signal=1
@@ -327,11 +327,12 @@ def bedsToPeak(ibeds,id):
             peak[GROUP_INDEX]=HAS_INTRON
             exonstarts.append(exon_start_point)
             exonsizes.append(exon_stop_point-exon_start_point)
+            print "debug in intron"
             exon_signal=0
     if exon_signal==1:
         exonstarts.append(exon_start_point)
         exonsizes.append(exon_stop_point-exon_start_point)
-        exonsignal=0
+        exon_signal=0
     peak[OTHER_INDEX]=cdna_length
     #print "META",peak
     #for i in ibeds:
