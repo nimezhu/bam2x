@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-28-2014, 17:08:50 EST
+# Last-modified: 01-28-2014, 17:09:32 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -337,11 +337,13 @@ def bedsToPeak(ibeds,id):
             exonsizes.append(exon_stop_point-exon_start_point)
             exon_signal=0
         peak[OTHER_INDEX]=cdna_length
+        '''
         print "DEBUG META",peak
         for i in ibeds:
             print "DEBUG IN",i
         print "DEBUG",exonstarts
         print "DEBUG",exonsizes
+        '''
         peak.append(tuple(exonstarts))
         peak.append(tuple(exonsizes))
         #print "debug",tuple(peak)
