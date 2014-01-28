@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-28-2014, 16:28:52 EST
+# Last-modified: 01-28-2014, 16:46:18 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -328,12 +328,12 @@ def bedsToPeak(ibeds,id):
             else:
                 peak[GROUP_INDEX]=HAS_INTRON
                 if exon_signal==1:
-                    exonstarts.append(exon_start_point)
+                    exonstarts.append(exon_start_point-peak[0])
                     exonsizes.append(exon_stop_point-exon_start_point)
                     #print "debug in intron"
                     exon_signal=0
         if exon_signal==1:
-            exonstarts.append(exon_start_point)
+            exonstarts.append(exon_start_point-peak[0])
             exonsizes.append(exon_stop_point-exon_start_point)
             exon_signal=0
         peak[OTHER_INDEX]=cdna_length
