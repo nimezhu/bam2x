@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-29-2014, 16:19:37 EST
-VERSION="0.1"
+# Last-modified: 01-29-2014, 18:14:49 EST
+VERSION="pv20h"
 import os,sys,argparse
 from xplib.Annotation import Bed
 from xplib import TableIO,Tools,DBI
@@ -61,6 +61,9 @@ pv20g:
 pv20h:
     DONE : start with the exon structure.
     DONE : fix the some result entry don't have pattern error (ignore these entries)
+    DONE : increase the dark of output
+    DONE : ignore the pattern that is not compatible with query bed12
+    DONE : add options to report seq or not
 TODO.tar.gz:    
     TODO : scan model                            ( get start and end          )  --> xbam2converage splicing sites!
     TODO : start and end sites detection
@@ -72,11 +75,12 @@ def report_format(x,**kwargs):
         S=""
         S+="QR\t"+str(x["QR"])+"\n"
         S+="FIGURE %s\n"%x["FIGURE"]
-        if x["QR"][2]-x["QR"][1] < 100:
-            S+="SQ\t"+x["WIG_TABLE"][0]
-        else:
-            S+="PARTIAL_SQ\t"+x["WIG_TABLE"][0][0:100]+"......."
-        S+="\n"
+        if args.report_seq:
+            if x["QR"][2]-x["QR"][1] < 100:
+                S+="SQ\t"+x["WIG_TABLE"][0]
+            else:
+                S+="PARTIAL_SQ\t"+x["WIG_TABLE"][0][0:100]+"......."
+            S+="\n"
         S+="FRG_NUMBER %s\n"%x["FRG_NUMBER"]
         S+="PATTERN_NUMBER %s\n"%x["PATTERN_NUMBER"]
         S+="  INDEX\tPATTERN\tFRGs\tINTRON_NUMBER\n"
@@ -85,10 +89,13 @@ def report_format(x,**kwargs):
             S+="No.%s\t%s\t%s\t%s\n"%(i,y[0],y[1],y[2])
         S+="CLIQUES\n"
         for i,y in enumerate(x["CLIQUES"]):
-            S+="  NO."+str(i)+"\n"
+            S+="  NO."+str(i+1)+"\n"
             S+="    REP"+"\t"+y["REP"]+"\n"
             S+="    UNIQ_SCORE\t"+str(y["UNIQ_SCORE"])+"\n"
             S+="    BED"+"\t"+str(y["BED"])+"\n"
+            if args.report_seq:
+                S+="    ALL_COMPATIBLE_PATTERN\t"+str(y["ALL_GROUP"])+"\n"
+                S+="    UNIQ_COMPATIBLE_PATTERN\t"+str(y["UNIQ_GROUP"])+"\n"
         S+="INTERPRET\t"+str(x["INTERPRET_FRG"])+"\n"
         S+="//\n"
         return S
@@ -158,6 +165,7 @@ def ParseArg():
     p.add_argument('--sort_model',dest="sort_model",type=int,default=0,choices=[0,1,2],help="model 0: sort by abundance*intron number, model 1: sort by intron number, model 2: sort by abundance, default: %(default)i ")
     p.add_argument('-g','--genome',dest="genome",type=str,help="genome sequence in 2bit format, e.g. mm9.2bit")
     p.add_argument('-n','--num_cores',dest="num_cores",type=int, default=4 ,help="number of cpu cores , DEFAULT: %(default)i")
+    p.add_argument('--report_seq',default=False,dest="report_seq",action="store_true",help="report sequence [ warning: cost mem ]")
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
@@ -176,6 +184,7 @@ def Main():
     }
     '''
     args=ParseArg()
+    # print "debug:",args.report_seq
     MIN_FPK_RATIO=args.min_uniq_fpk_increase #TO TEST
     fin=IO.fopen(args.input,"r")
     out=IO.fopen(args.output,"w")
@@ -198,7 +207,7 @@ def Main():
     for i,x in enumerate(reader):
         query_lists[i%args.num_cores].append(x)
     query_num=i+1
-    querys(query_lists[0])
+    #querys(query_lists[0])
     pool=Pool(processes=args.num_cores)
     results=pool.map(querys,query_lists)
     #print results
@@ -416,7 +425,7 @@ def query(i,dbi_bam,genome): # i is query iteem
                 #print "debug blockStop",blockStop
                 k=correctToNearDonor(blockStop)
                 if k==-1:
-                    ti_codes.append((j,cb.BLOCKOFF))
+                    ti_codes.append((blockStop,cb.BLOCKOFF))
                     last_stop=j
                 else:
                     ti_codes.append((k,cb.BLOCKOFF))
@@ -426,6 +435,7 @@ def query(i,dbi_bam,genome): # i is query iteem
                     l.append((k,cb.BLOCKOFF))
                 elif k==-1 and not hDonor.has_key(blockStop):
                     hDonor[blockStop]=1
+                    l.append((blockStop,cb.BLOCKOFF))
 
             ti_codes.append((0,cb.ON))
             ti_codes.append((last_stop,cb.OFF))
@@ -441,6 +451,7 @@ def query(i,dbi_bam,genome): # i is query iteem
             initial_bits[-1]=True
             initial_bits[-2]=True
             return initial_bits
+        l.sort()
         return None
 
 
@@ -452,8 +463,7 @@ def query(i,dbi_bam,genome): # i is query iteem
     
 
     initial_bits=addCoverageAndSeqScore()
-
-    l.sort()
+    g=l
     '''
     PART B : Report wig
     retv+="WIG"+"\n"
@@ -461,7 +471,8 @@ def query(i,dbi_bam,genome): # i is query iteem
     for j in xrange(tuple_len(i)):
         retv+= str(j)+"\t"+str(seq[j])+"\t"+str(array[j])+"\t"+str(donorSitesScore[j])+"\t"+str(acceptorSitesScore[j])+"\t"+str(gt[j])+"\t"+str(ag[j])+"\n"
     '''
-    ret_dict["WIG_TABLE"]=(seq,array,donorSitesScore,acceptorSitesScore,gt,ag)
+    if args.report_seq:
+        ret_dict["WIG_TABLE"]=(seq,array,donorSitesScore,acceptorSitesScore,gt,ag)
     
     '''
     end of adding wig
@@ -474,7 +485,6 @@ def query(i,dbi_bam,genome): # i is query iteem
     
     '''
     
-    g=l 
     
     # bitarray_path=bitarray(2*len(g))
     # bitarray_path.setall(True)
@@ -485,7 +495,7 @@ def query(i,dbi_bam,genome): # i is query iteem
     hc={}
     j0=0;
     total_frag=0
-    #for j in g: print "debug g:",j
+    # for j in g: print "debug g:",j
     # print "INIT",bitarray_to_rep(initial_bits)
     g_len=codes_length(g)
     if initial_bits is None:
@@ -514,6 +524,7 @@ def query(i,dbi_bam,genome): # i is query iteem
         j0+=1
     #retv+="PATTERN_NUMBER\t"+str(len(h.keys()))+"\n"
     ret_dict["PATTERN_NUMBER"]=len(h.keys())
+    # print >>sys.stderr,"debug pattern number",ret_dict["PATTERN_NUMBER"]
     #retv+="FRG_NUMBER\t"+str(j0)+"\n"
     ret_dict["FRG_NUMBER"]=j0
     total_frag=j0
@@ -548,19 +559,19 @@ def query(i,dbi_bam,genome): # i is query iteem
                 cliques_pattern[m]=bitarray_and(cliques_pattern[m],hc[sorted_keys[j]])
                 break
         if not joined_clique:
-            clique=[]
             '''
             bits=bitarray(g_len*2)
             bits.setall(True)  
             '''
             bits=initial_bits.copy()
-            #TODO  change the bits start with exon structure.
-
-            max_index=0
-            clique.append(j)
-            bits=bitarray_and(bits,hc[sorted_keys[j]])
-            cliques.append(clique)
-            cliques_pattern.append(bits)
+            #TODO  change the bits start with exon structure
+            if isCompatible(bits,hc[sorted_keys[j]]):
+                max_index=0
+                clique=[]
+                clique.append(j)
+                bits=bitarray_and(bits,hc[sorted_keys[j]])
+                cliques.append(clique)
+                cliques_pattern.append(bits)
     ret_dict["CLIQUES"]=list()
 
     cumulative_score=0
@@ -605,7 +616,7 @@ def query(i,dbi_bam,genome): # i is query iteem
             if uniq_fpk  < max_uniq_fpk * MIN_FPK_RATIO:
                 #print >>sys.stderr,"ignore due to fpk",bed,"\tuniq_fpk:",uniq_fpk,"\t current max:",max_uniq_fpk
                 continue
-            rgb=255-uniq_score*240/total_frag  
+            rgb=200-uniq_score*200/total_frag  
             cumulative_score+=uniq_score
             j0+=1
             #retv+="NO."+str(j0)+" CLIQUE"+"\n"    
