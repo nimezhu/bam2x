@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-29-2014, 16:05:34 EST
+# Last-modified: 01-29-2014, 16:19:37 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -59,7 +59,8 @@ pv20f:
 pv20g:
     DONE : adding exon structure in bam2peak?
 pv20h:
-    DOING : start with the exon structure. 
+    DONE : start with the exon structure.
+    DONE : fix the some result entry don't have pattern error (ignore these entries)
 TODO.tar.gz:    
     TODO : scan model                            ( get start and end          )  --> xbam2converage splicing sites!
     TODO : start and end sites detection
@@ -67,29 +68,36 @@ TODO.tar.gz:
 
 def report_format(x,**kwargs):
     #TOD
-    S=""
-    S+="QR\t"+str(x["QR"])+"\n"
-    S+="FIGURE %s\n"%x["FIGURE"]
-    if x["QR"][2]-x["QR"][1] < 100:
-        S+="SQ\t"+x["WIG_TABLE"][0]
-    else:
-        S+="PARTIAL_SQ\t"+x["WIG_TABLE"][0][0:100]+"......."
-    S+="\n"
-    S+="FRG_NUMBER %s\n"%x["FRG_NUMBER"]
-    S+="PATTERN_NUMBER %s\n"%x["PATTERN_NUMBER"]
-    S+="  INDEX\tPATTERN\tFRGs\tINTRON_NUMBER\n"
-    for i,y in enumerate(x["PATTERNS"]):
-        S+="  "
-        S+="No.%s\t%s\t%s\t%s\n"%(i,y[0],y[1],y[2])
-    S+="CLIQUES\n"
-    for i,y in enumerate(x["CLIQUES"]):
-        S+="  NO."+str(i)+"\n"
-        S+="    REP"+"\t"+y["REP"]+"\n"
-        S+="    UNIQ_SCORE\t"+str(y["UNIQ_SCORE"])+"\n"
-        S+="    BED"+"\t"+str(y["BED"])+"\n"
-    S+="INTERPRET\t"+str(x["INTERPRET_FRG"])+"\n"
-    S+="//\n"
-    return S
+    try:
+        S=""
+        S+="QR\t"+str(x["QR"])+"\n"
+        S+="FIGURE %s\n"%x["FIGURE"]
+        if x["QR"][2]-x["QR"][1] < 100:
+            S+="SQ\t"+x["WIG_TABLE"][0]
+        else:
+            S+="PARTIAL_SQ\t"+x["WIG_TABLE"][0][0:100]+"......."
+        S+="\n"
+        S+="FRG_NUMBER %s\n"%x["FRG_NUMBER"]
+        S+="PATTERN_NUMBER %s\n"%x["PATTERN_NUMBER"]
+        S+="  INDEX\tPATTERN\tFRGs\tINTRON_NUMBER\n"
+        for i,y in enumerate(x["PATTERNS"]):
+            S+="  "
+            S+="No.%s\t%s\t%s\t%s\n"%(i,y[0],y[1],y[2])
+        S+="CLIQUES\n"
+        for i,y in enumerate(x["CLIQUES"]):
+            S+="  NO."+str(i)+"\n"
+            S+="    REP"+"\t"+y["REP"]+"\n"
+            S+="    UNIQ_SCORE\t"+str(y["UNIQ_SCORE"])+"\n"
+            S+="    BED"+"\t"+str(y["BED"])+"\n"
+        S+="INTERPRET\t"+str(x["INTERPRET_FRG"])+"\n"
+        S+="//\n"
+        return S
+    except:
+        if x.has_key("QR"):
+            return "# ERROR RESULT FORMAT FOR "+str(x["QR"])
+        else:
+            return "# UNKNOWN QR"
+    
 
 
 def sharpScore(l,n):
