@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-28-2014, 17:45:27 EST
+# Last-modified: 01-29-2014, 22:38:19 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -35,6 +35,9 @@ DONE: report if peak has intron and the possible cDNA length and gene length.
 V6:
     change format to Bed12
     get rid of terminal introns
+V7:
+    don't change state because ofintron just link all exon will do.
+    get rid of small linked exons.
 
 TODO: compare with known gene
 TODO: trim the last intron or extend the exon? ( KEY PROBLEM. how to define the end )
@@ -336,11 +339,13 @@ def bedsToPeak(ibeds,id):
                 exon_stop_point=i[STOP_INDEX]
             else:
                 peak[GROUP_INDEX]=HAS_INTRON
+                '''
                 if exon_signal==1:
                     exonstarts.append(exon_start_point-peak[0])
                     exonsizes.append(exon_stop_point-exon_start_point)
                     #print "debug in intron"
                     exon_signal=0
+                '''
         if exon_signal==1:
             exonstarts.append(exon_start_point-peak[0])
             exonsizes.append(exon_stop_point-exon_start_point)
