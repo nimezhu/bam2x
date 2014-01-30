@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-30-2014, 12:09:13 EST
+# Last-modified: 01-30-2014, 12:15:51 EST
 import os
 import sys
 from distutils.core import setup
@@ -32,7 +32,7 @@ metadata = {
                    "bin/xbams2APS.py",
                    "bin/pBam20h.py",
                    "scripts/bam2rpkm.py",
-                   "scripts/bamInfo.py"
+                   "scripts/bamInfo.py",
                    "scripts/bam2peak.py"
                    ],
           #'requires':['pysam (>=0.7.5)','twobitreader (>=2.9)',],
