@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-29-2014, 18:06:30 EST
+# Last-modified: 01-29-2014, 21:08:08 EST
 
 from xplib.Annotation import *
 from bitarray import bitarray
@@ -67,6 +67,24 @@ def bitarray_to_rep(bitstr):
             s+="x"
         else:
             s+="_"
+    return s
+def bitarray_codes_to_rep(codes,bitstr):
+    s=""
+    pos={}
+    for i in codes:
+        if not pos.has_key(i[0]):
+            pos[i[0]]=1
+    keys=pos.keys()
+    keys.sort()
+    for i in range(0,len(bitstr),2):
+        if bitstr[i] and (not bitstr[i+1]):
+            s+=str(keys[i/2])+"E "
+        elif (not bitstr[i]) and bitstr[i+1]:
+            s+=str(keys[i/2])+"i "
+        elif not bitstr[i] and not bitstr[i+1]:
+            s+=str(keys[i/2])+"x "
+        else:
+            s+=str(keys[i/2])+"_ "
     return s
 def TuringFactory(bed12):
     import xplib.Turing.TuringCodeBook as cb
