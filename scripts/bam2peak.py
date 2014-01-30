@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-30-2014, 18:39:06 EST
+# Last-modified: 01-30-2014, 18:49:41 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -150,7 +150,7 @@ def nice_format(chrom,a):
     s=chrom+"\t"
     s+=str(a[START_INDEX])+"\t"
     s+=str(a[STOP_INDEX])+"\t"
-    s+=chrom+"_"+str(a[ID_INDEX])+"\t"
+    s+=str(a[ID_INDEX])+"\t"
     s+=str(a[SCORE_INDEX])+"\t"
     if a[STRAND_INDEX]==1:
         s+="+\t"
@@ -253,41 +253,31 @@ def call_peaks(chrom,bedgraph,exon_cutoff):
     if hasGenome:
         genome=DBI.init(args.genome,"genome")
     def filter_low_complexity(peak):
-        try:
-            new_exon_starts=[]
-            new_exon_sizes=[]
-            local_peak=list(peak)
-            offset=local_peak[START_INDEX]
-            #print "before",peak
-            for exon_start,exon_size in itertools.izip(local_peak[EXONSTARTS_INDEX],local_peak[EXONSIZES_INDEX]):
-                exon_s=offset+exon_start
-                exon_e=offset+exon_start+exon_size
-                seq=genome.query(Bed([chrom,exon_s,exon_e]),method="seq")
-                #print "debug",seq,
-                if len(seq) > 100:
-                    cplx=float(complexity(seq[0:100]))/100
-                else:
-                    cplx=float(complexity(seq))/len(seq)
-                #print cplx
-                if cplx > CPLX_CUTOFF:
-                    new_exon_starts.append(exon_start)
-                    new_exon_sizes.append(exon_size)
-                else:
-                    #print "kill",exon_start,exon_size,seq,cplx
-            if len(new_exon_sizes) > 0:
-                local_peak[EXONSIZES_INDEX]=tuple(new_exon_sizes)
-                local_peak[START_INDEX]=new_exon_starts[0]+offset
-                local_peak[STOP_INDEX]=new_exon_starts[-1]+offset+new_exon_sizes[-1]
-                shift_start=new_exon_starts[0]
-                for i0 in range(len(new_exon_starts)):
-                    new_exon_starts[i0]-=shift_start
-                local_peak[EXONSTARTS_INDEX]=tuple(new_exon_starts)
-                return tuple(local_peak)
+        new_exon_starts=[]
+        new_exon_sizes=[]
+        local_peak=list(peak)
+        offset=local_peak[START_INDEX]
+        for exon_start,exon_size in itertools.izip(local_peak[EXONSTARTS_INDEX],local_peak[EXONSIZES_INDEX]):
+            exon_s=offset+exon_start
+            exon_e=offset+exon_start+exon_size
+            seq=genome.query(Bed([chrom,exon_s,exon_e]),method="seq")
+            if len(seq) > 100:
+                cplx=float(complexity(seq[0:100]))/100
             else:
-                #print "NO EXON",peak
-                return None
-        except:
-            print >>sys.stderr,"warning error in ",seq
+                cplx=float(complexity(seq))/len(seq)
+            if cplx > CPLX_CUTOFF:
+                new_exon_starts.append(exon_start)
+                new_exon_sizes.append(exon_size)
+        if len(new_exon_sizes) > 0:
+            local_peak[EXONSIZES_INDEX]=tuple(new_exon_sizes)
+            local_peak[START_INDEX]=new_exon_starts[0]+offset
+            local_peak[STOP_INDEX]=new_exon_starts[-1]+offset+new_exon_sizes[-1]
+            shift_start=new_exon_starts[0]
+            for i0 in range(len(new_exon_starts)):
+                new_exon_starts[i0]-=shift_start
+            local_peak[EXONSTARTS_INDEX]=tuple(new_exon_starts)
+            return tuple(local_peak)
+        else:
             return None
     gap=10
     pos_beds=[]
