@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-30-2014, 12:15:51 EST
+# Last-modified: 01-30-2014, 12:25:44 EST
 import os
 import sys
 from distutils.core import setup
 
 metadata = {
 
-          'name':"xplib",
+          'name':"bam2x",
           'version':"0.03",
           'description':"bionformatics python lib for query bam files",
           'author':"Xiaopeng Zhu",
