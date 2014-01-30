@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-27-2014, 17:20:56 EST
+# Last-modified: 01-29-2014, 19:25:26 EST
 import xplib.Turing.TuringCodeBook as cb
 from bitarray import bitarray 
 from xplib.Turing.TuringUtils import *
@@ -14,10 +14,11 @@ from xplib.Annotation import Bed12
 
 I_POS=0
 I_CODE=1
-I_CID=2
-I_OTHER=3
 
-
+I4_POS=0
+I4_CID=1
+I4_CODE=2
+I4_OTHER=3
 
 def turing_tuples_to_graph_string(x,scale=60):
     '''
@@ -71,10 +72,10 @@ def translate_path_into_bits(codes,codes_len,path,bp=5):
     #print "debug",p
     #print "debug",c
     for i in c:
-        c2.append(i+(ccid,))
+        c2.append((i[0],ccid,i[1]))
     for i in p:
         # print "debug",pcid
-        p2.append(i+(pcid,))
+        p2.append((i[0],pcid,i[1]))
     c=[i for i in heapq.merge(c2,p2)]
     #codes.sort()
     '''
@@ -106,25 +107,25 @@ def translate_path_into_bits(codes,codes_len,path,bp=5):
     last_pos=0
     last_code=cb.ON
     for i,x in enumerate(c):
-        if c[i][I_CID]==pcid:
+        if c[i][I4_CID]==pcid:
             buff.append(i)
-        if c[i][I_CID]==ccid:
+        if c[i][I4_CID]==ccid:
             for j in buff:
-                if c[j][I_CODE]%2 ==last_code%2 and abs(c[j][I_POS]-last_pos)<=bp:
+                if c[j][I4_CODE]%2 ==last_code%2 and abs(c[j][I4_POS]-last_pos)<=bp:
                     lst=list(c[j])
-                    lst[I_POS]=last_pos
+                    lst[I4_POS]=last_pos
                     c[j]=tuple(lst)
-                if c[j][I_CODE]%2==c[i][I_CODE]%2 and abs(c[j][I_POS]-c[i][I_POS])<=bp:
+                if c[j][I4_CODE]%2==c[i][I4_CODE]%2 and abs(c[j][I4_POS]-c[i][I4_POS])<=bp:
                     lst=list(c[j])
-                    lst[I_POS]=c[i][I_POS]
+                    lst[I4_POS]=c[i][I4_POS]
                     c[j]=tuple(lst)
             buff=[]
-            last_pos=c[i][I_POS]
-            last_code=c[i][I_CODE]
+            last_pos=c[i][I4_POS]
+            last_code=c[i][I4_CODE]
     for j in buff:
-        if c[j][I_CODE]==last_code and abs(c[j][I_POS]-last_pos)<=bp:
+        if c[j][I4_CODE]==last_code and abs(c[j][I4_POS]-last_pos)<=bp:
             lst=list(c[j])
-            lst[I_POS]=last_pos
+            lst[I4_POS]=last_pos
             c[j]=tuple(lst)
     '''
     end of revise position
@@ -134,9 +135,10 @@ def translate_path_into_bits(codes,codes_len,path,bp=5):
     last_pos=-1
     # c.sort()
     for i in c:
-        #print i[I_CID],i
-        if (i[I_POS]!=last_pos):
+        #print i[I4_CID],i
+        if (i[I4_POS]!=last_pos):
             if pstate==cb.ON:
+                #print "pstate",i
                 if pbstate==cb.BLOCKON:
                     output[2*j]=True;
                     output[2*j+1]=False;
@@ -145,27 +147,29 @@ def translate_path_into_bits(codes,codes_len,path,bp=5):
                         output[2*j]=False
             elif pstate==cb.OFF:
                 pass
-            if(i[I_CID]==ccid and last_pos!=i[I_POS] and (i[I_CODE]==cb.BLOCKON or i[I_CODE]==cb.BLOCKOFF)):
+            if(i[I4_CID]==ccid and last_pos!=i[I4_POS] and (i[I4_CODE]==cb.BLOCKON or i[I4_CODE]==cb.BLOCKOFF)):
+                #print "debug +1",i
                 j+=1
-                last_pos=i[I_POS]
-        if i[I_CID]==pcid: ## process path
-            if i[I_CODE]==cb.ON: 
+                last_pos=i[I4_POS]
+        if i[I4_CID]==pcid: ## process path
+            if i[I4_CODE]==cb.ON: 
+                #print "init",i
                 pstate=cb.ON
-            elif i[I_CODE]==cb.OFF:
+            elif i[I4_CODE]==cb.OFF:
                 pstate=cb.OFF
                 
-            elif i[I_CODE]==cb.BLOCKON:
+            elif i[I4_CODE]==cb.BLOCKON:
                 pbstate=cb.BLOCKON
-            elif i[I_CODE]==cb.BLOCKOFF:
+            elif i[I4_CODE]==cb.BLOCKOFF:
                 pbstate=cb.BLOCKOFF
-        elif i[I_CID]==ccid: ## process self[I_CODE]s
-            if i[I_CODE]==cb.ON: 
+        elif i[I4_CID]==ccid: ## process self[I_CODE]s
+            if i[I4_CODE]==cb.ON: 
                 cstate=cb.ON
-            elif i[I_CODE]==cb.OFF:
+            elif i[I4_CODE]==cb.OFF:
                 cstate=cb.OFF
-            elif i[I_CODE]==cb.BLOCKON:
+            elif i[I4_CODE]==cb.BLOCKON:
                 cbstate=cb.BLOCKON
-            elif i[I_CODE]==cb.BLOCKOFF:
+            elif i[I4_CODE]==cb.BLOCKOFF:
                 cbstate=cb.BLOCKOFF
     #print "debug output",output
     #print "return output",output

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-29-2014, 18:14:49 EST
+# Last-modified: 01-29-2014, 19:32:24 EST
 VERSION="pv20h"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -207,7 +207,7 @@ def Main():
     for i,x in enumerate(reader):
         query_lists[i%args.num_cores].append(x)
     query_num=i+1
-    #querys(query_lists[0])
+    # querys(query_lists[0])
     pool=Pool(processes=args.num_cores)
     results=pool.map(querys,query_lists)
     #print results
@@ -437,14 +437,16 @@ def query(i,dbi_bam,genome): # i is query iteem
                     hDonor[blockStop]=1
                     l.append((blockStop,cb.BLOCKOFF))
 
-            ti_codes.append((0,cb.ON))
+            ti_codes.append((correctToNearAcceptor(ti[BLOCKSTARTS][0]),cb.ON))
             ti_codes.append((last_stop,cb.OFF))
             ti_codes.sort()
+            #print "debug ti_codes",ti_codes
             #print ti_codes
             #TODO  GENERate start path.
             l.sort()
             l_len=codes_length(l)
             initial_bits=translate_path_into_bits(l,l_len,ti_codes,args.merge_bp)
+            #print "debug ", initial_bits
             for i in range(0,2*l_len,2):
                 if initial_bits[i]==True and initial_bits[i+1]==False:
                     initial_bits[i+1]=True

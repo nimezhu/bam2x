@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-27-2014, 15:10:01 EST
+# Last-modified: 01-29-2014, 18:06:30 EST
 
 from xplib.Annotation import *
 from bitarray import bitarray
@@ -63,6 +63,8 @@ def bitarray_to_rep(bitstr):
             s+="E"
         elif (not bitstr[i]) and bitstr[i+1]:
             s+="i"
+        elif not bitstr[i] and not bitstr[i+1]:
+            s+="x"
         else:
             s+="_"
     return s
