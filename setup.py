@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-30-2014, 12:25:44 EST
+# Last-modified: 01-30-2014, 12:37:02 EST
 import os
 import sys
 from distutils.core import setup
@@ -36,7 +36,7 @@ metadata = {
                    "scripts/bam2peak.py"
                    ],
           #'requires':['pysam (>=0.7.5)','twobitreader (>=2.9)',],
-          'install_requires':['numpy>=1.7.0','pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1']
+          'install_requires':['numpy>=1.7.0','pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1','bitarray>=0.8.1']
 
 
 }
