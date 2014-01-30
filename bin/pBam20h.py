@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-29-2014, 19:32:24 EST
+# Last-modified: 01-29-2014, 20:48:00 EST
 VERSION="pv20h"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -184,7 +184,7 @@ def Main():
     }
     '''
     args=ParseArg()
-    # print "debug:",args.report_seq
+    #print "debug:",args.report_seq
     MIN_FPK_RATIO=args.min_uniq_fpk_increase #TO TEST
     fin=IO.fopen(args.input,"r")
     out=IO.fopen(args.output,"w")
@@ -297,6 +297,8 @@ def query(i,dbi_bam,genome): # i is query iteem
    
     hDonor={}
     hAcceptor={}
+    hAcceptor[0]=1
+    hDonor[length]=1
     for j in xrange(length):
         if donorSitesScore[j] > MIN_SPLICING_SITES_SCORE:
             l.append((j,cb.BLOCKOFF))
@@ -326,6 +328,7 @@ def query(i,dbi_bam,genome): # i is query iteem
                 n+=1
                 max_diff=0.0
                 for k0 in nearbyIter(k,args.merge_bp,length):
+                    if k0>=length: continue
                     if abs(max_diff) < abs(diff[k0]):
                         max_diff=diff[k0]
                 s+=max_diff
@@ -497,8 +500,8 @@ def query(i,dbi_bam,genome): # i is query iteem
     hc={}
     j0=0;
     total_frag=0
-    # for j in g: print "debug g:",j
-    # print "INIT",bitarray_to_rep(initial_bits)
+    #for j in g: print "debug g:",j
+    #print "INIT",bitarray_to_rep(initial_bits)
     g_len=codes_length(g)
     if initial_bits is None:
         initial_bits=bitarray(2*g_len)
@@ -524,7 +527,7 @@ def query(i,dbi_bam,genome): # i is query iteem
             h[a.tobytes()]=1
             hc[a.tobytes()]=a
         j0+=1
-    #retv+="PATTERN_NUMBER\t"+str(len(h.keys()))+"\n"
+     #retv+="PATTERN_NUMBER\t"+str(len(h.keys()))+"\n"
     ret_dict["PATTERN_NUMBER"]=len(h.keys())
     # print >>sys.stderr,"debug pattern number",ret_dict["PATTERN_NUMBER"]
     #retv+="FRG_NUMBER\t"+str(j0)+"\n"
