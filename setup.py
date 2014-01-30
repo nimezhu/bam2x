@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-27-2014, 15:15:13 EST
+# Last-modified: 01-30-2014, 12:09:13 EST
 import os
 import sys
 from distutils.core import setup
@@ -9,7 +9,7 @@ from distutils.core import setup
 metadata = {
 
           'name':"xplib",
-          'version':"0.02",
+          'version':"0.03",
           'description':"bionformatics python lib for query bam files",
           'author':"Xiaopeng Zhu",
           'author_email':"nimezhu@gmail.com",
@@ -30,12 +30,13 @@ metadata = {
                    "bin/xCmpGene.py",
                    "bin/xGetSeq.py",
                    "bin/xbams2APS.py",
-                   "bin/pBam20f.py",
+                   "bin/pBam20h.py",
                    "scripts/bam2rpkm.py",
                    "scripts/bamInfo.py"
+                   "scripts/bam2peak.py"
                    ],
           #'requires':['pysam (>=0.7.5)','twobitreader (>=2.9)',],
-          'install_requires':['pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1']
+          'install_requires':['numpy>=1.7.0','pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1']
 
 
 }
