@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-29-2014, 22:38:19 EST
+# Last-modified: 01-30-2014, 18:39:06 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -38,6 +38,9 @@ V6:
 V7:
     don't change state because ofintron just link all exon will do.
     get rid of small linked exons.
+V8:
+    TODO: add complexity filter out [ LZW complexity / length > 0.4 ]
+        
 
 TODO: compare with known gene
 TODO: trim the last intron or extend the exon? ( KEY PROBLEM. how to define the end )
@@ -59,6 +62,7 @@ OTHER_INDEX=5
 ID_INDEX=6
 EXONSTARTS_INDEX=7
 EXONSIZES_INDEX=8
+CPLX_CUTOFF=0.4
 
 def ParseArg():
     ''' This Function Parse the Argument '''
@@ -71,6 +75,7 @@ def ParseArg():
     p.add_argument('--prefix',dest="prefix",type=str,default="R",help="prefix for bed name default: %(default)s")
     p.add_argument('--cutoff',dest="cutoff",type=int,default=1,help="only report region covrage >= cutoff : %(default)i")
     p.add_argument('--pvalue',dest="pvalue",type=float,default=1e-05,help="cutoff for calling peak : %(default)f")
+    p.add_argument('-g','--genome',dest="genome",type=str,help="genome sequence file in twobit format")
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
@@ -79,10 +84,14 @@ def Main():
     '''
     IO TEMPLATE
     '''
-    global args,out,exon_cutoff,intron_cutoff
+    global args,out,exon_cutoff,intron_cutoff,hasGenome
     args=ParseArg()
     dbi=DBI.init(args.input,"bam")
     out=IO.fopen(args.output,"w")
+    hasGenome=False
+    if args.genome:
+        hasGenome=True
+    
     '''
     END OF IO TEMPLATE 
     '''
@@ -128,7 +137,7 @@ def Main():
     print >>out,"# EXON COVERAGE CUTOFF:",exon_cutoff
     
     #call_peaks(bedgraphs[0],1) #debug
-    peaks=p.map(call_peaks_star,itertools.izip(bedgraphs,itertools.repeat(exon_cutoff)))
+    peaks=p.map(call_peaks_star,itertools.izip(chrs,bedgraphs,itertools.repeat(exon_cutoff)))
     output(chrs,peaks)
 
     #process_chrom("chr1")
@@ -141,7 +150,7 @@ def nice_format(chrom,a):
     s=chrom+"\t"
     s+=str(a[START_INDEX])+"\t"
     s+=str(a[STOP_INDEX])+"\t"
-    s+=str(a[ID_INDEX])+"\t"
+    s+=chrom+"_"+str(a[ID_INDEX])+"\t"
     s+=str(a[SCORE_INDEX])+"\t"
     if a[STRAND_INDEX]==1:
         s+="+\t"
@@ -166,7 +175,7 @@ from xplib.Turing import TuringCode
 from xplib.Turing import TuringCodeBook as cb
 from xplib.Turing import TuringTupleSortingArray
 from operator import itemgetter
-
+from xplib.Tools.LZW import complexity 
 def process_chrom(chrom):
     local_dbi=DBI.init(args.input,"bam")
     retv=list()
@@ -235,11 +244,51 @@ def codesToBedGraph(iter):
     raise StopIteration
 
 
-def call_peaks_star(a_b):
-    return call_peaks(*a_b)
+def call_peaks_star(a_b_c):
+    return call_peaks(*a_b_c)
     
-def call_peaks(bedgraph,exon_cutoff):
+def call_peaks(chrom,bedgraph,exon_cutoff):
     #TODO
+    
+    if hasGenome:
+        genome=DBI.init(args.genome,"genome")
+    def filter_low_complexity(peak):
+        try:
+            new_exon_starts=[]
+            new_exon_sizes=[]
+            local_peak=list(peak)
+            offset=local_peak[START_INDEX]
+            #print "before",peak
+            for exon_start,exon_size in itertools.izip(local_peak[EXONSTARTS_INDEX],local_peak[EXONSIZES_INDEX]):
+                exon_s=offset+exon_start
+                exon_e=offset+exon_start+exon_size
+                seq=genome.query(Bed([chrom,exon_s,exon_e]),method="seq")
+                #print "debug",seq,
+                if len(seq) > 100:
+                    cplx=float(complexity(seq[0:100]))/100
+                else:
+                    cplx=float(complexity(seq))/len(seq)
+                #print cplx
+                if cplx > CPLX_CUTOFF:
+                    new_exon_starts.append(exon_start)
+                    new_exon_sizes.append(exon_size)
+                else:
+                    #print "kill",exon_start,exon_size,seq,cplx
+            if len(new_exon_sizes) > 0:
+                local_peak[EXONSIZES_INDEX]=tuple(new_exon_sizes)
+                local_peak[START_INDEX]=new_exon_starts[0]+offset
+                local_peak[STOP_INDEX]=new_exon_starts[-1]+offset+new_exon_sizes[-1]
+                shift_start=new_exon_starts[0]
+                for i0 in range(len(new_exon_starts)):
+                    new_exon_starts[i0]-=shift_start
+                local_peak[EXONSTARTS_INDEX]=tuple(new_exon_starts)
+                return tuple(local_peak)
+            else:
+                #print "NO EXON",peak
+                return None
+        except:
+            print >>sys.stderr,"warning error in ",seq
+            return None
     gap=10
     pos_beds=[]
     neg_beds=[]
@@ -261,8 +310,14 @@ def call_peaks(bedgraph,exon_cutoff):
                             
                             peak=bedsToPeak(pos_beds,"p_"+str(i_p))
                             if peak is not None:
-                                peaks.append(peak)
-                                i_p+=1
+                                if hasGenome:
+                                    peak=filter_low_complexity(peak)
+                                    if peak is not None:
+                                        peaks.append(peak)
+                                        i_p+=1
+                                else:
+                                    peaks.append(peak)
+                                    i_p+=1
                             pos_beds=[i]
                             last_pos_stop=i[STOP_INDEX]
                     else:
@@ -283,6 +338,12 @@ def call_peaks(bedgraph,exon_cutoff):
                         else:
                             peak=bedsToPeak(neg_beds,"n_"+str(i_n))
                             if peak is not None:
+                                if hasGenome:
+                                    peak=filter_low_complexity(peak)
+                                    if peak is not None:
+                                        peaks.append(peak)
+                                        i_n+=1
+                            else:
                                 peaks.append(peak)
                                 i_n+=1
                             neg_beds=[i]
@@ -298,11 +359,22 @@ def call_peaks(bedgraph,exon_cutoff):
     if len(pos_beds)>0:
         peak=bedsToPeak(pos_beds,"p_"+str(i_p))
         if peak is not None:
-            peaks.append(peak)
+            if hasGenome:
+                peak=filter_low_complexity(peak)
+                if peak is not None:        
+                    peaks.append(peak)
+            else:
+                peaks.append(peak)
     if len(neg_beds)>0:
         peak=bedsToPeak(neg_beds,"n_"+str(i_n))
         if peak is not None:
-            peaks.append(peak)
+            if hasGenome:
+                peak=filter_low_complexity(peak)
+                if peak is not None:        
+                    peaks.append(peak)
+            
+            else:
+                peaks.append(peak)
     peaks.sort()
     return peaks
 def length(x):
