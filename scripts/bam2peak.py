@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-30-2014, 18:49:41 EST
+# Last-modified: 01-30-2014, 19:12:46 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -36,10 +36,10 @@ V6:
     change format to Bed12
     get rid of terminal introns
 V7:
-    don't change state because ofintron just link all exon will do.
-    get rid of small linked exons.
+    don't change state because of intron just link all exon will do.
+    get rid of consective small exons.
 V8:
-    TODO: add complexity filter out [ LZW complexity / length > 0.4 ]
+    DONE: add complexity filter out [ LZW complexity / length > 0.4 ]
         
 
 TODO: compare with known gene
@@ -150,7 +150,7 @@ def nice_format(chrom,a):
     s=chrom+"\t"
     s+=str(a[START_INDEX])+"\t"
     s+=str(a[STOP_INDEX])+"\t"
-    s+=str(a[ID_INDEX])+"\t"
+    s+=chrom+"_"+str(a[ID_INDEX])+"\t"
     s+=str(a[SCORE_INDEX])+"\t"
     if a[STRAND_INDEX]==1:
         s+="+\t"
