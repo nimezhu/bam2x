@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 01-22-2014, 13:52:57 EST
+# Last-modified: 02-04-2014, 13:34:27 EST
 from string import upper,lower
 from xplib.Annotation import Fragment,Bed,Bed12,GeneBed
 import xplib
@@ -109,6 +109,7 @@ def translate_coordinates(coord,bed,reverse=False): # bed is Bed12 format
                 blockStarts[i]=blockStarts[i]
         elif coord.strand=="-":
             for i,x in enumerate(blockStarts):
+                #print "debug",i,x,blockStarts,blockSizes
                 blockStarts[i]+=blockSizes[i]
             blockStarts=blockStarts[::-1]
             for i,x in enumerate(blockStarts):
