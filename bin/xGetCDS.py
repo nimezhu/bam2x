@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-12-2013, 13:35:46 EDT
+# Last-modified: 02-10-2014, 14:15:28 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -17,6 +17,7 @@ def ParseArg():
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : xplib')
     p.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
     p.add_argument('-i','--input',dest="input",default="stdin",type=str,help="input annotation file in gene table format or bed DEFAULT: STDIN")
+    p.add_argument('-I','--input_format',dest="format",default="bed",type=str,help="input annotation file format")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
     
     if len(sys.argv)==1:
@@ -57,10 +58,8 @@ def Main():
     print >>out,"# Date: ",time.asctime()
     print >>out,"# The command line is :"
     print >>out,"#\t"," ".join(sys.argv)
-    for i in TableIO.parse(fin,"bed"):
-            print >>out,"#",i;
-            print >>out,i.cds().toBedString();
-            
+    for i in TableIO.parse(fin,args.format):
+            print >>out,i
 
 
 

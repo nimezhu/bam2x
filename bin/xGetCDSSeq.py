@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-27-2013, 21:19:43 EST
+# Last-modified: 02-10-2014, 14:13:08 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -17,6 +17,7 @@ def ParseArg():
     p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : xplib')
     p.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
     p.add_argument('-i','--input',dest="input",default="stdin",type=str,help="input annotation file in gene table format or bed DEFAULT: STDIN")
+    p.add_argument('-I','--input_format',dest="format",default="bed",type=str,help="input annotation file format")
     p.add_argument('-g','--genome',dest="genome",type=str,help="chromosome.2bit file")
     p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
     
@@ -59,7 +60,7 @@ def Main():
     print >>out,"# The command line is :"
     print >>out,"#\t"," ".join(sys.argv)
     genome=GenomeI(args.genome)
-    for i in TableIO.parse(fin,"genebed"):
+    for i in TableIO.parse(fin,args.format):
             print >>out,">",i.id+"_CDS"
             print >>out,seq_wrapper(genome.get_cds_seq(i))
 
