@@ -6,6 +6,9 @@ H_BED3=("chr","start","stop")
 H_BED6=("chr","start","stop","id","score","strand")
 H_BED12=("chr","start","stop","id","score","strand","cds_start","cds_stop","itemRgb","blockCount","blockSizes","blockStarts")
 class METABED(object):
+    @property
+    def end(self):
+        return self.stop
     def __cmp__(self,other):
         return cmp(self.chr,other.chr) or cmp(self.start,other.start) or (self.stop,other.stop)
     def __str__(self):
@@ -31,3 +34,4 @@ if __name__=="__main__":
     a=BED3(*b)
     print a
     print a.chr
+    print a.end
