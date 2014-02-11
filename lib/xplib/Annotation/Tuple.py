@@ -108,11 +108,6 @@ class BED12(namedtuple("BED12",H_BED12),METABED):
             return None
         else:
             return BED12(chr,start,end,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,tuple(sliceBlockSizes),tuple(sliceBlockStarts))
-
-
-            
-
-
     def utr5(self):
         if self.strand=="+":
             return self._slice(self.start,self.cds_start,"utr5")
@@ -129,6 +124,18 @@ class BED12(namedtuple("BED12",H_BED12),METABED):
             return None
     def cds(self):
         return self._slice(self.cds_start,self.cds_stop,"cds")
+    def __str__(self):
+        s=""
+        for i,x in enumerate(self):
+            if i==10 or i==11:
+                for y in x:
+                    s+=str(y)+","
+                s+="\t"
+            else:
+                s+=str(x)+"\t"
+        return s.strip("\t")
+
+
 
 
 if __name__=="__main__":

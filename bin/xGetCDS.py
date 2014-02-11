@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-10-2014, 14:15:28 EST
+# Last-modified: 02-11-2014, 16:22:39 EST
 VERSION="0.1"
 import os,sys,argparse
 from xplib.Annotation import Bed
@@ -59,7 +59,7 @@ def Main():
     print >>out,"# The command line is :"
     print >>out,"#\t"," ".join(sys.argv)
     for i in TableIO.parse(fin,args.format):
-            print >>out,i
+            print >>out,i.cds().toBedString()
 
 
 

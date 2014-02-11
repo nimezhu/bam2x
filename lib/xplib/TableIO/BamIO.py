@@ -1,10 +1,12 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-22-2014, 12:00:05 EST
+# Last-modified: 02-11-2014, 16:35:54 EST
 import types
 import pysam
-from xplib.Annotation import Bed,Bed12,Fragment
+from xplib.Annotation import Fragment
 from xplib import Tools
+from xplib.Annotation.Tuple import BED6 as Bed
+from xplib.Annotation.Tuple import BED12 as Bed12
 
 def BamIterator(filename,**kwargs):
     '''
@@ -74,7 +76,7 @@ def BamToBedIterator(filename,**kwargs):
         if i.is_reverse:
             strand="-"
         score=i.mapq
-        bed=Bed([f.references[i.tid],i.pos,i.aend,i.qname,score,strand])
+        bed=Bed(f.references[i.tid],i.pos,i.aend,i.qname,score,strand)
         yield bed
 def BamToBed12Iterator(handle,**kwargs):
     '''
@@ -132,7 +134,7 @@ def BamToBed12Iterator(handle,**kwargs):
             strand=Tools.reverse_strand(strand)
         elif i.is_read2 and read1:
             strand=Tools.reverse_strand(strand)
-        bed=Bed12([chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts])
+        bed=Bed12(chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts)
         yield bed
 def BamToBed12TupleIterator(handle,**kwargs):
     '''
