@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-22-2014, 12:05:18 EST
+# Last-modified: 02-11-2014, 13:01:56 EST
 import BedIO
 import GeneBedIO
 import SimpleIO
@@ -14,6 +14,7 @@ import gtfIO
 import IO
 FormatToIterator = { "bed":BedIO.BedIterator,
                      "bedtuple":BedIO.BedTupleIterator,
+                     "bednamedtuple":BedIO.BedNamedTupleIterator,
                      "genebed":GeneBedIO.GeneBedIterator,
                      "genepred":GeneBedIO.GeneBedIterator,
                      "simple":SimpleIO.SimpleIterator,

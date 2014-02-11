@@ -1,7 +1,8 @@
 # Programmer : zhuxp
 # Date:
-# Last-modified: 01-22-2014, 12:17:23 EST
+# Last-modified: 02-11-2014, 13:04:40 EST
 from xplib.Annotation import Bed,Bed12
+from xplib.Annotation.Tuple import BED12,BED6,BED3
 import types
 import gzip
 import SimpleIO 
@@ -52,4 +53,19 @@ def BedTupleIterator(handle,**dict):
         yield tuple(x)
     
 
-    
+def BedNamedTupleIterator(handle,**dict):
+    for x in SimpleIO.SimpleIterator(handle,**dict):
+        l=[]
+        if len(x)==12:
+            x[BLOCKSIZES]=x[BLOCKSIZES].strip(",").split(",")
+            x[BLOCKSTARTS]=x[BLOCKSTARTS].strip(",").split(",")
+            for i in range(x[BLOCKCOUNT]):
+                x[BLOCKSIZES][i]=int(x[BLOCKSIZES][i])
+                x[BLOCKSTARTS][i]=int(x[BLOCKSTARTS][i])
+            x[BLOCKSIZES]=tuple(x[BLOCKSIZES])
+            x[BLOCKSTARTS]=tuple(x[BLOCKSTARTS])
+            yield BED12(*x)
+        elif len(x)==6:
+            yield BED6(*x)
+        elif len(x)==3:
+            yield BED3(*x)
