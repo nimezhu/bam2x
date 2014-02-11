@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 02-10-2014, 14:25:11 EST
+#Last-modified: 02-11-2014, 10:41:54 EST
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 class Bed(object):
@@ -392,7 +392,10 @@ class GeneBed(Bed):
         s+=self.strand+"\t"
         s+=str(self.cds_start)+"\t"
         s+=str(self.cds_stop)+"\t"
-        s+="0,0,0"+"\t"
+        if hasattr(self,"itemRgb"):
+            s+=str(self.itemRgb)+"\t"
+        else:
+            s+="0,0,0"+"\t"
         s+=str(self.exon_count)+"\t"
         for i in range(self.exon_count):
             s+=str(self.exon_stops[i]-self.exon_starts[i])+","
