@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 16:49:09 EST
+# Last-modified: 02-12-2014, 16:48:14 EST
 VERSION="0.1"
 import os,sys,argparse
 import signal
@@ -17,10 +17,12 @@ def ParseArg():
     group.add_argument('-i','--input',dest='input',default='stdin',type=str,help="input file Default: %(default)s")
     group.add_argument('-o','--output',dest='output',default='stdout',type=str,help="output file Default: %(default)s")
     
+    mcpu_group=argparse.ArgumentParser(add_help=False)
+    mcpu_group.add_argument('-n','--num_cpus',dest="num_cpus",type=str,default=4,help="number of cpus DEFAULT: %(default)i")
     
     subs=p.add_subparsers(help="subcommand help",dest="sub")
     for i in commands.keys():
-        pi=subs.add_parser(i,help=commands[i].help(),parents=[group])
+        pi=subs.add_parser(i,help=commands[i].help(),parents=[mcpu_group,group])
         commands[i].set_parser(pi)
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
