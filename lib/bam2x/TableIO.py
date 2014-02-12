@@ -1,0 +1,50 @@
+import csv
+import bam2x
+import sys
+from bam2x import IO,Annotation
+
+hclass = {
+    "bed3":Annotation.BED3,
+    "bed6":Annotation.BED6,
+    "bed12":Annotation.BED12,
+}
+def parse(cls,handle,**dict):
+    sep="\t"
+    if dict.has_key("sep"):
+        sep=dict["sep"]
+    if isinstance(cls,str):
+        if hclass.has_key(cls):
+            cls=hclass[cls]
+        else:
+            raise "can't regonize this format"
+    if isinstance(handle,str):
+        try:
+            handle=IO.fopen(handle,"r")
+            for i in csv.reader(handle,delimiter=sep):
+                i=cls._types(i)
+                yield cls._make(i)
+            handle.close()
+        except IOError as e:
+            print >>sys.stderr,"I/O error({0}): {1}".format(e.errno, e.strerror)
+    else:
+        try:    
+            for i in csv.reader(handle,delimiter=sep):
+                i=cls._types(i)
+                yield cls._make(i)
+        except Error as e:
+            print >>sys.stderr,"error({0}): {1}".format(e.errno, e.strerror)
+
+
+def Main():
+    for i in parse("bed12",sys.argv[1]):
+        print i
+if __name__=="__main__":
+    Main()
+
+
+
+
+
+
+
+

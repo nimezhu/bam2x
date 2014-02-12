@@ -4,8 +4,16 @@ import itertools
 
 H_PSL=("matches","misMatches","repMatches","nCount","qNumInsert","qBaseInsert","tNumInsert","tBaseInsert","strand","qName","qSize","qStart","qEnd","tName","tSize","tStart","tEnd","blockCount","blockSizes","qStarts","tStart")
 H_BED3=("chr","start","stop")
+F_BED3=(str,int,int)
 H_BED6=("chr","start","stop","id","score","strand")
+F_BED6=(str,int,int,str,float,str)
 H_BED12=("chr","start","stop","id","score","strand","cds_start","cds_stop","itemRgb","blockCount","blockSizes","blockStarts")
+def int_tuple(x):
+    a=[]
+    for i in x.strip().strip(",").split(","):
+        a.append(int(i))
+    return tuple(a)
+F_BED12=(str,int,int,str,float,str,int,int,str,int,int_tuple,int_tuple)
 class METABED(object):
     @property
     def end(self):
@@ -15,17 +23,12 @@ class METABED(object):
     def __str__(self):
         s=""
         for i in self:
-            s+=str(i).strip("(").strip(")")+"\t"
+            s+=str(i)+"\t"
         s.strip("\t")
         s.strip("")
         return s
     def __len__(self):
         return self.stop-self.start
-    def cdna_length(self):
-        s=0
-        for i in self.Exons():
-            s=s+len(i)
-        return s
     def Exons(self):
         if hasattr(self,"blockCount"):
             a=[]
@@ -69,16 +72,21 @@ class METABED(object):
             if self.strand=="-":
                 return a[::-1]
         return a
-    
-    
-    
+
+def types(x,TYPES):
+    b=[]
+    for v,t in itertools.izip(x,TYPES):
+        b.append(t(v))
+    return tuple(b)
 class BED3(namedtuple("BED3",H_BED3),METABED):
-    pass
-
-
+    @classmethod
+    def _types(cls,x):
+        return types(x,F_BED3)
 class BED6(namedtuple("BED6",H_BED6),METABED):
-    pass
-
+    @classmethod
+    def _types(cls,x):
+        return types(x,F_BED6)
+    
 
 class BED12(namedtuple("BED12",H_BED12),METABED):
     def _slice(self,start,end,suffix):
@@ -134,9 +142,9 @@ class BED12(namedtuple("BED12",H_BED12),METABED):
             else:
                 s+=str(x)+"\t"
         return s.strip("\t")
-
-
-
+    @classmethod
+    def _types(cls,x):
+        return types(x,F_BED12)
 
 if __name__=="__main__":
     b=("chr1",200,500,"test_gene",0.0,"-",250,450,"0,0,0",2,(100,101),(0,199))
