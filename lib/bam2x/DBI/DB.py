@@ -1,11 +1,12 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 12:38:25 EST
+# Last-modified: 02-12-2014, 17:02:51 EST
 
 import os,sys
 from bam2x.Annotation import *
 from bam2x.Annotation import BED6 as Bed
 from bam2x.TableIO import hclass
+from bam2x import TableIO
 from bam2x.Struct import binindex
 import pysam
 from bam2x.Tools import rc

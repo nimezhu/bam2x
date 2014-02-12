@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 15:28:31 EST
+# Last-modified: 02-12-2014, 15:31:08 EST
 import os
 import sys
 from distutils.core import setup
@@ -22,7 +22,7 @@ metadata = {
                     "xplib.Tools",
                     "xplib.Turing",
                     "xplib.Tuple",
-                    "xplib.TuringTuple"
+                    "xplib.TuringTuple",
                     "bam2x",
                     "bam2x.DBI",
                     "bam2x.Run"
