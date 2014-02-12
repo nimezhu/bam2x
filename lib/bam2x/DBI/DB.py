@@ -1,19 +1,32 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 00:37:10 EST
+# Last-modified: 02-12-2014, 12:38:25 EST
 
 import os,sys
 from bam2x.Annotation import *
 from bam2x.Annotation import BED6 as Bed
-from bam2x import TableIO
+from bam2x.TableIO import hclass
 from bam2x.Struct import binindex
 import pysam
 from bam2x.Tools import rc
 from bam2x import Tools
 from twobitreader import *
+import csv
+from bam2x import IO
 '''
 BASIC QUERY FUNCTIONS
 '''
+
+def parse_region_str(x):
+    try:
+        a=x.split(":")
+        b=a.split("-")
+        b[0]=int(b[0])-1
+        b[1]=int(b[1])
+        return BED3(a[0],b[0],b[1])
+    except:
+        print >>sys.stderr,"unknown formatted region string"
+        raise
 class MetaDBI:
     '''
     Meta Class for all DBI (Database Interface)
@@ -28,82 +41,103 @@ class MetaDBI:
 class BinIndexI(MetaDBI):
     '''
     DBI for flat annotation file or list
-    Read annotations (bed,genebed or vcf etc.) into binindex structure.
-    Please read documents in bam2x.Annotation.Utils for BinIndex Structure detail
-    Query the overlap features using bam2x.Annotation.Utils.iterOverlapFeature.
-    Usage:
-            from bam2x import DBI
-            dbi=DBI.init(file handle or filename or list,"bed")
-            for i in dbi.query(bed):
-                print i
+    cls
     '''
     def __init__(self,file,**dict):
         '''
         Wrapped in bam2x.DBI.init()
+        BinIndex(file,cls=inherited_namedtuplecls)
+        inherited_namedtuplecls should have _make and _types functino
+        or
+        assuming the entry in container is already formatted
+        BinIndex(container) 
         '''
-        if type(file)==type([1,2,3]):
-            f=file
+        if isinstance(file,str):
+            file=csv.reader(IO.fopen(file,"r"),delimiter="\t")
+        if dict.has_key("cls"):
+            cls=dict["cls"]
+            if isinstance(cls,str):
+                if hclass.has_key(cls):
+                    cls=hclass[cls]
+                else:
+                    print >>sys.stderr,"UNKNOWN FORMAT %s IN BININDEX DATA STRUCT"%cls
+    
+            self.data=binindex(file,cls=cls)
         else:
-            format=dict['format']
-            f=TableIO.parse(file,format)
-        self.data=binindex(f)
-    def query(self,x):
+            self.data=binindex(file)
+    def query(self,x=None,**kwargs):
         '''
         yield the overlap features with x.
         '''
-        for i in self.data.query(x):
+        if x is None:
+            try:
+                x=BED3(kwargs["chr"],kwargs["start"],kwargs["stop"])
+            except:
+                print >>sys.stderr,"UNKNOWN QUERY"
+                raise 
+        if isinstance(x,str):
+            x=parse_region_str(x)
+        for i in self.data.query(x,**kwargs):
             yield i
+    def close(self):
+        '''
+        release memory
+        '''
+        self.data=None 
         
 class TabixI(MetaDBI):
     '''
-    DBI for tabix file.
-    it is a simple interface for pysam.Tabix.
-    Usage:
-        from bam2x import DBI
-        dbi=DBI.init(filename,"tabix")
-        for i in dbi.query(bed):
-            print i
-
+    New DBI for tabix file. 
+    TabixI(filename,cls=inherited_namedtuplecls)
     '''
     def __init__(self, tabix_file_name,**dict):
         '''
-        wrapped in DBI.init(filename,"tabix")
+        wrapped in DBI.init(filename,"tabix",cls=cls)
         '''
         self.tabix_file_name=tabix_file_name
         self.dict=dict
+        
+        if dict.has_key("cls"):
+            self.cls=dict["cls"]
+            if isinstance(self.cls,str):
+                if hclass.has_key(self.cls):
+                    self.cls=hclass[self.cls]
+                else:
+                    print >>sys.stderr,"UNKNOWN FORMAT %s IN BININDEX DATA STRUCT"%cls
         try:
             self.data=pysam.Tabixfile(tabix_file_name)
         except:
             print >>sys.stderr,"WARNING: Can't init the tabix file",tabix_file_name
-        self.header=None
-        if dict.has_key("header") and dict["header"]==True:
-            f=TableIO.parse(tabix_file_name)
-            h=f.next()
-            l=len(h)
-            for i in range(l):
-                h[i]=h[i].strip()
-            self.header=h
-            f.close()
-        elif dict.has_key("header") and isinstance(dict["header"],list):
-            self.header=dict["header"]
-        elif dict.has_key("header") and isinstance(dict["header"],str):
-            fh=TableIO.parse(dict["header"])
-            self.header=fh.next()
-            #print >>sys.stderr,self.header
-        self.tabix_format="simple"
-        if self.dict.has_key("tabix"):
-            self.tabix_format=self.dict["tabix"]
-           
-
-
-    def query(self,x,**kwargs):
+    def query(self,x=None,**kwargs):
         '''
         yield the overlap feature in tabix index files
+        
+        dbi=TabixI(filename,cls=cls)
+        three options:
+        dbi.query(x)  , x is BED class or any class have .chr, .start, .stop
+        dbi.query(chr="",start="",stop="")
+        dbi.query("chr01:1-10000")
         '''
         try:
-            for item in TableIO.parse(self.data.fetch(x.chr,x.start,x.stop),format=self.tabix_format,header=self.header):
-                yield item
-        except:
+            if x is None:
+                try:
+                    x=BED3(kwargs["chr"],kwargs["start"],kwargs["stop"])
+                except:
+                    print "UNKNOWN QUERY"
+                    raise 
+            if isinstance(x,str):
+                x=parse_region_str(x)
+            if hasattr(self,"cls"):
+                for item in self.data.fetch(x.chr,x.start,x.stop):
+                    item=self.cls._make(self.cls._types(item.split("\t")))
+                    yield item
+            else:
+                for item in self.data.fetch(x.chr,x.start,x.stop):
+                    yield item
+
+        except Exception as e:
+           print e
+           raise
            raise StopIteration
     def close(self):
         self.data.close()
@@ -121,7 +155,15 @@ class GenomeI(TwoBitI):
     Wrapped for query sequence
     Initialize genome 2bit file only once.
     '''
-    def query(self,x,**dict):
+    def query(self,x=None,**dict):
+        if x is None:
+            try:
+                x=BED3(kwargs["chr"],kwargs["start"],kwargs["stop"])
+            except:
+                print "UNKNOWN QUERY"
+                raise 
+        if isinstance(x,str):
+            x=parse_region_str(x)
         method="seq"
         if(dict.has_key("method")):
             method=dict["method"]
@@ -135,31 +177,32 @@ class GenomeI(TwoBitI):
             return self.get_utr3_seq(x)
         elif method=="utr5":
             return self.get_utr5_seq(x)
-
     def get_seq(self,x):
         chr=self.data[x.chr]
         seq=chr[x.start:x.stop]
         if x.strand=="-":
             seq=rc(seq)
         return seq
-    def get_cdna_seq(self,genebed):
+    def get_cdna_seq(self,bed12):
         s=""
-        for i in genebed.Exons():
+        for i in bed12.Exons():
             s+=self.get_seq(i)
         return s
-    def get_cds_seq(self,genebed):
-        cds=genebed.cds()
+    def get_cds_seq(self,bed12):
+        cds=bed12.cds()
         if cds is None or len(cds)==0: return ""
         return self.get_cdna_seq(cds)
-    def get_utr3_seq(self,genebed):
-        utr3=genebed.utr3()
+    def get_utr3_seq(self,bed12):
+        utr3=bed12.utr3()
         if utr3 is None or len(utr3)==0: return ""
         return self.get_cdna_seq(utr3)
-    def get_utr5_seq(self,genebed):
-        utr5=genebed.utr5()
+    def get_utr5_seq(self,bed12):
+        utr5=bed12.utr5()
         if utr5 is None or len(utr5)==0: return ""
-        return self.get_cdna_seq(utr5)
-        
+        return self.get_cdna_seq(utr5)        
+
+
+
 class BamlistI(MetaDBI):
     '''
     A DBI for a list of bamfiles ( or a file contain bamfile names) 
@@ -223,20 +266,17 @@ class BamlistI(MetaDBI):
             i.close()
 
     def query(self,x=None,method='fetch',**dict):
+        if x is None:
+            try:
+                x=BED3(dict["chr"],dict["start"],dict["stop"])
+            except:
+                print "UNKNOWN QUERY"
+                raise 
         if type(x)==type("str"):
-            x=x.split(":")
-            chrom=x[0]
-            start=None
-            end=None
-            if len(x)>1:
-                b=x[1].split("-")
-                if len(b)==2:
-                    start=int(b[0])-1
-                    end=int(b[1])
-        elif x is not None:
-            chrom=x.chr
-            start=x.start
-            end=x.stop
+            x=parse_region_str(x)
+        chrom=x.chr
+        start=x.start
+        end=x.stop
         if method=='fetch' or method=="bam2bed12" or method=="fetch12":
             '''
             test version
@@ -288,14 +328,7 @@ class BamlistI(MetaDBI):
                for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
                    s+=1
             yield s
-        elif method=="references":
-            for i in self.bamfiles[0].references:
-                yield i
-        elif method=="lengths":
-            for i in self.bamfiles[0].lengths:
-                yield i
-
-
+        
 
 class BamI(BamlistI):
     '''
@@ -355,13 +388,22 @@ class BigWigI(MetaDBI):
             except:
                 print >>sys.stderr,"Error in open bw file"
 
-    def query(self,x,**dict):
+    def query(self,x=None,**dict):
         '''
         query bw file
         '''
+        if x is None:
+            try:
+                x=BED3(dict["chr"],dict["start"],dict["stop"])
+            except:
+                print "UNKNOWN QUERY"
+                raise 
+        if type(x)==type("str"):
+            x=parse_region_str(x)
+ 
         if not dict.has_key("method"):
             results=self.data.get_as_array(x.chr,x.start,x.stop)
-            if x.strand=="-":
+            if hasattr(x,"strand") and x.strand=="-":
                 return results[::-1]
             else:
                 return results
@@ -379,7 +421,7 @@ class BigWigI(MetaDBI):
                             s.append(array[j])
                 return s
             else:
-                print >>sys.stderr,"query model is wrong for bw file"
+                print >>sys.stderr,"query model is not a BED12 class"
 
         
 

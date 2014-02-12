@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-11-2014, 22:12:34 EST
+# Last-modified: 02-12-2014, 12:42:25 EST
 import os,sys,argparse,types
 from bam2x.Annotation import BED6 as Bed 
 from bam2x import TableIO
@@ -155,23 +155,7 @@ class binindex(object):
         def __init__(self,handle=None,**kwargs):
             self.data={}
             if handle is not None:
-                self.read(handle)
-            '''
-            init from file
-            Example:
-            data=binindex(file="file.bed")
-            or
-            data=binindex(file="file.vcf",format="vcf")
-            '''
-            if kwargs.has_key("format"):
-                format=kwargs["format"]
-                del kwargs["format"]
-            else:
-                format="bed"
-            if kwargs.has_key("file"):
-                f=kwargs["file"]
-                del kwargs["file"]
-                self.read(TableIO.parse(f,format,**kwargs))
+                self.read(handle,**kwargs)
             
 	def append(self,bed):
 	    '''
@@ -239,31 +223,20 @@ class binindex(object):
 	            for i in self.data[chr][binindex]:
 	                yield i
 	
-	def read(self,handle):
+	def read(self,handle,**kwargs):
 	    '''
-	    Read list  or iterator into BinIndex Data Structure
-	    Usage:
-	    Example:
-	        f=TableIO.parse("filename","genebed")
-	        data=binindex(f)
-	    Example:
-	        f=TableIO.parse("filename","vcf")
-                data=binindex(f)
-                
-                equals to
-
-	        f=TableIO.parse("filename","vcf")
-                data=binindex()
-                data.read(f)
-	    Example:
-	        data.read(bedlist)
-	    '''
-	    
-	    for i in handle:
-	        a=i
-	        if type(i)==type([]) or type(i)==type((1,2,3)):
-	            a=Bed(i)
-	        self.append(a)
+	    Read iterator into BinIndex Data Structure
+	    if have cls, turn tuple into namedtuple
+            '''
+            cls=None
+            if kwargs.has_key("cls"):
+                cls=kwargs["cls"]
+	    if cls is not None:
+                for i in handle:      
+                    a=cls._make(cls._types(i))
+	            self.append(a)
+            else:
+                self.append(a)
 	
 	def query(self,bed,**kwargs):
 	    '''
@@ -277,7 +250,7 @@ class binindex(object):
 	    '''
 	
 	    if type(bed)==type((1,2,3)) or type(bed)==([1,2,3]):
-	        bed=Bed(bed[0:3])  # guess (chrome,start,stop)
+	        bed=Bed(*bed[0:3])  # guess (chrome,start,stop)
 	    if not self.data.has_key(bed.chr):
 	         raise StopIteration 
 	    D=self.data[bed.chr]
