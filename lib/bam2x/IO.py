@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-11-2014, 23:43:27 EST
+# Last-modified: 02-12-2014, 15:40:13 EST
 VERSION="0.1"
 import pysam
 import sys
-
+import gzip
 
 suffixToFormat={
     'fa':'fasta',

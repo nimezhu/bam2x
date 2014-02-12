@@ -12,7 +12,7 @@ hclass = {
 htranslate = {
     "bam2bed12": Translator.BamToBed12
 }
-FormatToIterator=hclass
+FormatToIterator=dict(hclass.items()+htranslate.items())
 def parse(handle,convert_cls,**dict):
     if hclass.has_key(convert_cls):
         return parse_tuples(handle,convert_cls,**dict)
