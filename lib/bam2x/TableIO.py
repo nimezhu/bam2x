@@ -2,13 +2,23 @@ import csv
 import bam2x
 import sys
 from bam2x import IO,Annotation
-
+from bam2x import Translator
 hclass = {
     "bed3":Annotation.BED3,
     "bed6":Annotation.BED6,
     "bed12":Annotation.BED12,
+    "bed":Annotation.BED6,
 }
-def parse(cls,handle,**dict):
+htranslate = {
+    "bam2bed12": Translator.BamToBed12
+}
+FormatToIterator=hclass
+def parse(handle,convert_cls,**dict):
+    if hclass.has_key(convert_cls):
+        return parse_tuples(handle,convert_cls,**dict)
+    elif htranslate.has_key(convert_cls):
+        return htranslate[convert_cls](handle,**dict)
+def parse_tuples(handle,cls,**dict):
     sep="\t"
     if dict.has_key("sep"):
         sep=dict["sep"]
@@ -36,7 +46,7 @@ def parse(cls,handle,**dict):
 
 
 def Main():
-    for i in parse("bed12",sys.argv[1]):
+    for i in parse(sys.argv[1],"bed12"):
         print i
 if __name__=="__main__":
     Main()

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-11-2014, 21:31:22 EST
+# Last-modified: 02-11-2014, 23:43:27 EST
 VERSION="0.1"
 import pysam
-
+import sys
 
 
 suffixToFormat={
