@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-10-2014, 14:29:52 EST
+# Last-modified: 02-12-2014, 15:28:31 EST
 import os
 import sys
 from distutils.core import setup
@@ -23,6 +23,9 @@ metadata = {
                     "xplib.Turing",
                     "xplib.Tuple",
                     "xplib.TuringTuple"
+                    "bam2x",
+                    "bam2x.DBI",
+                    "bam2x.Run"
                     ],
           'package_dir':{"":"lib"},
           'scripts':["bin/xQuery.py",
@@ -37,7 +40,8 @@ metadata = {
                    "bin/pBam20h.py",
                    "scripts/bam2rpkm.py",
                    "scripts/bamInfo.py",
-                   "scripts/bam2peak.py"
+                   "scripts/bam2peak.py",
+                   "bin/bam2x"
                    ],
           #'requires':['pysam (>=0.7.5)','twobitreader (>=2.9)',],
           'install_requires':['numpy>=1.7.0','pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1','bitarray>=0.8.1']
