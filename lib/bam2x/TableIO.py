@@ -41,8 +41,9 @@ def parse_tuples(handle,cls,**dict):
             for i in csv.reader(handle,delimiter=sep):
                 i=cls._types(i)
                 yield cls._make(i)
-        except Error as e:
-            print >>sys.stderr,"error({0}): {1}".format(e.errno, e.strerror)
+        except:
+            raise
+            i#print >>sys.stderr,"error({0}): {1}".format(e.errno, e.strerror)
 
 
 def Main():
