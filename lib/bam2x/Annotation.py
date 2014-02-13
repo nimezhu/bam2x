@@ -156,6 +156,15 @@ class BED3(namedtuple("BED3",H_BED3),METABED):
     @classmethod
     def _types(cls,x):
         return types(x,F_BED3)
+    @property
+    def strand(self):
+        return "."
+    @property
+    def id(self):
+        return "noname"
+    @property
+    def score(self):
+        return 0.0
 class BED6(namedtuple("BED6",H_BED6),METABED):
     @classmethod
     def _types(cls,x):
