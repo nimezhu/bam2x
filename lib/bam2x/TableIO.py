@@ -32,7 +32,9 @@ def parse_tuples(handle,cls,**dict):
         try:
             handle=IO.fopen(handle,"r")
             for i in csv.reader(handle,delimiter=sep):
+                if i[0].strip()[0]=="#": continue
                 i=cls._types(i)
+                
                 yield cls._make(i)
             handle.close()
         except IOError as e:
@@ -40,6 +42,7 @@ def parse_tuples(handle,cls,**dict):
     else:
         try:    
             for i in csv.reader(handle,delimiter=sep):
+                if i[0].strip()[0]=="#": continue
                 i=cls._types(i)
                 yield cls._make(i)
         except:
