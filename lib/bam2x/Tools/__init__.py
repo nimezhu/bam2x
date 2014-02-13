@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 02-12-2014, 21:46:42 EST
+# Last-modified: 02-13-2014, 10:32:10 EST
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -99,11 +99,11 @@ def translate_coordinates(coord,bed,reverse=False): # bed is Bed12 format
     (start,stop,strand)=translate_coordinate(coord,bed,reverse)
     score=bed.score
     if isinstance(bed,Bed12):
-        (cds_start,cds_stop,cds_strand)=translate_coordinate(coord,Bed(bed.chr,bed.cds_start,bed.cds_stop),reverse)
+        (cds_start,cds_stop,cds_strand)=translate_coordinate(coord,Bed(bed.chr,bed.cds_start,bed.cds_stop,bed.id+"_cds",bed.score,bed.strand),reverse)
         itemRgb=bed.itemRgb
         blockCount=bed.blockCount
-        blockSizes=copy.copy(bed.blockSizes)
-        blockStarts=copy.copy(bed.blockStarts)
+        blockSizes=list(bed.blockSizes)
+        blockStarts=list(bed.blockStarts)
         
         if coord.strand=="+" or coord.strand==".":
             for i,x in enumerate(blockStarts):
@@ -117,7 +117,7 @@ def translate_coordinates(coord,bed,reverse=False): # bed is Bed12 format
                 #print blockStarts[i]
                 blockStarts[i]=bed.stop-(blockStarts[i]+bed.start)
             blockSizes=blockSizes[::-1]
-        return Bed12(chr,start,stop,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,blockSizes,blockStarts)
+        return Bed12(chr,start,stop,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,tuple(blockSizes),tuple(blockStarts))
     else:
         C=copy.copy(bed)
         C.chr=chr

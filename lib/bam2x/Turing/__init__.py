@@ -1,7 +1,7 @@
 #!/usr/bin/env pythON
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 20:16:25 EST
+# Last-modified: 02-13-2014, 10:03:34 EST
 import TuringCodeBook as cb
 from bitarray import bitarray 
 from TuringUtils import *
@@ -104,13 +104,16 @@ class TuringGraph:
  
 
     def __len__(self):
+        if hasattr(self,"_len"):
+            return self._len
         d={}
         for i in self.codes:
             if d.has_key(i.pos):
                 d[i.pos]+=1
             else:
                 d[i.pos]=1
-        return len(d.values())
+        self._len=len(d.values())
+        return self._len
     def score_path(path):
         #TO DO
         pass
@@ -256,7 +259,63 @@ class TuringGraph:
         return Bed12(chr,start,stop,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,blockSizes,blockStarts)
 
 
-
+    def translate_bits_into_beds(self,bits,id="noname",chr="chr"):
+        '''
+        beds means to fragmentation the bits.
+        not try to link them with missing data
+        '''
+        chr=chr
+        id=id
+        last_pos=-1
+        blockStarts=[]
+        blockSizes=[]
+        blockCount=0
+        itemRgb="0,0,0"
+        score=0
+        i=0
+        exon_state=False
+        i0=0
+        strand="+"
+        for x in self.codes:
+            if x.code!=cb.BLOCKON and x.code!=cb.BLOCKOFF: continue
+            if x.pos!=last_pos:
+                last_pos=x.pos
+                if bits[2*i]==True and bits[2*i+1]==False:
+                    if not exon_state and x.code==cb.BLOCKON: # TODO : test if and after is right, debut the bug.bed
+                        exon_state=True
+                        blockStarts.append(last_pos)
+                        blockCount+=1
+                elif bits[2*i]==False and bits[2*i+1]==True:
+                    if exon_state:
+                        exon_state=False
+                        blockSizes.append(last_pos-blockStarts[-1])
+                elif bits[2*i]==True and bits[2*i+1]==True:
+                    if blockCount>0:
+                        start=blockStarts[0]
+                        if exon_state:
+                            exon_state=False
+                            blockSizes.append(last_pos-blockStarts[-1])
+                        stop=blockStarts[-1]+blockSizes[-1]
+                        for j,y in enumerate(blockStarts):
+                            blockStarts[j]-=start
+                        i0+=1
+                        yield Bed12(chr,start,stop,id+"."+str(i0),score,strand,start,start,itemRgb,blockCount,blockSizes,blockStarts)
+                        blockCount=0
+                        blockStarts=[]
+                        blockSizes=[]
+                i+=1
+    
+        if blockCount>0:
+            if exon_state:
+                blockSizes.append(last_pos-blockStarts[-1])
+                exon_state=False
+            start=blockStarts[0]
+            stop=blockStarts[-1]+blockSizes[-1]
+            for j,y in enumerate(blockStarts):
+                blockStarts[j]-=start
+            i0+=1
+            yield Bed12(chr,start,stop,id+"."+str(i0),score,strand,start,start,itemRgb,blockCount,blockSizes,blockStarts)
+                    
 
 import array,tempfile,heapq
 import itertools

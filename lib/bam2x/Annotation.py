@@ -72,6 +72,12 @@ class METABED(object):
             if self.strand=="-":
                 return a[::-1]
         return a
+    def cdna_length(self):
+        '''sum of the length of exons'''
+        s=0
+        for i in self.Exons():
+            s=s+len(i)
+        return s
         
     def upstream(self,bp=1000):
         '''return the $bp bp upstream Bed Class Object'''

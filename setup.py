@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 23:13:21 EST
+# Last-modified: 02-12-2014, 23:54:18 EST
 import os
 import sys
 from distutils.core import setup
@@ -9,8 +9,8 @@ from distutils.core import setup
 metadata = {
 
           'name':"bam2x",
-          'version':"0.03",
-          'description':"bionformatics python lib for query bam files",
+          'version':"0.04",
+          'description':"bionformatics python lib for query bam files, xplib final version, mv to bam2x lib in future version",
           'author':"Xiaopeng Zhu",
           'author_email':"nimezhu@gmail.com",
           'packages':["xplib",
@@ -37,8 +37,6 @@ metadata = {
                    "bin/xGetSeq.py",
                    "bin/xGetCDSSeq.py",
                    "bin/xGetCDS.py",
-                   "bin/xGetUTR5.py",
-                   "bin/xGetUTR3.py",
                    "bin/xbams2APS.py",
                    "bin/pBam20h.py",
                    "scripts/bam2rpkm.py",
