@@ -5,7 +5,7 @@ import argparse
 from bam2x import TableIO,IO,DBI
 from bam2x.Tools import seq_wrapper
 def help():
-    return "get sequence from twobit genome file"
+    return "query bam file"
 def set_parser(parser):
     parser.add_argument("-m",type=str,choices=("fetch","pileup"),dest="method",default="fetch")
     parser.add_argument("-b","--bam",type=str,dest="bam",help="bam file")
