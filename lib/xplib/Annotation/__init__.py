@@ -1,7 +1,7 @@
 # programmer:  zhuxp
 # email: nimezhu@163.com
 import sys
-#Last-modified: 02-11-2014, 10:41:54 EST
+#Last-modified: 02-12-2014, 22:33:18 EST
 # reader of any column file
 __all__=['Bed','Bed12','GeneBed','TransUnit','Peak','OddsRatioSNP','VCF']        
 class Bed(object):
@@ -139,7 +139,7 @@ class Bed(object):
         else:
             return "-"
     def Exons(self):
-        b=Bed([self.chr,self.start,self.stop,self.id+"_Exon_1",self.strand,self.score])
+        b=Bed([self.chr,self.start,self.stop,self.id+"_Exon_1",self.score,self.strand])
         a=[]
         a.append(b)
         return a

@@ -1,9 +1,10 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 02-11-2014, 23:40:29 EST
+# Last-modified: 02-12-2014, 21:46:42 EST
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
+from bam2x.Annotation import BED3
 import bam2x
 import copy
 
@@ -98,7 +99,7 @@ def translate_coordinates(coord,bed,reverse=False): # bed is Bed12 format
     (start,stop,strand)=translate_coordinate(coord,bed,reverse)
     score=bed.score
     if isinstance(bed,Bed12):
-        (cds_start,cds_stop,cds_strand)=translate_coordinate(coord,Bed([bed.chr,bed.cds_start,bed.cds_stop]),reverse)
+        (cds_start,cds_stop,cds_strand)=translate_coordinate(coord,Bed(bed.chr,bed.cds_start,bed.cds_stop),reverse)
         itemRgb=bed.itemRgb
         blockCount=bed.blockCount
         blockSizes=copy.copy(bed.blockSizes)
@@ -116,11 +117,7 @@ def translate_coordinates(coord,bed,reverse=False): # bed is Bed12 format
                 #print blockStarts[i]
                 blockStarts[i]=bed.stop-(blockStarts[i]+bed.start)
             blockSizes=blockSizes[::-1]
-        return Bed12([chr,start,stop,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,blockSizes,blockStarts])
-    elif isinstance(bed,GeneBed):
-        C1=Bed12(bed.toBedString())
-        C2=translate_coordinates(coord,C1)
-        return GeneBed(C2.toGenePredString())
+        return Bed12(chr,start,stop,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,blockSizes,blockStarts)
     else:
         C=copy.copy(bed)
         C.chr=chr
@@ -151,7 +148,7 @@ def find_nearest(bed,dbi,extends=50000,**dict):
     stop=bed.stop+extends
     chr=bed.chr
     if start<0: start=0
-    new_bed=Bed([chr,start,stop])
+    new_bed=BED3(chr,start,stop)
 
     results=dbi.query(new_bed,**dict)
     d=2*extends
@@ -177,9 +174,10 @@ def find_nearest(bed,dbi,extends=50000,**dict):
 
 def compatible(a,b,**kwargs):
     '''
+    TODO: UNFINISHED IN Bam2x LIB
     VERSION: TEST
     if a and b are compatible return true
-    a and b are BED12 class or GENEBED 
+    a and b are BED12 class 
     definition of compatible
        the overlap region should be same transcript structure.
     '''
@@ -200,7 +198,7 @@ def compatible(a,b,**kwargs):
     find the overlap region from [start,stop)
     '''
     a_starts_slice=[];
-    
+    #TODO REVISE IT ! 
     for i in a.exon_starts:
         if i>start and i<stop:
             a_starts_slice.append(i); 
@@ -305,7 +303,7 @@ def parse_string_to_bed(string):
         exit(1)
     start=int(y[0])-1
     end=int(y[1])
-    return Bed([chr,start,end])
+    return BED3(chr,start,end)
 
 
 

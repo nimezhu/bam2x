@@ -43,7 +43,7 @@ class METABED(object):
                 exon_end=self.start+self.blockStarts[i]+self.blockSizes[i]
                 j+=step
                 exon_id=self.id+"_Exon_"+str(j+1)
-                t=(self.chr,exon_start,exon_end,exon_id,self.strand,0.0)
+                t=(self.chr,exon_start,exon_end,exon_id,0.0,self.strand)
                 a.append(BED6(*t))
             if self.strand=="-":
                 return a[::-1]
@@ -67,12 +67,80 @@ class METABED(object):
                 intron_end=self.start+self.blockStarts[i+1]
                 j+=step
                 intron_id=self.id+"_Intron_"+str(j+1)
-                t=(self.chr,intron_start,intron_end,intron_id,self.strand,0.0)
+                t=(self.chr,intron_start,intron_end,intron_id,0.0,self.strand)
                 a.append(BED6(*t))
             if self.strand=="-":
                 return a[::-1]
         return a
-
+        
+    def upstream(self,bp=1000):
+        '''return the $bp bp upstream Bed Class Object'''
+        chr=self.chr
+        strand=self.strand
+        id=self.id+"_up"+str(bp)
+        if(self.strand=="+"):
+            start=self.start-bp
+            stop=self.start
+        else:
+            start=self.stop
+            stop=self.stop+bp
+        if (start<0):start=0
+        x=[chr,start,stop,id,0,strand]
+        return BED6(*x)
+    def core_promoter(self,bp=1000,down=500):
+        '''return the $bp bp upstream Bed Class Object'''
+        chr=self.chr
+        strand=self.strand
+        id=self.id+"_core_promoter"
+        if(self.strand=="+"):
+            start=self.start-bp
+            stop=self.start+down
+        else:
+            start=self.stop-down
+            stop=self.stop+bp
+        if (start<0):start=0
+        x=[chr,start,stop,id,0,strand]
+        return BED6(*x)
+    def downstream(self,bp=1000):
+        '''return the $bp bp downstream Bed Class Object'''
+        chr=self.chr
+        strand=self.strand
+        id=self.id+"_down"+str(bp)
+        if(self.strand=="+"):
+            start=self.stop
+            stop=self.stop+bp
+        else:
+            start=self.start-bp
+            stop=self.start
+        x=[chr,start,stop,id,0,strand]
+        return BED6(*x)
+    def tss(self):
+        '''return the Bed Object that represent transcription start site, name is geneid_tss'''
+        pos=self.stop
+        if self.strand=="+":
+            pos=self.start
+        else:
+            pos=self.stop-1  #should minus one or not?
+        return BED6(self.chr,pos,pos+1,self.id+"_tss",0,self.strand)
+    def tts(self):
+        '''return the Bed Object that represent transcription termination site, name is geneid_tss'''
+        if self.strand=="+":
+            pos= self.stop-1
+        else:
+            pos=self.start 
+        return BED6(self.chr,pos,pos+1,self.id+"_tts",0,self.strand)
+    def head(self,bp=2):
+        '''return the head 2(default) bp of simple bed'''
+        if self.strand=="+":
+            return BED6(self.chr,self.start,self.start+bp,self.id+"_head"+str(bp)+"bp",0,self.strand)
+        if self.strand=="-":
+            return BED6(self.chr,self.stop-bp,self.stop,self.id+"_head"+str(bp)+"bp",0,self.strand)
+    def tail(self,bp=2):
+        '''return the tail 2(default) bp of simple bed'''
+        if self.strand=="+":
+            return BED6(self.chr,self.stop-bp,self.stop,self.id+"_tail"+str(bp)+"bp",0,self.strand)
+        if self.strand=="-":
+            return BED6(self.chr,self.start,self.start+2,self.id+"_tail"+str(bp)+"bp",0,self.strand)
 def types(x,TYPES):
     b=[]
     for v,t in itertools.izip(x,TYPES):

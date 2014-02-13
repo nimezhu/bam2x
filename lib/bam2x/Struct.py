@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 12:42:25 EST
+# Last-modified: 02-12-2014, 22:02:57 EST
 import os,sys,argparse,types
 from bam2x.Annotation import BED6 as Bed 
 from bam2x import TableIO
@@ -236,7 +236,8 @@ class binindex(object):
                     a=cls._make(cls._types(i))
 	            self.append(a)
             else:
-                self.append(a)
+                for i in handle:
+                    self.append(i)
 	
 	def query(self,bed,**kwargs):
 	    '''
