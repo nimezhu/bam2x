@@ -1,4 +1,5 @@
-from . import getseq,query_bam,read 
+__all__=["getseq","query_bam","read"]
+from . import *
 
 '''
 command lines

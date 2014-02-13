@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 16:49:09 EST
-VERSION="0.1"
+# Last-modified: 02-12-2014, 21:18:15 EST
+VERSION="0.0.4"
 import os,sys,argparse
 import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
 from bam2x.Run import commands
+from bam2x.MRun import commands as mcmd
 def ParseArg():
     ''' This Function Parse the Argument '''
     p=argparse.ArgumentParser( description = 'bam2x', epilog='')
@@ -17,11 +18,16 @@ def ParseArg():
     group.add_argument('-i','--input',dest='input',default='stdin',type=str,help="input file Default: %(default)s")
     group.add_argument('-o','--output',dest='output',default='stdout',type=str,help="output file Default: %(default)s")
     
+    mcpu_group=argparse.ArgumentParser(add_help=False)
+    mcpu_group.add_argument('-n','--num_cpus',dest="num_cpus",type=str,default=4,help="number of cpus DEFAULT: %(default)i")
     
     subs=p.add_subparsers(help="subcommand help",dest="sub")
     for i in commands.keys():
         pi=subs.add_parser(i,help=commands[i].help(),parents=[group])
         commands[i].set_parser(pi)
+    for i in mcmd.keys():
+        pi=subs.add_parser(i,help=mcmd[i].help(),parents=[group,mcpu_group])
+        mcmd[i].set_parser(pi)
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
@@ -31,8 +37,10 @@ def ParseArg():
     return p.parse_args()
 def Main():
     args=ParseArg()
-    commands[args.sub].run(args)
-
+    if commands.has_key(args.sub):
+        commands[args.sub].run(args)
+    elif mcmd.has_key(args.sub):
+        mcmd[args.sub].run(args)
 
     
 if __name__=="__main__":

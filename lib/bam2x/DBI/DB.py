@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 17:02:51 EST
+# Last-modified: 02-12-2014, 21:12:12 EST
 
 import os,sys
 from bam2x.Annotation import *
@@ -21,9 +21,11 @@ BASIC QUERY FUNCTIONS
 def parse_region_str(x):
     try:
         a=x.split(":")
-        b=a.split("-")
-        b[0]=int(b[0])-1
-        b[1]=int(b[1])
+        b=[None,None]
+        if len(a)==2:
+            b=a.split("-")
+            b[0]=int(b[0])-1
+            b[1]=int(b[1])
         return BED3(a[0],b[0],b[1])
     except:
         print >>sys.stderr,"unknown formatted region string"

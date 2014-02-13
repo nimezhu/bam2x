@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 15:31:08 EST
+# Last-modified: 02-12-2014, 21:19:45 EST
 import os
 import sys
 from distutils.core import setup
@@ -25,7 +25,10 @@ metadata = {
                     "xplib.TuringTuple",
                     "bam2x",
                     "bam2x.DBI",
-                    "bam2x.Run"
+                    "bam2x.Run",
+                    "bam2x.MRun",
+                    "bam2x.Tools".
+                    "bam2x.Turing".
                     ],
           'package_dir':{"":"lib"},
           'scripts':["bin/xQuery.py",
