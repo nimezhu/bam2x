@@ -219,6 +219,36 @@ class BED12(namedtuple("BED12",H_BED12),METABED):
     @classmethod
     def _types(cls,x):
         return types(x,F_BED12)
+    
+class Fragment:
+    '''
+    Paired End Raw Data
+    '''
+    def __init__(self,read,mate=None,**kwargs):
+        self.reads=[]
+        if mate is None:
+            self.reads.append(read)
+        else:
+            if read.is_read1:
+                self.reads.append(read)
+                self.reads.append(mate)
+            else:
+                self.reads.append(mate)
+                self.reads.append(read)
+        if kwargs.has_key("chr"):
+            self.chr=kwargs["chr"]
+    def __str__(self):
+        s=""
+        for i,x in enumerate(self.reads):
+            s+="READ"+str(i)+"\t"+str(x)+"\n"
+        return s
+    def toBed12(self,chr="unknown_chr",strand="read2"):
+        from bam2x import TableIO
+        x=list()
+        for i in TableIO.parse(self.reads,"bam2bed12",references=chr,strand=strand):
+            x.append(i)
+        return x
+  
 
 if __name__=="__main__":
     b=("chr1",200,500,"test_gene",0.0,"-",250,450,"0,0,0",2,(100,101),(0,199))

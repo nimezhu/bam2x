@@ -296,6 +296,20 @@ class BamlistI(MetaDBI):
                     strand=dict["strand"]
                 for bed in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2bed12",references=chrom,strand=strand):
                     yield bed
+        elif method=="bam2": # yield bed12
+            for bamfile in self.bamfiles:
+                for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
+                    if dict.has_key("strand"):
+                        yield fragment.toBed12(chr=chrom,strand=dict["strand"])
+                    else:
+                        yield fragment.toBed12(chr=chrom)
+        elif method=="bam2fast": # yield bed12 , don't report mate not in this iterator, 
+            for bamfile in self.bamfiles:
+                for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment"):
+                    if dict.has_key("strand"):
+                        yield fragment.toBed12(chr=chrom,strand=dict["strand"])
+                    else:
+                        yield fragment.toBed12(chr=chrom)
         elif method=='pileup':
             s=[[0,0,0,0] for row in range(end-start)]
             for bamfile in self.bamfiles:

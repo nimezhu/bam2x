@@ -164,11 +164,12 @@ def set_parser(p):
     ''' This Function Parse the Argument '''
     p.add_argument('-I','--input_format',dest="format",default="bed12",choices=["bed6","bed12"],type=str,help="input file format DEFAULT:%(default)s , all possible exons")
     p.add_argument('-b','--bam',dest="bam",type=str,help="bam file")
-    p.add_argument('-S','--strand',dest="strand",type=str,choices=["read1","read2"],default="read2",help="bam file")
+    p.add_argument('-S','--strand',dest="strand",type=str,choices=["read1","read2"],default="read2",help="strand information")
     p.add_argument('-m','--min_uniq_percentage',dest="min_uniq",type=float,default=0.02,help="min uniq percentage [ add an isoform only if it can interpret more than min uniq percentage fragments ], DEFAULT: %(default)f ")
     p.add_argument('-f','--min_uniq_fpk_increase',dest="min_uniq_fpk_increase",type=float,default=0.05,help="default: %(default)f ")
     p.add_argument('-p','--merge_mismatch_bp',dest="merge_bp",type=int,default=5,help="default: %(default)i ")
     p.add_argument('--sort_model',dest="sort_model",type=int,default=0,choices=[0,1,2],help="model 0: sort by abundance*intron number, model 1: sort by intron number, model 2: sort by abundance, default: %(default)i ")
+    p.add_argument('--interpret_model',dest="interpret_model",type=int,default=0,choices=[0,1],help="model 0: try to interpret reads by link them with detected transcript structure, model 1: report fragments independently, default: %(default)i ")
     p.add_argument('-g','--genome',dest="genome",type=str,help="genome sequence in 2bit format, e.g. mm9.2bit")
     p.add_argument('--report_seq',default=False,dest="report_seq",action="store_true",help="report sequence [ warning: cost mem ]")
 def run(local_args):
@@ -507,17 +508,15 @@ def query(i,dbi_bam,genome): # i is query iteem
         initial_bits=bitarray(2*g_len)
         initial_bits.setall(True)
 
-    for j in dbi_bam.query(i,method="bam1",strand=args.strand):
+    for j in dbi_bam.query(i,method="bam2fast",strand=args.strand):
         p=[]
         logging.debug(j)
         #print "debug",j
         
-        '''
         if j[0].strand!=i.strand: continue
         for k in j:
             p.append(TuringFactory(Tools.translate_coordinates(i,k))) #TODO check this
-        '''
-        p.append(TuringFactory(Tools.translate_coordinates(i,j))) #TODO check this
+        # p.append(TuringFactory(Tools.translate_coordinates(i,j))) #TODO check this
 
         #print "debug glen:",g_len
 
@@ -653,23 +652,31 @@ def query(i,dbi_bam,genome): # i is query iteem
             pattern=cliques_pattern[j]
             pattern[-1]=True
             pattern[-2]=True
-            beds=[bed for bed in g.translate_bits_into_beds(cliques_pattern_no_prior[j])]
+            if args.interpret_model==1:
+                beds=[bed for bed in g.translate_bits_into_beds(cliques_pattern_no_prior[j])]
+                ret_dict["CLIQUES"][-1]["BEDS"]=[]
+                for j1,bed in enumerate(beds):
+                    score=score*1000.0/cdna_length
+                    chr=i.id
+                    id=i.id+"_"+"NO."+str(j0)+"_"+str(j1)
+                    itemRgb=str(rgb)+","+str(rgb)+","+str(rgb)
+                    bed=bed._replace(chr=chr,id=id,itemRgb=itemRgb)
+                    ret_dict["CLIQUES"][-1]["BEDS"].append(str(Tools.translate_coordinates(i,bed,True)))
+            elif args.interpret_model==0:
+                bed=g.translate_bits_into_bed(cliques_pattern[j])
+                score=score*1000.0/cdna_length
+                chr=i.id
+                id=i.id+"_"+"NO."+str(j0)
+                itemRgb=str(rgb)+","+str(rgb)+","+str(rgb)
+                bed=bed._replace(chr=chr,id=id,itemRgb=itemRgb)
+                ret_dict["CLIQUES"][-1]["BED"]=str(Tools.translate_coordinates(i,bed,True))
             #print "debug,bed",bed
             '''
             end of need to revise
             '''
             #bed=translate_bits_into_bed(g,cliques_pattern[j])
 
-            ret_dict["CLIQUES"][-1]["BEDS"]=[]
-
-            for j1,bed in enumerate(beds):
-                score=score*1000.0/cdna_length
-                chr=i.id
-                id=i.id+"_"+"NO."+str(j0)+"_"+str(j1)
-                itemRgb=str(rgb)+","+str(rgb)+","+str(rgb)
-                bed=bed._replace(chr=chr,id=id,itemRgb=itemRgb)
-                ret_dict["CLIQUES"][-1]["BEDS"].append(str(Tools.translate_coordinates(i,bed,True)))
-
+           
 
 
             ret_dict["CLIQUES"][-1]["UNIQ_SCORE"]=uniq_score

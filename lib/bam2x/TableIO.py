@@ -10,7 +10,8 @@ hclass = {
     "bed":Annotation.BED6,
 }
 htranslate = {
-    "bam2bed12": Translator.BamToBed12
+    "bam2bed12": Translator.BamToBed12,
+    "bam2fragment":Translator.BamToFragmentIterator,
 }
 FormatToIterator=dict(hclass.items()+htranslate.items())
 def parse(handle,convert_cls,**dict):
