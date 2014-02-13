@@ -1,24 +1,24 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 01-29-2014, 20:48:00 EST
-VERSION="pv20h"
+# Last-modified: 02-13-2014, 12:00:34 EST
+VERSION="bam2x 0.0.4"
 import os,sys,argparse
-from xplib.Annotation import Bed
-from xplib import TableIO,Tools,DBI
-from xplib.Tools import IO
+from bam2x.Annotation import BED6 as Bed
+from bam2x.Annotation import BED12
+from bam2x import TableIO,Tools,DBI,IO
 import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
 import gzip
 import time
-import xplib.Turing.TuringCodeBook as cb
-from xplib.Turing.TuringUtils import *
-from xplib.Turing import TuringCode,TuringGraph
+import bam2x.Turing.TuringCodeBook as cb
+from bam2x.Turing.TuringUtils import *
+from bam2x.Turing import TuringCode,TuringGraph
 from bitarray import bitarray
 from multiprocessing import  Pool
 import math
-from xplib.TuringTuple import *
-from xplib.Tuple.Bed12Tuple import *
+import itertools
+import logging
 '''
 Query bam and splicing sites
 Construct Turing Graph
@@ -64,13 +64,20 @@ pv20h:
     DONE : increase the dark of output
     DONE : ignore the pattern that is not compatible with query bed12
     DONE : add options to report seq or not
-TODO.tar.gz:    
-    TODO : scan model                            ( get start and end          )  --> xbam2converage splicing sites!
-    TODO : start and end sites detection
-'''
+pv22a:
+    DONE : report singleton as singleton , score is still cliques score
+    TODO : link undetected exon.
+v0.0.4:
+    DONE: rm xplib and convert to bam2x lib, 
+    DONE: using turing namedtuple instead of tuple
+    TODO: no bam2 query but bam1 query ( fragment query in lib )
 
+'''
+def help():
+    return "detect isoforms."
 def report_format(x,**kwargs):
     #TOD
+    logging.debug(x)
     try:
         S=""
         S+="QR\t"+str(x["QR"])+"\n"
@@ -92,7 +99,11 @@ def report_format(x,**kwargs):
             S+="  NO."+str(i+1)+"\n"
             S+="    REP"+"\t"+y["REP"]+"\n"
             S+="    UNIQ_SCORE\t"+str(y["UNIQ_SCORE"])+"\n"
-            S+="    BED"+"\t"+str(y["BED"])+"\n"
+            if y.has_key("BED"):
+                S+="    BED"+"\t"+str(y["BED"])+"\n"
+            elif y.has_key("BEDS"):
+                for bed in y["BEDS"]:
+                    S+="    BED"+"\t"+str(bed)+"\n"
             if args.report_seq:
                 S+="    ALL_COMPATIBLE_PATTERN\t"+str(y["ALL_GROUP"])+"\n"
                 S+="    UNIQ_COMPATIBLE_PATTERN\t"+str(y["UNIQ_GROUP"])+"\n"
@@ -100,6 +111,7 @@ def report_format(x,**kwargs):
         S+="//\n"
         return S
     except:
+        raise
         if x.has_key("QR"):
             return "# ERROR RESULT FORMAT FOR "+str(x["QR"])
         else:
@@ -148,29 +160,19 @@ def nearbyIter(i,n,length,include_self=True):
     for j in range(1,n+1):
         if i-j > 0: yield i-j
         if i+j < length : yield i+j 
-def ParseArg():
+def set_parser(p):
     ''' This Function Parse the Argument '''
-    p=argparse.ArgumentParser( description = 'Example: %(prog)s -h', epilog='Library dependency : xplib')
-    p.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
-    p.add_argument('-i','--input',dest="input",default="stdin",type=str,help="input file DEFAULT: STDIN")
-    p.add_argument('-I','--input_format',dest="format",default="bedtuple",type=str,help="input file format")
-    p.add_argument('-o','--output',dest="output",type=str,default="stdout",help="output file DEFAULT: STDOUT")
-    # p.add_argument('-s','--splicing_sites',dest="splicing_sites",type=str,help="splicing sites [tabix file] [ output of xBamToSplicingSites.py ]")
+    p.add_argument('-I','--input_format',dest="format",default="bed12",choices=["bed6","bed12"],type=str,help="input file format DEFAULT:%(default)s , all possible exons")
     p.add_argument('-b','--bam',dest="bam",type=str,help="bam file")
     p.add_argument('-S','--strand',dest="strand",type=str,choices=["read1","read2"],default="read2",help="bam file")
-    # p.add_argument('-t','--threshold',dest="threshold",type=float,default=0.95,help="cutoff for interpret fragments percentage, default: 0.95 ")
     p.add_argument('-m','--min_uniq_percentage',dest="min_uniq",type=float,default=0.02,help="min uniq percentage [ add an isoform only if it can interpret more than min uniq percentage fragments ], DEFAULT: %(default)f ")
     p.add_argument('-f','--min_uniq_fpk_increase',dest="min_uniq_fpk_increase",type=float,default=0.05,help="default: %(default)f ")
     p.add_argument('-p','--merge_mismatch_bp',dest="merge_bp",type=int,default=5,help="default: %(default)i ")
     p.add_argument('--sort_model',dest="sort_model",type=int,default=0,choices=[0,1,2],help="model 0: sort by abundance*intron number, model 1: sort by intron number, model 2: sort by abundance, default: %(default)i ")
     p.add_argument('-g','--genome',dest="genome",type=str,help="genome sequence in 2bit format, e.g. mm9.2bit")
-    p.add_argument('-n','--num_cores',dest="num_cores",type=int, default=4 ,help="number of cpu cores , DEFAULT: %(default)i")
     p.add_argument('--report_seq',default=False,dest="report_seq",action="store_true",help="report sequence [ warning: cost mem ]")
-    if len(sys.argv)==1:
-        print >>sys.stderr,p.print_help()
-        exit(0)
-    return p.parse_args()
-def Main():
+def run(local_args):
+    logging.basicConfig(level=logging.WARNING)
     global args,out,dbi_bam,g, MIN_INTRON_LENGTH, MIN_SPLICING_SITES_SCORE, MIN_FPK_RATIO,query_num
     MIN_INTRON_LENGTH=10
     MIN_SPLICING_SITES_SCORE=2
@@ -183,7 +185,7 @@ def Main():
               2:sort_by_abundance
     }
     '''
-    args=ParseArg()
+    args=local_args
     #print "debug:",args.report_seq
     MIN_FPK_RATIO=args.min_uniq_fpk_increase #TO TEST
     fin=IO.fopen(args.input,"r")
@@ -198,17 +200,17 @@ def Main():
     print >>out,"#\t"," ".join(sys.argv)
     # header=["chr","start","end","id","score","strand","seq"];
     # dbi_splicing_sites=DBI.init(args.splicing_sites,"tabix",tabix="metabed",header=header);
-    if args.format=="guess":
-        args.format=Tools.guess_format(args.input)
+    #if args.format=="guess":
+    #    args.format=IO.guess_format(args.input)
     reader=TableIO.parse(fin,args.format)
     query_list=[]
-    query_lists=[[] for i in range(args.num_cores)]
+    query_lists=[[] for i in range(args.num_cpus)]
     query_num=0
     for i,x in enumerate(reader):
-        query_lists[i%args.num_cores].append(x)
+        query_lists[i%args.num_cpus].append(x)
     query_num=i+1
-    # querys(query_lists[0])
-    pool=Pool(processes=args.num_cores)
+    querys(query_lists[0])  #DEBUG
+    pool=Pool(processes=args.num_cpus)
     results=pool.map(querys,query_lists)
     #print results
     output(results)
@@ -230,7 +232,7 @@ def iter(results):
     #print "in iter"
     #print "query_num:",query_num
     for i in range(query_num):
-        j=i%args.num_cores
+        j=i%args.num_cpus
         if j==0:
             index+=1
         #print"in iter:",results[j][index]
@@ -242,44 +244,40 @@ def query(i,dbi_bam,genome): # i is query iteem
     hc={}
     #retv="" #RETURN VALUE
     #retv+="BEGIN\nQR\t"+str(i)+"\n"
-    
+    x=i
     ret_dict={}
     ret_dict["QR"]=i
     '''
     PART A: scoring and adding splicing sites
     '''
     print >>sys.stderr,"QR",str(i)
-    length=tuple_len(i)
-    l=list()
-    l.append((0,cb.ON))
-    l.append((0,cb.BLOCKON))
-    l.append((length,cb.OFF))
-    l.append((length,cb.BLOCKOFF))
-    
+    length=i.stop-i.start
+    g=list()
+    g.append(TuringCode(0,cb.ON))
+    g.append(TuringCode(0,cb.BLOCKON))
+    g.append(TuringCode(length,cb.OFF))
+    g.append(TuringCode(length,cb.BLOCKOFF))
+    logging.debug(g)
     array=[0.0 for j in xrange(length)]
     donorSitesScore=[0.0 for j in xrange(length+1)]
     acceptorSitesScore=[0.0 for j in xrange(length+1)]
-
-    bedi=Bed(i)
-    x=i
-    seq=genome.get_seq(bedi).upper()
-    for j in dbi_bam.query(bedi,method="bam1tuple",strand=args.strand):
-
-        read=Tools.tuple_translate_coordinates(i,j)
+    seq=genome.get_seq(i).upper()
+    for j in dbi_bam.query(i,method="bam1",strand=args.strand):
+        read=Tools.translate_coordinates(i,j)
         #TODO : get read anc call peaks
-        if read[STRAND]=="+":
-            for k in get_exons(read):
-                for k0 in xrange(k[CHROMSTART],k[CHROMEND]):
+        if read.strand=="+":
+            for k in read.Exons():
+                for k0 in xrange(k.start,k.stop):
                     if k0>=length:
                         break
                     if k0>=0:
                         array[k0]+=1
-	    for intron in get_introns(read):
-	        if tuple_len(intron)< MIN_INTRON_LENGTH: continue
-                if intron[CHROMSTART] > 0  and intron[CHROMSTART] <length:
-                    donorSitesScore[intron[CHROMSTART]]+=1
-                if intron[CHROMEND] > 0  and intron[CHROMEND] <length:
-                    acceptorSitesScore[intron[CHROMEND]]+=1
+	    for intron in read.Introns():
+	        if len(intron)< MIN_INTRON_LENGTH: continue
+                if intron.start > 0  and intron.start <length:
+                    donorSitesScore[intron.start]+=1
+                if intron.stop > 0  and intron.stop <length:
+                    acceptorSitesScore[intron.stop]+=1
     
     gt=[0 for j in range(length)]
     ag=[0 for j in range(length)]
@@ -301,10 +299,10 @@ def query(i,dbi_bam,genome): # i is query iteem
     hDonor[length]=1
     for j in xrange(length):
         if donorSitesScore[j] > MIN_SPLICING_SITES_SCORE:
-            l.append((j,cb.BLOCKOFF))
+            g.append(TuringCode(j,cb.BLOCKOFF))
             hDonor[j]=1
         elif acceptorSitesScore[j] > MIN_SPLICING_SITES_SCORE:
-            l.append((j,cb.BLOCKON))
+            g.append(TuringCode(j,cb.BLOCKON))
             hAcceptor[j]=1
     '''
     closure to score sites by coverage
@@ -316,6 +314,8 @@ def query(i,dbi_bam,genome): # i is query iteem
         1. phase change threshold determin
         2. find the nearest possible splicing sites 
         '''
+        logging.debug(length)
+        logging.debug(g)
         diff=[array[0]] # assume the pos -1  is 0.0
         for j in range(length-1):
             diff.append(math.log((array[j+1]+1)/(array[j]+1.0)))
@@ -386,7 +386,7 @@ def query(i,dbi_bam,genome): # i is query iteem
                 k=correctToNearAcceptor(j)
                 if k!=-1 and not hAcceptor.has_key(k):
                     hAcceptor[k]=1
-                    l.append((k,cb.BLOCKON))
+                    l.append(TuringCode(k,cb.BLOCKON))
                 # add to revise small fragrments ?
                 '''
                 elif k==-1 and diff[j] > meanAcceptor + 3 * sdAcceptor and not hAcceptor.has_key(j):
@@ -400,64 +400,65 @@ def query(i,dbi_bam,genome): # i is query iteem
                 k=correctToNearDonor(j)
                 if k!=-1 and not hDonor.has_key(k):
                     hDonor[k]=1
-                    l.append((k,cb.BLOCKOFF))
+                    g.append(TuringCode(k,cb.BLOCKOFF))
                 '''
                 elif k==-1 and diff[j] <  meanDonor - 3 * sdDonor and not hDonor.has_key(j):
                     hDonor[j]=1
                     l.append((j,cb.BLOCKOFF))
                 '''
-        if len(x)==12: #strange could not use i?
-            ti=Tools.tuple_translate_coordinates(x,x)
+        if isinstance(x,BED12): #strange could not use i?
+            ti=Tools.translate_coordinates(x,x)
             #print "debug ti:",tia
             ti_codes=[]
-            for j in ti[BLOCKSTARTS]:
+            for j in ti.blockStarts:
                 k=correctToNearAcceptor(j)
                 if k==-1:
-                    ti_codes.append((j,cb.BLOCKON))
+                    ti_codes.append(TuringCode(j,cb.BLOCKON))
                 else:
-                    ti_codes.append((k,cb.BLOCKON))
+                    ti_codes.append(TuringCode(k,cb.BLOCKON))
                 if k!=-1 and not hAcceptor.has_key(k):
                     hAcceptor[k]=1
-                    l.append((k,cb.BLOCKON))
+                    g.append(TuringCode(k,cb.BLOCKON))
                 if k==-1 and not hAcceptor.has_key(j):
                     hAcceptor[j]=1
-                    l.append((j,cb.BLOCKON))
+                    g.append(TuringCode(j,cb.BLOCKON))
             last_stop=0
-            for j,m in itertools.izip(ti[BLOCKSTARTS],ti[BLOCKSIZES]):
+            for j,m in itertools.izip(ti.blockStarts,ti.blockSizes):
                 blockStop=j+m
                 #print "debug blockStop",blockStop
                 k=correctToNearDonor(blockStop)
                 if k==-1:
-                    ti_codes.append((blockStop,cb.BLOCKOFF))
+                    ti_codes.append(TuringCode(blockStop,cb.BLOCKOFF))
                     last_stop=j
                 else:
-                    ti_codes.append((k,cb.BLOCKOFF))
+                    ti_codes.append(TuringCode(k,cb.BLOCKOFF))
                     last_stop=k
                 if k!=-1 and not hDonor.has_key(k):
                     hDonor[k]=1
-                    l.append((k,cb.BLOCKOFF))
+                    g.append(TuringCode(k,cb.BLOCKOFF))
                 elif k==-1 and not hDonor.has_key(blockStop):
                     hDonor[blockStop]=1
-                    l.append((blockStop,cb.BLOCKOFF))
+                    g.append(TuringCode(blockStop,cb.BLOCKOFF))
 
-            ti_codes.append((correctToNearAcceptor(ti[BLOCKSTARTS][0]),cb.ON))
-            ti_codes.append((last_stop,cb.OFF))
+            ti_codes.append(TuringCode(correctToNearAcceptor(ti.blockStarts[0]),cb.ON))
+            ti_codes.append(TuringCode(last_stop,cb.OFF))
             ti_codes.sort()
             #print "debug ti_codes",ti_codes
             #print ti_codes
             #TODO  GENERate start path.
-            l.sort()
-            l_len=codes_length(l)
-            initial_bits=translate_path_into_bits(l,l_len,ti_codes,args.merge_bp)
+            # l.sort()
+            graph=TuringGraph(g)
+            g_len=len(graph)
+            initial_bits=graph.translate_path_into_bits(TuringGraph(ti_codes),args.merge_bp)
             #print "debug ", initial_bits
-            for i in range(0,2*l_len,2):
+            for i in range(0,2*g_len,2):
                 if initial_bits[i]==True and initial_bits[i+1]==False:
                     initial_bits[i+1]=True
             initial_bits[-1]=True
             initial_bits[-2]=True
-            return initial_bits
-        l.sort()
-        return None
+            return initial_bits,graph
+        # l.sort()
+        return None,TuringGraph(g)
 
 
 
@@ -466,16 +467,15 @@ def query(i,dbi_bam,genome): # i is query iteem
 
 
     
-
-    initial_bits=addCoverageAndSeqScore()
-    g=l
+    initial_bits,g=addCoverageAndSeqScore()
     '''
     PART B : Report wig
     retv+="WIG"+"\n"
     retv+= "index\tnt\tcoverage\tdonorSitesScore\tacceptorSitesScore\tGT\tAG\n"
-    for j in xrange(tuple_len(i)):
+    for j in xrange(len(i)):
         retv+= str(j)+"\t"+str(seq[j])+"\t"+str(array[j])+"\t"+str(donorSitesScore[j])+"\t"+str(acceptorSitesScore[j])+"\t"+str(gt[j])+"\t"+str(ag[j])+"\n"
     '''
+    logging.debug(initial_bits)
     if args.report_seq:
         ret_dict["WIG_TABLE"]=(seq,array,donorSitesScore,acceptorSitesScore,gt,ag)
     
@@ -494,28 +494,34 @@ def query(i,dbi_bam,genome): # i is query iteem
     # bitarray_path=bitarray(2*len(g))
     # bitarray_path.setall(True)
     #TODO change bitarray?
-    #retv+="FIGURE\t"+turing_tuples_to_graph_string(g,600)+"\n"
-    ret_dict["FIGURE"]=turing_tuples_to_graph_string(g,600)
+    logging.debug(g)
+    ret_dict["FIGURE"]=g.graph_str(600)
     h={}
     hc={}
     j0=0;
     total_frag=0
     #for j in g: print "debug g:",j
     #print "INIT",bitarray_to_rep(initial_bits)
-    g_len=codes_length(g)
+    g_len=len(g)
     if initial_bits is None:
         initial_bits=bitarray(2*g_len)
         initial_bits.setall(True)
 
-    for j in dbi_bam.query(i,method="bam2tuple_fast",strand=args.strand):
+    for j in dbi_bam.query(i,method="bam1",strand=args.strand):
         p=[]
+        logging.debug(j)
         #print "debug",j
-        if j[0][STRAND]!=i[STRAND]: continue
+        
+        '''
+        if j[0].strand!=i.strand: continue
         for k in j:
-            p.append(TupleTuringFactory(Tools.tuple_translate_coordinates(i,k))) #TODO check this
+            p.append(TuringFactory(Tools.translate_coordinates(i,k))) #TODO check this
+        '''
+        p.append(TuringFactory(Tools.translate_coordinates(i,j))) #TODO check this
+
         #print "debug glen:",g_len
 
-        a=translate_paths_into_bits(g,g_len,p,args.merge_bp)
+        a=g.translate_paths_into_bits(p,args.merge_bp)
         #print "debug bits: ",a
         #print "debug bed :",translate_bits_into_bed(g,a)
         if isSelfIncompatible(a): continue
@@ -543,12 +549,11 @@ def query(i,dbi_bam,genome): # i is query iteem
         sorted_keys.sort(lambda x,y:h[x]-h[y] or bitarray_to_intron_number(hc[x])-bitarray_to_intron_number(hc[y]), reverse=True) 
     clique=[]
     cliques=[clique]
-    '''
-    bits=bitarray(g_len*2)
-    bits.setall(True)
-    '''
+    bits_no_prior=bitarray(g_len*2)
+    bits_no_prior.setall(True)
     bits=initial_bits.copy()
     cliques_pattern=[bits]
+    cliques_pattern_no_prior=[bits_no_prior]
     ret_dict["PATTERNS"]=list()
     for j,key in enumerate(sorted_keys):
         #retv+="No."+str(j)+"\t"+str(bitarray_to_rep(hc[key]))+" "+str(h[key])+" "+str(bitarray_to_intron_number(hc[key]))+"\n"
@@ -564,12 +569,12 @@ def query(i,dbi_bam,genome): # i is query iteem
                 cliques_pattern[m]=bitarray_and(cliques_pattern[m],hc[sorted_keys[j]])
                 break
         if not joined_clique:
-            '''
-            bits=bitarray(g_len*2)
-            bits.setall(True)  
-            '''
+            bits_no_prior=bitarray(g_len*2)
+            bits_no_prior.setall(True)  
             bits=initial_bits.copy()
             #TODO  change the bits start with exon structure
+            #print bits,hc[sorted_keys[j]],
+            #print isCompatible(bits,hc[sorted_keys[j]])
             if isCompatible(bits,hc[sorted_keys[j]]):
                 max_index=0
                 clique=[]
@@ -577,6 +582,8 @@ def query(i,dbi_bam,genome): # i is query iteem
                 bits=bitarray_and(bits,hc[sorted_keys[j]])
                 cliques.append(clique)
                 cliques_pattern.append(bits)
+                cliques_pattern_no_prior.append(bits_no_prior)
+                #print cliques
     ret_dict["CLIQUES"]=list()
 
     cumulative_score=0
@@ -589,15 +596,22 @@ def query(i,dbi_bam,genome): # i is query iteem
         score=0
         c=[] 
         for k,y in enumerate(sorted_keys):
+            '''
+            adding default or not? should not adding default?
+            '''
             if isCompatible(cliques_pattern[j],hc[y]):
                 cliques_pattern[j]=bitarray_and(cliques_pattern[j],hc[y])
+                cliques_pattern_no_prior[j]=bitarray_and(cliques_pattern_no_prior[j],hc[y])
                 score+=h[y]
                 c.append(k)
         '''
         to debug this
         '''
         cliques_pattern[j][-1]=True
+        cliques_pattern_no_prior[j][-1]=True
         cliques_pattern[j][-2]=True
+        cliques_pattern_no_prior[j][-2]=True
+
         uniq_score=0
         for k,y in enumerate(x):
             uniq_score+=h[sorted_keys[y]]
@@ -610,7 +624,7 @@ def query(i,dbi_bam,genome): # i is query iteem
             #print >>sys.stderr,"ignore due to small uniq frags:",float(uniq_score)/total_frag
             continue
         else:
-            bed=translate_bits_into_bed(g,cliques_pattern[j])
+            bed=g.translate_bits_into_bed(cliques_pattern[j])
             cdna_length=bed.cdna_length()
             if cdna_length==0:
                 #print >>sys.stderr,"ignore due to cdna_length",bed
@@ -630,7 +644,7 @@ def query(i,dbi_bam,genome): # i is query iteem
             #ret_dict["CLIQUES"][-1]["CLIQUE"]=(c,cliques[j],bitarray_to_rep(cliques_pattern[j]))
             ret_dict["CLIQUES"][-1]["ALL_GROUP"]=c
             ret_dict["CLIQUES"][-1]["UNIQ_GROUP"]=cliques[j]
-            ret_dict["CLIQUES"][-1]["REP"]=bitarray_to_rep(cliques_pattern[j])
+            ret_dict["CLIQUES"][-1]["REP"]=bitarray_to_rep(cliques_pattern_no_prior[j])
             #retv+="CLIQUE\t",c,"\nUNIQ\t",cliques[j],"\nPATTERN\t",cliques_pattern[j]
             '''
             pattern
@@ -639,24 +653,25 @@ def query(i,dbi_bam,genome): # i is query iteem
             pattern=cliques_pattern[j]
             pattern[-1]=True
             pattern[-2]=True
-            bed=translate_bits_into_bed(g,pattern)
+            beds=[bed for bed in g.translate_bits_into_beds(cliques_pattern_no_prior[j])]
             #print "debug,bed",bed
             '''
             end of need to revise
             '''
             #bed=translate_bits_into_bed(g,cliques_pattern[j])
-            bed.score=score*1000.0/bed.cdna_length()
-            bed.chr=i[NAME]
-            bed.id=i[NAME]+"_"+"NO."+str(j0)
-            bed.itemRgb=str(rgb)+","+str(rgb)+","+str(rgb)
-            #retv+="UNIQ_FRG\t"+str(uniq_score)+"\n"
-            #retv+="TOTAL_FRG\t"+str(score)+"\n"
-            #retv+="UNIQ_FPK\t"+str(uniq_fpk)+"\n"
-            #retv+="FPK(SCORE)\t"+str(bed.score)+"\n"
-            #retv+="TR\t"+str(bed)+"\n"
-            ret_dict["CLIQUES"][-1]["BED_IN_QR_COORD"]=str(bed)
-            #print "debug",g,pattern,i,bed
-            ret_dict["CLIQUES"][-1]["BED"]=str(Tools.translate_coordinates(Bed(i),bed,True))
+
+            ret_dict["CLIQUES"][-1]["BEDS"]=[]
+
+            for j1,bed in enumerate(beds):
+                score=score*1000.0/cdna_length
+                chr=i.id
+                id=i.id+"_"+"NO."+str(j0)+"_"+str(j1)
+                itemRgb=str(rgb)+","+str(rgb)+","+str(rgb)
+                bed=bed._replace(chr=chr,id=id,itemRgb=itemRgb)
+                ret_dict["CLIQUES"][-1]["BEDS"].append(str(Tools.translate_coordinates(i,bed,True)))
+
+
+
             ret_dict["CLIQUES"][-1]["UNIQ_SCORE"]=uniq_score
             ret_dict["CLIQUES"][-1]["UNIQ_FPK"]=uniq_fpk
             ret_dict["CLIQUES"][-1]["SCORE"]=score
@@ -676,5 +691,5 @@ def query(i,dbi_bam,genome): # i is query iteem
 
 
 if __name__=="__main__":
-    Main()
+    run()
 
