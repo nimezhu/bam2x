@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-13-2014, 14:09:28 EST
+# Last-modified: 02-13-2014, 14:53:10 EST
 VERSION="0.0.9"
 import os,sys,argparse
 from bam2x.Annotation import BED6 as Bed
@@ -322,9 +322,9 @@ def call_peaks(chrom,bedgraph,exon_cutoff):
                                     if peak is not None:
                                         peaks.append(peak)
                                         i_n+=1
-                            else:
-                                peaks.append(peak)
-                                i_n+=1
+                                else:
+                                    peaks.append(peak)
+                                    i_n+=1
                             neg_beds=[i]
                             last_neg_stop=i[STOP_INDEX]
                     else:
