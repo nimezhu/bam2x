@@ -11,3 +11,4 @@ Library Dependent:
 - bxpython (optional, needed for query bigwig file)
 - bitarray
 - numpy
+- matplotlib

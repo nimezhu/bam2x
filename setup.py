@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-13-2014, 20:15:37 EST
+# Last-modified: 02-13-2014, 20:42:08 EST
 import os
 import sys
 from distutils.core import setup
@@ -25,7 +25,7 @@ metadata = {
           'scripts':[
                    "bin/bam2x"
                    ],
-          'install_requires':['numpy>=1.7.0','pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1','bitarray>=0.8.1']
+          'install_requires':['numpy>=1.7.0','pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1','bitarray>=0.8.1','matplotlib>=1.3.1']
 
 
 }
