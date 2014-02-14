@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-13-2014, 20:10:29 EST
+# Last-modified: 02-13-2014, 20:15:37 EST
 import os
 import sys
 from distutils.core import setup
@@ -31,8 +31,8 @@ metadata = {
 }
 
 def main():
-    if not float(sys.version[:3])>2.7:
-        sys.stderr.write("CRITICAL: Python version must be greater than or equal to 2.7!")
+    if not float(sys.version[:3])>2.4:
+        sys.stderr.write("CRITICAL: Python version must be greater than or equal to 2.4!")
         sys.exit(1)
     dist=setup(**metadata)
 
