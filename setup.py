@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-13-2014, 19:27:00 EST
+# Last-modified: 02-13-2014, 20:10:29 EST
 import os
 import sys
 from distutils.core import setup
@@ -9,7 +9,7 @@ from distutils.core import setup
 metadata = {
 
           'name':"bam2x",
-          'version':"0.05",
+          'version':"0.1",
           'description':"bionformatics python lib for query bam files, xplib final version, mv to bam2x lib in future version",
           'author':"Xiaopeng Zhu",
           'author_email':"nimezhu@gmail.com",
@@ -31,8 +31,8 @@ metadata = {
 }
 
 def main():
-    if not float(sys.version[:3])>2.4:
-        sys.stderr.write("CRITICAL: Python version must be greater than or equal to 2.4!")
+    if not float(sys.version[:3])>2.7:
+        sys.stderr.write("CRITICAL: Python version must be greater than or equal to 2.7!")
         sys.exit(1)
     dist=setup(**metadata)
 
