@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-15-2014, 11:44:46 EST
+# Last-modified: 02-15-2014, 12:17:15 EST
 import os
 import sys
 from distutils.core import setup
@@ -9,7 +9,7 @@ from distutils.core import setup
 metadata = {
 
           'name':"bam2x",
-          'version':"0.1.1",
+          'version':"0.1.0",
           'description':"bionformatics python lib for query bam files, this version set matplotlib as optional.",
           'author':"Xiaopeng Zhu",
           'author_email':"nimezhu@gmail.com",
