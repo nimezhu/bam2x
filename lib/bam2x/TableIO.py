@@ -8,6 +8,7 @@ hclass = {
     "bed6":Annotation.BED6,
     "bed12":Annotation.BED12,
     "bed":Annotation.BED6,
+    "vcf":Annotation.VCF,
 }
 htranslate = {
     "bam2bed12": Translator.BamToBed12,

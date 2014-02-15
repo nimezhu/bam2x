@@ -1,4 +1,4 @@
-__all__=["getseq","query_bam","read","cmpgene","getanno"]
+__all__=["getseq","query_bam","read","sort","cmpgene","getanno"]
 from . import *
 
 '''
@@ -9,6 +9,7 @@ commands= {
     "getanno":getanno,
     "query_bam":query_bam,
     "read":read,
+    "sort":sort,
     "cmpgene":cmpgene,
 }
 

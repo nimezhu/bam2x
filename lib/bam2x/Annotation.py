@@ -3,6 +3,8 @@ import itertools
 
 
 H_PSL=("matches","misMatches","repMatches","nCount","qNumInsert","qBaseInsert","tNumInsert","tBaseInsert","strand","qName","qSize","qStart","qEnd","tName","tSize","tStart","tEnd","blockCount","blockSizes","qStarts","tStart")
+H_VCF=("chr","pos","id","ref","alt","qual","filter","info")
+F_VCF=(str,int,str,str,str,int,str,str)
 H_BED3=("chr","start","stop")
 F_BED3=(str,int,int)
 H_BED6=("chr","start","stop","id","score","strand")
@@ -25,7 +27,6 @@ class METABED(object):
         for i in self:
             s+=str(i)+"\t"
         s.strip("\t")
-        s.strip("")
         return s
     def __len__(self):
         return self.stop-self.start
@@ -51,7 +52,10 @@ class METABED(object):
                 return a
         else:
             l=[]
-            l.append(self._replace(id=self.id+"_Exon_1"))
+            if hasattr(self,id):
+                l.append(self._replace(id=self.id+"_Exon_1"))
+            else:
+                l.append(self)
             return l
     def Introns(self):
         a=[]
@@ -169,7 +173,17 @@ class BED6(namedtuple("BED6",H_BED6),METABED):
     @classmethod
     def _types(cls,x):
         return types(x,F_BED6)
-    
+class VCF(namedtuple("VCF",H_VCF),METABED):
+    @classmethod
+    def _types(cls,x):
+        return types(x,F_VCF)
+    @property
+    def start(self):
+        return self.pos-1
+    @property
+    def stop(self):
+        return self.pos
+
 
 class BED12(namedtuple("BED12",H_BED12),METABED):
     def _slice(self,start,end,suffix):
