@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-13-2014, 20:42:08 EST
+# Last-modified: 02-15-2014, 11:44:46 EST
 import os
 import sys
 from distutils.core import setup
@@ -9,8 +9,8 @@ from distutils.core import setup
 metadata = {
 
           'name':"bam2x",
-          'version':"0.1",
-          'description':"bionformatics python lib for query bam files, xplib final version, mv to bam2x lib in future version",
+          'version':"0.1.1",
+          'description':"bionformatics python lib for query bam files, this version set matplotlib as optional.",
           'author':"Xiaopeng Zhu",
           'author_email':"nimezhu@gmail.com",
           'packages':[
@@ -25,7 +25,7 @@ metadata = {
           'scripts':[
                    "bin/bam2x"
                    ],
-          'install_requires':['numpy>=1.7.0','pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1','bitarray>=0.8.1','matplotlib>=1.3.1']
+          'install_requires':['numpy>=1.7.0','pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1','bitarray>=0.8.1']
 
 
 }

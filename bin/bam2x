@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-13-2014, 12:39:57 EST
-VERSION="0.0.4"
+# Last-modified: 02-15-2014, 11:39:12 EST
+VERSION="0.1"
 import os,sys,argparse
 import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
 from bam2x.Run import commands
 from bam2x.MRun import commands as mcmd
+import imp
+
 def ParseArg():
     ''' This Function Parse the Argument '''
     p=argparse.ArgumentParser( description = 'bam2x', epilog='')
@@ -28,6 +30,11 @@ def ParseArg():
     for i in mcmd.keys():
         pi=subs.add_parser(i,help=mcmd[i].help(),parents=[group,mcpu_group])
         mcmd[i].set_parser(pi)
+    if matplotlib_found:
+        from bam2x.Run.Plot import commands as plot_commands
+        for i in plot_commands.keys():
+            pi=subs.add_parser(i,help=plot_commands[i].help(),parents=[group])
+            plot_commands[i].set_parser(pi)
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
@@ -44,6 +51,12 @@ def Main():
 
     
 if __name__=="__main__":
+    global matplotlib_found
+    try: 
+        matplotlib_info=imp.find_module('matplotlib')
+        matplotlib_found=True
+    except ImportError:
+        matplotlib_found=False
     Main()
 
 

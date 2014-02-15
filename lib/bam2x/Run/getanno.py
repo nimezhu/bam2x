@@ -5,9 +5,10 @@ import argparse
 from bam2x import TableIO,IO,DBI
 from bam2x.Tools import seq_wrapper
 def help():
-    return "get [utr,exon,intron] annotations from bed12 file"
+    return "get [utr, cds, exon,intron,upstream or downstream] annotations from bed12 file"
 def set_parser(parser):
-    parser.add_argument("-a","--anno",type=str,choices=("cds","utr5","utr3","exon","intron","utr"),dest="annotation",default="cdna")
+    parser.add_argument("-a","--anno",type=str,choices=("cds","utr5","utr3","exon","intron","utr","upstream","downstream"),dest="annotation",default="cdna")
+    parser.add_argument("--bp",type=int,dest="bp",default=1000,help="upstream or downstream bp number")
     
 def run(args):
     out=IO.fopen(args.output,"w")
@@ -50,6 +51,16 @@ def run(args):
             j=i.utr3()
             if j is not None and j.cdna_length() > 0:
                 print >>out,j
+    elif args.annotation=="upstream":
+        for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
+            j=i.upstream(args.bp)
+            print >>out,j
+    elif args.annotation=="downstream":
+        for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
+            j=i.downstream(args.bp)
+            print >>out,j
+
+
 
 
 

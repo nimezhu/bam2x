@@ -1,13 +1,14 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 02-13-2014, 10:32:10 EST
+# Last-modified: 02-14-2014, 17:25:39 EST
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
+from bam2x.Annotation import BED12 
 from bam2x.Annotation import BED3
 import bam2x
 import copy
-
+import logging
 # __all__=["IO","codon"]
 
 hNtToNum={'a':0,'A':0,
@@ -129,8 +130,132 @@ def translate_coordinates(coord,bed,reverse=False): # bed is Bed12 format
             C.pos=C.start+1  # position is 1  index
         return C
         
-        
+def merge_bed(bedA,bedB,id="noname"):
+    '''
+    merge two bed into a bed , ratain all exon region.
+    '''
+    if bedA.chr!=bedB.chr: return None
+    l=[]
+    for i in bedA.Exons():
+        l.append(i)
+    for i in bedB.Exons():
+        l.append(i)
+    return _merge_bed6(l,id=id)
+    #TODO 
+def _merge_bed6(beds,id="noname"):
+    '''
+    a simple turing state change
+    '''
+    l=[]
 
+    for i in beds:
+        l.append((i.start,-1))
+        l.append((i.stop,1))
+    chr=beds[0].chr
+    l.sort()
+    switch=0
+    
+    start=l[0][0]
+    end=l[-1][0]
+    
+    state=0
+    assert i[0][1] > 1
+    last_pos=l[0][0]
+    state=1
+    switch=1
+    blockStarts=[]
+    blockSizes=[]
+    for i in l[1:]:
+        state-=i[1]
+        if switch==1 and state==0:
+            blockStarts.append(last_pos-start)
+            blockSizes.append(i[0]-last_pos)
+            switch=0
+        if switch==0 and state>0:
+            last_pos=i[0]
+            switch=1
+    
+    assert state==0
+    blockCount=len(blockSizes)
+    return BED12(chr,start,end,id,0.0,".",start,start,"0,0,0",blockCount,blockSizes,blockStarts) 
+
+def translate(bedA,bedB):
+    #TODO
+    '''
+    return merge bed
+    and 
+    the location for bedA in merge bed
+    the location for bedB in merge bed
+    return (merged_bed, bedA_in_merged_bed , bedB_in_merged_bed)
+    '''
+    meta=merge_bed(bedA,bedB,bedA.id+"_"+bedB.id+"_merged")
+    new_bedA=_translate_to_meta(meta,bedA)
+    new_bedB=_translate_to_meta(meta,bedB)
+    return new_bedA,new_bedB,meta
+def _translate_to_meta(meta,bed):
+    '''
+    another simple turing 
+    meta is the bigger one
+    meta code 1
+    bed code 2
+    '''
+    l=[]
+    for i in meta.Exons():
+        l.append((i.start,-1,1))
+        l.append((i.stop,1,1))
+    for i in bed.Exons():
+        l.append((i.start,-1,2))
+        l.append((i.stop,1,2))
+    l.append((bed.cds_start,0,3))
+    l.append((bed.cds_stop,0,4))
+    l.sort()
+    logging.debug("bed id %s, l=%s",bed.id,l)
+    meta_state=0
+    bed_state=0
+    meta_last_pos=0
+    meta_coordinate=0
+    tl=[]
+    for i in l:
+        if i[2]==1: #META
+            if i[1]==-1 and meta_state==0:
+                meta_state=1
+                meta_last_pos=i[0]
+            elif i[1]==1 and meta_state==1:
+                meta_state=0
+                meta_coordinate+=i[0]-meta_last_pos 
+                meta_last_pos=i[0]
+        elif i[2]==2:  #BED
+            tl.append((i[0]-meta_last_pos+meta_coordinate,i[1]))
+        elif i[2]==3:
+            cds_start=i[0]-meta_last_pos+meta_coordinate
+        elif i[2]==4:
+            cds_stop=i[0]-meta_last_pos+meta_coordinate
+    tl.sort()
+    state=0
+    switch=0
+    blockStarts=[]
+    blockSizes=[]
+    for i in tl:
+        state-=i[1]
+        if switch==0:
+            if state > 0:
+                logging.debug("start:%i",i[0])
+                b_start=i[0]
+                switch=1
+                blockStarts.append(b_start)
+        elif switch==1:
+            if state == 0:
+                logging.debug("end:%i",i[0])
+                b_end=i[0]
+                switch=0
+                blockSizes.append(b_end-b_start)
+    blockCount=len(blockSizes)
+    return BED12(meta.id,blockStarts[0],blockStarts[-1]+blockSizes[-1],"id",0.0,bed.strand,cds_start,cds_stop,"0,0,0",blockCount,blockSizes,blockStarts)
+    
+    
+
+
+    
 
 
 
@@ -306,4 +431,14 @@ def parse_string_to_bed(string):
     return BED3(chr,start,end)
 
 
-
+def test():
+    logging.basicConfig(level=logging.DEBUG)
+    a=Bed("chr1",100,200,"a",0.1,"+")
+    b=Bed("chr1",200,300,"b",0.2,"-")
+    c=Bed("chr1",400,500,"c",0.2,"-")
+    d=merge_bed(a,b)
+    e=merge_bed(d,c)
+    print _translate_to_meta(e,merge_bed(c,b))
+    print _translate_to_meta(e,d)
+if __name__=="__main__":
+    test()
