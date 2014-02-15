@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-15-2014, 12:17:15 EST
+# Last-modified: 02-15-2014, 12:29:18 EST
 import os
 import sys
 from distutils.core import setup
@@ -17,6 +17,7 @@ metadata = {
                     "bam2x",
                     "bam2x.DBI",
                     "bam2x.Run",
+                    "bam2x.Run.Plot",
                     "bam2x.MRun",
                     "bam2x.Tools",
                     "bam2x.Turing",
