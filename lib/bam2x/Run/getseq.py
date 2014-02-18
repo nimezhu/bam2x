@@ -7,7 +7,7 @@ from bam2x.Tools import seq_wrapper
 def help():
     return "get sequence from twobit genome file"
 def set_parser(parser):
-    parser.add_argument("-m",type=str,choices=("seq","cDNA","cdna","cds","utr5","utr3"),dest="method",default="cdna")
+    parser.add_argument("-m",type=str,choices=("seq","cDNA","cdna","cds","utr5","utr3"),dest="method",default="seq")
     parser.add_argument("-g","--genome",type=str,dest="genome",help="chromsome.2bit file")
     parser.add_argument("-b","--bed_column_number",type=int,choices={3,6,12},dest="bed_column_number",default=12) 
     

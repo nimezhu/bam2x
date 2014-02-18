@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-13-2014, 12:00:34 EST
-VERSION="bam2x 0.0.4"
+# Last-modified: 02-18-2014, 13:52:43 EST
+VERSION="bam2x 0.1.1"
 import os,sys,argparse
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12
@@ -70,14 +70,15 @@ pv22a:
 v0.0.4:
     DONE: rm xplib and convert to bam2x lib, 
     DONE: using turing namedtuple instead of tuple
-    TODO: no bam2 query but bam1 query ( fragment query in lib )
-
+    DONE: no bam2 query but bam1 query ( fragment query in lib )
+v0.1.1:
+    TODO: merge only overlapping reads. [ spliced ]
 '''
 def help():
     return "detect isoforms."
 def report_format(x,**kwargs):
     #TOD
-    logging.debug(x)
+    #logging.debug(x)
     try:
         S=""
         S+="QR\t"+str(x["QR"])+"\n"
@@ -169,7 +170,6 @@ def set_parser(p):
     p.add_argument('-f','--min_uniq_fpk_increase',dest="min_uniq_fpk_increase",type=float,default=0.05,help="default: %(default)f ")
     p.add_argument('-p','--merge_mismatch_bp',dest="merge_bp",type=int,default=5,help="default: %(default)i ")
     p.add_argument('--sort_model',dest="sort_model",type=int,default=0,choices=[0,1,2],help="model 0: sort by abundance*intron number, model 1: sort by intron number, model 2: sort by abundance, default: %(default)i ")
-    p.add_argument('--interpret_model',dest="interpret_model",type=int,default=0,choices=[0,1],help="model 0: try to interpret reads by link them with detected transcript structure, model 1: report fragments independently, default: %(default)i ")
     p.add_argument('-g','--genome',dest="genome",type=str,help="genome sequence in 2bit format, e.g. mm9.2bit")
     p.add_argument('--report_seq',default=False,dest="report_seq",action="store_true",help="report sequence [ warning: cost mem ]")
 def run(local_args):
@@ -210,7 +210,7 @@ def run(local_args):
     for i,x in enumerate(reader):
         query_lists[i%args.num_cpus].append(x)
     query_num=i+1
-    querys(query_lists[0])  #DEBUG
+    #querys(query_lists[0])  #DEBUG
     pool=Pool(processes=args.num_cpus)
     results=pool.map(querys,query_lists)
     #print results
@@ -258,7 +258,7 @@ def query(i,dbi_bam,genome): # i is query iteem
     g.append(TuringCode(0,cb.BLOCKON))
     g.append(TuringCode(length,cb.OFF))
     g.append(TuringCode(length,cb.BLOCKOFF))
-    logging.debug(g)
+    #logging.debug(g)
     array=[0.0 for j in xrange(length)]
     donorSitesScore=[0.0 for j in xrange(length+1)]
     acceptorSitesScore=[0.0 for j in xrange(length+1)]
@@ -315,8 +315,8 @@ def query(i,dbi_bam,genome): # i is query iteem
         1. phase change threshold determin
         2. find the nearest possible splicing sites 
         '''
-        logging.debug(length)
-        logging.debug(g)
+        #logging.debug(length)
+        #logging.debug(g)
         diff=[array[0]] # assume the pos -1  is 0.0
         for j in range(length-1):
             diff.append(math.log((array[j+1]+1)/(array[j]+1.0)))
@@ -476,7 +476,7 @@ def query(i,dbi_bam,genome): # i is query iteem
     for j in xrange(len(i)):
         retv+= str(j)+"\t"+str(seq[j])+"\t"+str(array[j])+"\t"+str(donorSitesScore[j])+"\t"+str(acceptorSitesScore[j])+"\t"+str(gt[j])+"\t"+str(ag[j])+"\n"
     '''
-    logging.debug(initial_bits)
+    #logging.debug(initial_bits)
     if args.report_seq:
         ret_dict["WIG_TABLE"]=(seq,array,donorSitesScore,acceptorSitesScore,gt,ag)
     
@@ -495,7 +495,7 @@ def query(i,dbi_bam,genome): # i is query iteem
     # bitarray_path=bitarray(2*len(g))
     # bitarray_path.setall(True)
     #TODO change bitarray?
-    logging.debug(g)
+    #logging.debug(g)
     ret_dict["FIGURE"]=g.graph_str(600)
     h={}
     hc={}
@@ -510,7 +510,7 @@ def query(i,dbi_bam,genome): # i is query iteem
 
     for j in dbi_bam.query(i,method="bam2fast",strand=args.strand):
         p=[]
-        logging.debug(j)
+        #logging.debug(j)
         #print "debug",j
         
         if j[0].strand!=i.strand: continue
@@ -547,42 +547,61 @@ def query(i,dbi_bam,genome): # i is query iteem
     else:
         sorted_keys.sort(lambda x,y:h[x]-h[y] or bitarray_to_intron_number(hc[x])-bitarray_to_intron_number(hc[y]), reverse=True) 
     clique=[]
-    cliques=[clique]
+    cliques=[]
     bits_no_prior=bitarray(g_len*2)
     bits_no_prior.setall(True)
-    bits=initial_bits.copy()
-    cliques_pattern=[bits]
-    cliques_pattern_no_prior=[bits_no_prior]
+    cliques_pattern=[]
     ret_dict["PATTERNS"]=list()
+
+    keys_len=len(sorted_keys)
+    
+    
+    joined_cliques=[False for i0 in range(keys_len)]
+    unjoined_pattern=range(0,keys_len)
+
     for j,key in enumerate(sorted_keys):
-        #retv+="No."+str(j)+"\t"+str(bitarray_to_rep(hc[key]))+" "+str(h[key])+" "+str(bitarray_to_intron_number(hc[key]))+"\n"
         ret_dict["PATTERNS"].append((bitarray_to_rep(hc[key]),h[key],bitarray_to_intron_number(hc[key])))
-        #print "PATTERN debug",bitarray_to_rep(hc[key]),h[key],bitarray_to_intron_number(hc[key])
-        
+        if joined_cliques[j] : continue
         joined_clique=False
-        for m,clique in enumerate(cliques):
-            #print "debug cliques_patterns",m,cliques_pattern[m]
-            if isCompatible(cliques_pattern[m],hc[sorted_keys[j]]):
-                joined_clique=True
-                cliques[m].append(j)
-                cliques_pattern[m]=bitarray_and(cliques_pattern[m],hc[sorted_keys[j]])
-                break
-        if not joined_clique:
-            bits_no_prior=bitarray(g_len*2)
-            bits_no_prior.setall(True)  
-            bits=initial_bits.copy()
-            #TODO  change the bits start with exon structure
-            #print bits,hc[sorted_keys[j]],
-            #print isCompatible(bits,hc[sorted_keys[j]])
-            if isCompatible(bits,hc[sorted_keys[j]]):
-                max_index=0
-                clique=[]
-                clique.append(j)
-                bits=bitarray_and(bits,hc[sorted_keys[j]])
-                cliques.append(clique)
-                cliques_pattern.append(bits)
-                cliques_pattern_no_prior.append(bits_no_prior)
-                #print cliques
+        joined_cliques[j]=True
+        bits_no_prior=bitarray(g_len*2)
+        bits_no_prior.setall(True)  
+        h_clique={}
+        if isCompatible(initial_bits,hc[sorted_keys[j]]):
+            max_index=0
+            clique=[]
+            clique.append(j)
+            cliques.append(clique)
+            cliques_pattern.append(hc[sorted_keys[j]])
+            h_clique[j]=1
+            update=True
+            while update:
+                update=False
+                logging.debug("update:%s",update)
+                for k0,k in enumerate(unjoined_pattern):
+                    logging.debug("del %i",k)
+                    if k==j:
+                        del unjoined_pattern[k0]
+                    elif isOverlapCompatible(cliques_pattern[-1],hc[sorted_keys[k]]):
+                        update=True
+                        cliques[-1].append(k)
+                        cliques_pattern[-1]=bitarray_and(cliques_pattern[-1],hc[sorted_keys[k]])
+                        joined_cliques[k]=True
+                        del unjoined_pattern[k0]
+                        h_clique[k]=1
+                        break
+                if update==False: 
+                    for k in range(keys_len):
+                        if h_clique.has_key(k): continue
+                        if isOverlapCompatible(cliques_pattern[-1],hc[sorted_keys[k]]):
+                            update=True
+                            cliques[-1].append(k)
+                            cliques_pattern[-1]=bitarray_and(cliques_pattern[-1],hc[sorted_keys[k]])
+                            h_clique[k]=1
+                            break
+
+
+
     ret_dict["CLIQUES"]=list()
 
     cumulative_score=0
@@ -593,23 +612,9 @@ def query(i,dbi_bam,genome): # i is query iteem
     max_uniq=0
     for j,x in enumerate(cliques):
         score=0
-        c=[] 
-        for k,y in enumerate(sorted_keys):
-            '''
-            adding default or not? should not adding default?
-            '''
-            if isCompatible(cliques_pattern[j],hc[y]):
-                cliques_pattern[j]=bitarray_and(cliques_pattern[j],hc[y])
-                cliques_pattern_no_prior[j]=bitarray_and(cliques_pattern_no_prior[j],hc[y])
-                score+=h[y]
-                c.append(k)
-        '''
-        to debug this
-        '''
+        
         cliques_pattern[j][-1]=True
-        cliques_pattern_no_prior[j][-1]=True
         cliques_pattern[j][-2]=True
-        cliques_pattern_no_prior[j][-2]=True
 
         uniq_score=0
         for k,y in enumerate(x):
@@ -623,6 +628,7 @@ def query(i,dbi_bam,genome): # i is query iteem
             #print >>sys.stderr,"ignore due to small uniq frags:",float(uniq_score)/total_frag
             continue
         else:
+            logging.debug(cliques_pattern)
             bed=g.translate_bits_into_bed(cliques_pattern[j])
             cdna_length=bed.cdna_length()
             if cdna_length==0:
@@ -641,9 +647,9 @@ def query(i,dbi_bam,genome): # i is query iteem
             #retv+="CLIQUE\t"+str(c)+"\nUNIQ\t"+str(cliques[j])+"\nPATTERN\t"+bitarray_to_rep(cliques_pattern[j])+"\n"
             ret_dict["CLIQUES"].append(dict())
             #ret_dict["CLIQUES"][-1]["CLIQUE"]=(c,cliques[j],bitarray_to_rep(cliques_pattern[j]))
-            ret_dict["CLIQUES"][-1]["ALL_GROUP"]=c
+            ret_dict["CLIQUES"][-1]["ALL_GROUP"]=cliques[j]
             ret_dict["CLIQUES"][-1]["UNIQ_GROUP"]=cliques[j]
-            ret_dict["CLIQUES"][-1]["REP"]=bitarray_to_rep(cliques_pattern_no_prior[j])
+            ret_dict["CLIQUES"][-1]["REP"]=bitarray_to_rep(cliques_pattern[j])
             #retv+="CLIQUE\t",c,"\nUNIQ\t",cliques[j],"\nPATTERN\t",cliques_pattern[j]
             '''
             pattern
@@ -652,29 +658,16 @@ def query(i,dbi_bam,genome): # i is query iteem
             pattern=cliques_pattern[j]
             pattern[-1]=True
             pattern[-2]=True
-            if args.interpret_model==1:
-                beds=[bed for bed in g.translate_bits_into_beds(cliques_pattern_no_prior[j])]
-                ret_dict["CLIQUES"][-1]["BEDS"]=[]
-                for j1,bed in enumerate(beds):
-                    score=score*1000.0/cdna_length
-                    chr=i.id
-                    id=i.id+"_"+"NO."+str(j0)+"_"+str(j1)
-                    itemRgb=str(rgb)+","+str(rgb)+","+str(rgb)
-                    bed=bed._replace(chr=chr,id=id,itemRgb=itemRgb)
-                    ret_dict["CLIQUES"][-1]["BEDS"].append(str(Tools.translate_coordinates(i,bed,True)))
-            elif args.interpret_model==0:
-                bed=g.translate_bits_into_bed(cliques_pattern[j])
+            beds=[bed for bed in g.translate_bits_into_beds(cliques_pattern[j])]
+            ret_dict["CLIQUES"][-1]["BEDS"]=[]
+            for j1,bed in enumerate(beds):
+                #logging.debug(i)
                 score=score*1000.0/cdna_length
                 chr=i.id
-                id=i.id+"_"+"NO."+str(j0)
+                id=i.id+"_"+"NO."+str(j0)+"_"+str(j1)
                 itemRgb=str(rgb)+","+str(rgb)+","+str(rgb)
                 bed=bed._replace(chr=chr,id=id,itemRgb=itemRgb)
-                ret_dict["CLIQUES"][-1]["BED"]=str(Tools.translate_coordinates(i,bed,True))
-            #print "debug,bed",bed
-            '''
-            end of need to revise
-            '''
-            #bed=translate_bits_into_bed(g,cliques_pattern[j])
+                ret_dict["CLIQUES"][-1]["BEDS"].append(str(Tools.translate_coordinates(i,bed,True)))
 
            
 

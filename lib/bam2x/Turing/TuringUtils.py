@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 20:12:44 EST
+# Last-modified: 02-18-2014, 12:54:33 EST
 
 from bam2x.Annotation import BED12
 from bitarray import bitarray
@@ -119,7 +119,11 @@ def isSelfIncompatible(pathA):
     return False
 
 def isOverlap(pathA,pathB):   ## Fir paired end reads overlap is not start > stop, overlap definition is not the same as overlap reades
-    for i in range(0,len(path),2):
+    for i in range(0,len(pathA),2):
         if (pathA[i]^pathA[i+1]) and (pathB[i]^pathB[i+1]):
             return True
     return False
+
+
+def isOverlapCompatible(pathA,pathB):
+    return isOverlap(pathA,pathB) and isCompatible(pathA,pathB)
