@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-18-2014, 13:52:43 EST
+# Last-modified: 02-18-2014, 14:20:52 EST
 VERSION="bam2x 0.1.1"
 import os,sys,argparse
 from bam2x.Annotation import BED6 as Bed
@@ -387,7 +387,7 @@ def query(i,dbi_bam,genome): # i is query iteem
                 k=correctToNearAcceptor(j)
                 if k!=-1 and not hAcceptor.has_key(k):
                     hAcceptor[k]=1
-                    l.append(TuringCode(k,cb.BLOCKON))
+                    g.append(TuringCode(k,cb.BLOCKON))
                 # add to revise small fragrments ?
                 '''
                 elif k==-1 and diff[j] > meanAcceptor + 3 * sdAcceptor and not hAcceptor.has_key(j):
