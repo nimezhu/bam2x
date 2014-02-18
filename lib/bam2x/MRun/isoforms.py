@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-18-2014, 14:20:52 EST
+# Last-modified: 02-18-2014, 14:33:50 EST
 VERSION="bam2x 0.1.1"
 import os,sys,argparse
 from bam2x.Annotation import BED6 as Bed
@@ -72,7 +72,7 @@ v0.0.4:
     DONE: using turing namedtuple instead of tuple
     DONE: no bam2 query but bam1 query ( fragment query in lib )
 v0.1.1:
-    TODO: merge only overlapping reads. [ spliced ]
+    DONE: merge only overlapping reads.  link stragdy is changed
 '''
 def help():
     return "detect isoforms."
@@ -590,7 +590,9 @@ def query(i,dbi_bam,genome): # i is query iteem
                         del unjoined_pattern[k0]
                         h_clique[k]=1
                         break
-                if update==False: 
+                if update==False:
+                    if k==j:
+                        continue
                     for k in range(keys_len):
                         if h_clique.has_key(k): continue
                         if isOverlapCompatible(cliques_pattern[-1],hc[sorted_keys[k]]):
