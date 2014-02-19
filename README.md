@@ -14,3 +14,7 @@ Library Dependency:
 
 Optional Dependency:
 - matplotlib
+
+bam2x branch is a working branch
+master branch is release branch
+xplib branch is old scripts
