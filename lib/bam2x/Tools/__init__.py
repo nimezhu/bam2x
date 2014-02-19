@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 02-19-2014, 14:12:00 EST
+# Last-modified: 02-19-2014, 16:06:34 EST
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -283,7 +283,8 @@ def reverse_translate(meta,bed):
             stop-=blockSize
             if stop <= 0 and stop_sign:
                 new_start=blockStart-blockSize-stop+meta.start
-                stop_sign==0
+                stop_sign=False
+                break
     else:
         for blockSize,blockStart in itertools.izip(meta.blockSizes,meta.blockStarts):
             start-=blockSize

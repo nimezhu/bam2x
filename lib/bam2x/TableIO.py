@@ -15,28 +15,24 @@ htranslate = {
     "bam2fragment":Translator.BamToFragmentIterator,
 }
 FormatToIterator=dict(hclass.items()+htranslate.items())
-def parse(handle,convert_cls,**dict):
+def parse(handle,convert_cls=None,**dict):
     if hclass.has_key(convert_cls):
-        return parse_tuples(handle,convert_cls,**dict)
+        return parse_tuples(handle,hclass[convert_cls],**dict)
     elif htranslate.has_key(convert_cls):
         return htranslate[convert_cls](handle,**dict)
-def parse_tuples(handle,cls,**dict):
+    else:
+        return parse_simple(handle,**dict)
+
+def parse_simple(handle,**dict):
     sep="\t"
     if dict.has_key("sep"):
         sep=dict["sep"]
-    if isinstance(cls,str):
-        if hclass.has_key(cls):
-            cls=hclass[cls]
-        else:
-            raise "can't regonize this format"
     if isinstance(handle,str):
         try:
             handle=IO.fopen(handle,"r")
             for i in csv.reader(handle,delimiter=sep):
                 if i[0].strip()[0]=="#": continue
-                i=cls._types(i)
-                
-                yield cls._make(i)
+                yield tuple(i)
             handle.close()
         except IOError as e:
             print >>sys.stderr,"I/O error({0}): {1}".format(e.errno, e.strerror)
@@ -44,11 +40,13 @@ def parse_tuples(handle,cls,**dict):
         try:    
             for i in csv.reader(handle,delimiter=sep):
                 if i[0].strip()[0]=="#": continue
-                i=cls._types(i)
-                yield cls._make(i)
+                yield tuple(i)
         except:
             raise
-            i#print >>sys.stderr,"error({0}): {1}".format(e.errno, e.strerror)
+    
+def parse_tuples(handle,cls,**dict):
+    for i in parse_simple(handle,**dict):
+        yield cls._make(cls._types(i))
 
 
 def Main():
