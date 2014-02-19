@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 02-19-2014, 11:30:31 EST
+# Last-modified: 02-19-2014, 14:12:00 EST
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -9,6 +9,7 @@ from bam2x.Annotation import BED3
 import bam2x
 import copy
 import logging
+import itertools
 # __all__=["IO","codon"]
 
 hNtToNum={'a':0,'A':0,
@@ -86,8 +87,7 @@ def translate_coordinate(coord,bed,reverse=False):
             return (coord.stop-bed.stop,coord.stop-bed.start,strand)
 def translate_coordinates(coord,bed,reverse=False): # bed is Bed12 format
     '''
-    Translate Bed12 Object bed based on simple annotation coord
-
+    Translate Bed12 Object bed to BED3 coordinates ( no splicing )
     if reverse is True
         bed is in coord's coordinates and translate it back to the chromosome coordinates.
         TO TEST
@@ -147,10 +147,11 @@ def _merge_bed6(beds,id="noname"):
     a simple turing state change
     '''
     l=[]
-
+    strand=beds[0].strand
     for i in beds:
         l.append((i.start,-1))
         l.append((i.stop,1))
+        if strand!=i.strand: strand="."
     chr=beds[0].chr
     l.sort()
     switch=0
@@ -177,7 +178,7 @@ def _merge_bed6(beds,id="noname"):
     
     assert state==0
     blockCount=len(blockSizes)
-    return BED12(chr,start,end,id,0.0,".",start,start,"0,0,0",blockCount,blockSizes,blockStarts) 
+    return BED12(chr,start,end,id,0.0,strand,start,start,"0,0,0",blockCount,blockSizes,blockStarts) 
 
 def translate(bedA,bedB):
     #TODO
@@ -213,7 +214,6 @@ def _translate_to_meta(meta,bed):
         l.append((bed.start,0,4))
 
     l.sort()
-    logging.debug("bed id %s, l=%s",bed.id,l)
     meta_state=0
     bed_state=0
     meta_last_pos=0
@@ -243,21 +243,61 @@ def _translate_to_meta(meta,bed):
         state-=i[1]
         if switch==0:
             if state > 0:
-                logging.debug("start:%i",i[0])
                 b_start=i[0]
                 switch=1
                 blockStarts.append(b_start)
         elif switch==1:
             if state == 0:
-                logging.debug("end:%i",i[0])
                 b_end=i[0]
                 switch=0
                 blockSizes.append(b_end-b_start)
     blockCount=len(blockSizes)
-    return BED12(meta.id,blockStarts[0],blockStarts[-1]+blockSizes[-1],bed.id,0.0,bed.strand,cds_start,cds_stop,"0,0,0",blockCount,blockSizes,blockStarts)
+    if meta.strand=="." or meta.strand=="+":
+        return BED12(meta.id,blockStarts[0],blockStarts[-1]+blockSizes[-1],bed.id,0.0,bed.strand,cds_start,cds_stop,"0,0,0",blockCount,blockSizes,blockStarts)
+    else:
+        len_meta=meta.cdna_length()
+        logging.debug(len_meta)
+        strand=reverse_strand(bed.strand)
+        return BED12(meta.id,len_meta-blockStarts[-1]-blockSizes[-1],len_meta-blockStarts[0],bed.id,0.0,strand,len_meta-cds_stop,len_meta-cds_start,"0,0,0",blockCount,blockSizes[::-1],[len_meta-i0-j0 for i0,j0 in itertools.izip(blockStarts[::-1],blockSizes[::-1])])
     
     
 _translate=_translate_to_meta
+
+def reverse_translate(meta,bed):
+    '''
+    reverse translate bed in meta coordinates to chromosome coordinates
+    meta is BED12 class
+    '''
+    assert meta.id==bed.chr
+    start=bed.start
+    stop=bed.stop
+    start_sign=True
+    stop_sign=True
+
+    if meta.strand=="-":
+        for blockSize,blockStart in itertools.izip(meta.blockSizes[::-1],[ i0+j0 for i0,j0 in itertools.izip(meta.blockStarts[::-1],meta.blockSizes[::-1])]):
+            start-=blockSize
+            if start <= 0 and start_sign:
+                new_stop=blockStart-blockSize-start+meta.start
+                start_sign=False
+            stop-=blockSize
+            if stop <= 0 and stop_sign:
+                new_start=blockStart-blockSize-stop+meta.start
+                stop_sign==0
+    else:
+        for blockSize,blockStart in itertools.izip(meta.blockSizes,meta.blockStarts):
+            start-=blockSize
+            stop-=blockSize
+            if start <= 0 and start_sign:
+                new_start=blockStart + start + blockSize + meta.start
+                start_sign=False
+            if stop  <= 0 and stop_sign:
+                new_stop=blockStart + stop + blockSize + meta.start
+                stop_sign=False
+                break
+    return meta._slice(new_start,new_stop,bed.id)
+
+
 
 
 
@@ -293,7 +333,6 @@ def find_nearest(bed,dbi,extends=50000,**dict):
                 strand="+"
             else:
                 strand="-"
-                
             flag=1
     if flag==0:
         return (None,None,None)
@@ -446,11 +485,14 @@ def parse_string_to_bed(string):
 def test():
     logging.basicConfig(level=logging.DEBUG)
     a=Bed("chr1",100,200,"a",0.1,"+")
-    b=Bed("chr1",200,300,"b",0.2,"-")
-    c=Bed("chr1",400,500,"c",0.2,"-")
+    b=Bed("chr1",200,300,"b",0.2,"+")
+    c=Bed("chr1",400,500,"c",0.2,"+")
     d=merge_bed(a,b)
     e=merge_bed(d,c)
-    print _translate_to_meta(e,merge_bed(c,b))
-    print _translate_to_meta(e,d)
+    print "E",e
+    print "C and B",merge_bed(c,b)
+    print "C and B in E",_translate_to_meta(e,merge_bed(c,b))
+    print "C and B reverse translate to CHROMOSOME:",reverse_translate(e,_translate_to_meta(e,merge_bed(c,b)))
+    print _translate_to_meta(e,e)
 if __name__=="__main__":
     test()

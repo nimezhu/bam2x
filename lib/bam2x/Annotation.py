@@ -1,6 +1,6 @@
 from collections import namedtuple
 import itertools
-
+import logging
 
 H_PSL=("matches","misMatches","repMatches","nCount","qNumInsert","qBaseInsert","tNumInsert","tBaseInsert","strand","qName","qSize","qStart","qEnd","tName","tSize","tStart","tEnd","blockCount","blockSizes","qStarts","tStart")
 H_VCF=("chr","pos","id","ref","alt","qual","filter","info")
@@ -76,7 +76,8 @@ class METABED(object):
         '''sum of the length of exons'''
         s=0
         for i in self.Exons():
-            s=s+len(i)
+            s=s+i.stop-i.start
+        logging.debug("s=%i",s)
         return s
         
     def upstream(self,bp=1000):
