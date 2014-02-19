@@ -21,13 +21,9 @@ class METABED(object):
     def end(self):
         return self.stop
     def __cmp__(self,other):
-        return cmp(self.chr,other.chr) or cmp(self.start,other.start) or (self.stop,other.stop)
+        return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop)
     def __str__(self):
-        s=""
-        for i in self:
-            s+=str(i)+"\t"
-        s.strip("\t")
-        return s
+        return "\t".join([str(i) for i in self])
     def __len__(self):
         return self.stop-self.start
     def Exons(self):
@@ -52,7 +48,7 @@ class METABED(object):
                 return a
         else:
             l=[]
-            if hasattr(self,id):
+            if hasattr(self,"id"):
                 l.append(self._replace(id=self.id+"_Exon_1"))
             else:
                 l.append(self)
@@ -242,6 +238,14 @@ class BED12(namedtuple("BED12",H_BED12),METABED):
     @classmethod
     def _types(cls,x):
         return types(x,F_BED12)
+    @property
+    def exon_starts(self):
+        return [int(i+self.start) for i in self.blockStarts]
+
+    @property
+    def exon_stops(self):
+        return [int(i+j+self.start) for i,j in itertools.izip(self.blockStarts,self.blockSizes)]
+        
     
 class Fragment:
     '''
@@ -274,6 +278,7 @@ class Fragment:
   
 
 if __name__=="__main__":
+    from bam2x.Tools import translate
     b=("chr1",200,500,"test_gene",0.0,"-",250,450,"0,0,0",2,(100,101),(0,199))
     a=BED12(*b)
     print a
@@ -281,8 +286,14 @@ if __name__=="__main__":
     print a.end
     for i in a.Exons():
         print i
+        for j in translate(a,i):
+            print j
     for i in a.Introns():
         print i
+        for j in translate(a,i):
+            print j
     print a.utr3()
     print a.utr5()
     print a.cds()
+    print a.exon_starts[1]
+    print a.exon_stops[1]

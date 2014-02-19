@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 02-14-2014, 17:25:39 EST
+# Last-modified: 02-19-2014, 11:30:31 EST
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -194,10 +194,6 @@ def translate(bedA,bedB):
     return new_bedA,new_bedB,meta
 def _translate_to_meta(meta,bed):
     '''
-    another simple turing 
-    meta is the bigger one
-    meta code 1
-    bed code 2
     '''
     l=[]
     for i in meta.Exons():
@@ -206,8 +202,16 @@ def _translate_to_meta(meta,bed):
     for i in bed.Exons():
         l.append((i.start,-1,2))
         l.append((i.stop,1,2))
-    l.append((bed.cds_start,0,3))
-    l.append((bed.cds_stop,0,4))
+    if hasattr(bed,"cds_start"):
+        l.append((bed.cds_start,0,3))
+        l.append((bed.cds_stop,0,4))
+    else:
+        '''
+        no cds 
+        '''
+        l.append((bed.start,0,3))
+        l.append((bed.start,0,4))
+
     l.sort()
     logging.debug("bed id %s, l=%s",bed.id,l)
     meta_state=0
@@ -250,12 +254,11 @@ def _translate_to_meta(meta,bed):
                 switch=0
                 blockSizes.append(b_end-b_start)
     blockCount=len(blockSizes)
-    return BED12(meta.id,blockStarts[0],blockStarts[-1]+blockSizes[-1],"id",0.0,bed.strand,cds_start,cds_stop,"0,0,0",blockCount,blockSizes,blockStarts)
+    return BED12(meta.id,blockStarts[0],blockStarts[-1]+blockSizes[-1],bed.id,0.0,bed.strand,cds_start,cds_stop,"0,0,0",blockCount,blockSizes,blockStarts)
     
     
+_translate=_translate_to_meta
 
-
-    
 
 
 
@@ -280,8 +283,9 @@ def find_nearest(bed,dbi,extends=50000,**dict):
     flag=0
     
     for result in results:
-        if distance(bed,result)<d:
-            d=distance(bed,result)
+        d0=distance(bed,result)
+        if d0<d:
+            d=d0
             nearest=result
             if  result.strand=="." or bed.strand==".":
                 strand="."
@@ -297,9 +301,11 @@ def find_nearest(bed,dbi,extends=50000,**dict):
         return (d,nearest,strand)
 
 
+
+
+
 def compatible(a,b,**kwargs):
     '''
-    TODO: UNFINISHED IN Bam2x LIB
     VERSION: TEST
     if a and b are compatible return true
     a and b are BED12 class 
@@ -387,6 +393,12 @@ def compatible_with_transcript(read,transcript,**kwargs):
             return False
         else:
             return compatible(read,transcript,**kwargs)
+
+def translate_fragment_to_transcript_coordinate(read,transcript,**kwargs):
+    a=[]
+    for i in bam2x.TableIO.parse(read.reads,"bam2bed12",**kwarts):
+        a.append(_translate(transcript,i))
+    return a
     
 
 def cigar_to_coordinates(cigar,offset=0):

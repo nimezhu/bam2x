@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-15-2014, 12:29:18 EST
+# Last-modified: 02-18-2014, 23:41:49 EST
 import os
 import sys
 from distutils.core import setup
-
 metadata = {
 
           'name':"bam2x",
