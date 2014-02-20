@@ -1,16 +1,39 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-18-2014, 23:41:49 EST
+# Last-modified: 02-20-2014, 15:42:17 EST
+from __future__ import print_function
+from distutils.core import setup
+from setuptools import setup, find_packages
+import codecs
 import os
 import sys
-from distutils.core import setup
+import re
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+def read(*parts):
+    # intentionally *not* adding an encoding option to open
+        return codecs.open(os.path.join(here, *parts), 'r').read()
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                             version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
+long_description=read("README.md")
+
 metadata = {
 
           'name':"bam2x",
-          'version':"0.1.0",
+          'version':find_version('lib',"bam2x",'__init__.py'),
           'description':"bionformatics python lib for query bam files, this version set matplotlib as optional.",
           'author':"Xiaopeng Zhu",
+          'license':'GNU General Public License',
+          'url':'http://github.com/nimezhu/bam2x',
           'author_email':"nimezhu@gmail.com",
           'packages':[
                     "bam2x",
@@ -22,12 +45,11 @@ metadata = {
                     "bam2x.Turing",
                     ],
           'package_dir':{"":"lib"},
+          'platforms':'any',
           'scripts':[
                    "bin/bam2x"
                    ],
-          'install_requires':['numpy>=1.7.0','pysam>=0.7.5','twobitreader>=2.9','bx-python>=0.7.1','bitarray>=0.8.1']
-
-
+          'install_requires':['numpy>=1.6.0','pysam>=0.7.0','twobitreader>=2.9','bx-python>=0.7.0','bitarray>=0.8.0'],
 }
 
 def main():

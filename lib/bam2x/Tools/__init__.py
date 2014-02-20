@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 02-19-2014, 16:06:34 EST
+# Last-modified: 02-20-2014, 15:15:29 EST
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -53,16 +53,13 @@ def seq_wrapper(seq,width=60):
 def distance(A,B):
     if A.chr!=B.chr: return None
     if overlap(A,B): return 0
-    m=abs(A.start-B.start)
-    if( m > abs(A.start-B.stop)): m = abs(A.start-B.stop)
-    if( m > abs(A.stop-B.stop)): m = abs(A.stop-B.stop)
-    if( m > abs(A.stop-B.start)): m = abs(A.stop-B.start)
-    return m
+    return min(abs(A.start-B.stop),abs(A.stop-B.start))
 def translate_coordinate(coord,bed,reverse=False):
     '''
     translate bed's coordiante based on coord
     if reverse is True:
         bed is in coord's coordinates and translate it back to the chromosome coordinates
+    coord is a simple BED6 or BED3, didn't consider the splicing in this function
     '''
     if reverse:
         #TO TEST
@@ -87,7 +84,7 @@ def translate_coordinate(coord,bed,reverse=False):
             return (coord.stop-bed.stop,coord.stop-bed.start,strand)
 def translate_coordinates(coord,bed,reverse=False): # bed is Bed12 format
     '''
-    Translate Bed12 Object bed to BED3 coordinates ( no splicing )
+    Translate Bed12 Object bed to BED3 or BED6 coordinates ( no splicing )
     if reverse is True
         bed is in coord's coordinates and translate it back to the chromosome coordinates.
         TO TEST
@@ -183,11 +180,8 @@ def _merge_bed6(beds,id="noname"):
 def translate(bedA,bedB):
     #TODO
     '''
-    return merge bed
-    and 
-    the location for bedA in merge bed
-    the location for bedB in merge bed
-    return (merged_bed, bedA_in_merged_bed , bedB_in_merged_bed)
+    INPUT: two BED12 bedA and bedB 
+    return the location for bedA in merge bed, the location for bedB in merge bed, merged bed
     '''
     meta=merge_bed(bedA,bedB,bedA.id+"_"+bedB.id+"_merged")
     new_bedA=_translate_to_meta(meta,bedA)
@@ -265,8 +259,7 @@ _translate=_translate_to_meta
 
 def reverse_translate(meta,bed):
     '''
-    reverse translate bed in meta coordinates to chromosome coordinates
-    meta is BED12 class
+    reverse translate bed in meta coordinates ( a BED12 object ) to chromosome coordinates
     '''
     assert meta.id==bed.chr
     start=bed.start
