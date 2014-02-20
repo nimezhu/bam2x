@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-20-2014, 15:42:17 EST
+# Last-modified: 02-20-2014, 15:59:04 EST
 from __future__ import print_function
 from distutils.core import setup
 from setuptools import setup, find_packages
@@ -24,7 +24,6 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-long_description=read("README.md")
 
 metadata = {
 
@@ -49,6 +48,7 @@ metadata = {
           'scripts':[
                    "bin/bam2x"
                    ],
+          'package_data':{"":["README.md"]},
           'install_requires':['numpy>=1.6.0','pysam>=0.7.0','twobitreader>=2.9','bx-python>=0.7.0','bitarray>=0.8.0'],
 }
 

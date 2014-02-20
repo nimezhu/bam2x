@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-15-2014, 11:39:12 EST
-VERSION="0.1"
+# Last-modified: 02-20-2014, 16:01:22 EST
+from bam2x import __version__ as VERSION
 import os,sys,argparse
 import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
