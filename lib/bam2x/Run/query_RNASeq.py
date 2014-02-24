@@ -16,11 +16,11 @@ def run(args):
     dbi=DBI.init(args.bam,"bam")
     out=IO.fopen(args.output,"w")
     for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
-        print >>out,"QR",i
+        print >>out,"QR\t",i
         for j in dbi.query(i,method="bam1",strand=args.strand):
             if compatible_with_transcript(j,i):
-                print >>out,"HT",_translate_to_meta(i,j)
+                print >>out,"HT\t",_translate_to_meta(i,j)
             elif not args.hit:
-                print >>out,"OP",j
+                print >>out,"OP\t",j
         print >>out,""
 
