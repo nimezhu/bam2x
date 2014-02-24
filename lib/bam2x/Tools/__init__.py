@@ -1,11 +1,12 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 02-20-2014, 15:15:29 EST
+# Last-modified: 02-24-2014, 12:36:21 EST
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
 from bam2x.Annotation import BED12 
 from bam2x.Annotation import BED3
+from bam2x.Annotation import Fragment
 import bam2x
 import copy
 import logging
@@ -250,7 +251,6 @@ def _translate_to_meta(meta,bed):
         return BED12(meta.id,blockStarts[0],blockStarts[-1]+blockSizes[-1],bed.id,0.0,bed.strand,cds_start,cds_stop,"0,0,0",blockCount,blockSizes,blockStarts)
     else:
         len_meta=meta.cdna_length()
-        logging.debug(len_meta)
         strand=reverse_strand(bed.strand)
         return BED12(meta.id,len_meta-blockStarts[-1]-blockSizes[-1],len_meta-blockStarts[0],bed.id,0.0,strand,len_meta-cds_stop,len_meta-cds_start,"0,0,0",blockCount,blockSizes[::-1],[len_meta-i0-j0 for i0,j0 in itertools.izip(blockStarts[::-1],blockSizes[::-1])])
     
@@ -361,37 +361,19 @@ def compatible(a,b,**kwargs):
     stop is the min stop of a.stop and b.stop
     find the overlap region from [start,stop)
     '''
-    a_starts_slice=[];
-    #TODO REVISE IT ! 
-    for i in a.exon_starts:
-        if i>start and i<stop:
-            a_starts_slice.append(i); 
-    j=0;
-    l=len(a_starts_slice);
-    for i in b.exon_starts:
-        if i>start and i<stop:
-            if (j>l-1 or a_starts_slice[j]!=i) :
-                return False
-            j+=1
-    if j!=l : 
+    sliced_a=a._slice(start,stop)
+    sliced_b=b._slice(start,stop)
+    if sliced_a is None: return False
+    if sliced_b is None: return False
+    if sliced_a.blockCount!=sliced_b.blockCount : 
         return False
-    
-    
-    a_stops_slice=[];
-    for i in a.exon_stops:
-        if i>start and i<stop:
-            a_stops_slice.append(i); 
-    
-    j=0;
-    l=len(a_stops_slice);
-    for i in b.exon_stops:
-        if i>start and i<stop:
-            if (j>l-1 or a_stops_slice[j]!=i) : 
+    else:
+        for i in range(sliced_a.blockCount):
+            if sliced_a.blockStarts[i]!=sliced_b.blockStarts[i]:
                 return False
-            j+=1
-    if j!=l : 
-        return False
-    return True 
+            if sliced_a.blockSizes[i]!=sliced_b.blockSizes[i]:
+                return False
+    return True
 def reverse_strand(i):
     if i=="+": return "-"
     if i=="-": return "+"
@@ -420,7 +402,7 @@ def compatible_with_transcript(read,transcript,**kwargs):
                     return False
         return True
     else:
-        if kwargs.has_key("strand") and kwargs["strand"]==True:
+        if kwargs.has_key("strand") and kwargs["strand"]:
             if read.strand != transcript.strand: return False
         if read.start < transcript.start or read.stop > transcript.stop :
             return False

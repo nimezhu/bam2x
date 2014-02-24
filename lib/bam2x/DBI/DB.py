@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 21:12:12 EST
+# Last-modified: 02-24-2014, 11:23:47 EST
 
 import os,sys
 from bam2x.Annotation import *

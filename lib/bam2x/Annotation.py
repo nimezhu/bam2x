@@ -183,7 +183,7 @@ class VCF(namedtuple("VCF",H_VCF),METABED):
 
 
 class BED12(namedtuple("BED12",H_BED12),METABED):
-    def _slice(self,start,end,suffix):
+    def _slice(self,start,end,suffix="sliced"):
         chr=self.chr
         
         if start < self.start: start=self.start
