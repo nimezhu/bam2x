@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-25-2014, 14:24:32 EST
+# Last-modified: 02-25-2014, 15:25:33 EST
 from bam2x import __version__ as VERSION
 import pysam
 import sys
@@ -101,13 +101,7 @@ def parser_factory(**dict):
 
     
 if __name__=="__main__":
-    global matplotlib_found
-    try: 
-        matplotlib_info=imp.find_module('matplotlib')
-        matplotlib_found=True
-    except ImportError:
-        matplotlib_found=False
-    Main()
+    pass
 
 
 
