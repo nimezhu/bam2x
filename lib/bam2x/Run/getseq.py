@@ -18,3 +18,15 @@ def run(args):
     for i in TableIO.parse(IO.fopen(args.input,"r"),bedformat):
         print >>out,">",i.id+"_"+args.method
         print >>out,seq_wrapper(dbi.query(i,method=args.method))
+
+
+if __name__=="__main__":
+    from bam2x.IO import parser_factory
+    p=parser_factory(description=help())
+    set_parser(p)
+    if len(sys.argv)==1:
+        print(p.print_help())
+        exit(0)
+    run(p.parse_args())
+
+ 

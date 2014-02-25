@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 15:40:13 EST
-VERSION="0.1"
+# Last-modified: 02-25-2014, 14:24:32 EST
+from bam2x import __version__ as VERSION
 import pysam
 import sys
 import gzip
-
+import argparse
 suffixToFormat={
     'fa':'fasta',
     'fq':'fastq',
@@ -78,4 +78,41 @@ def read_config(file,sep=":"):
     for i in TableIO.parse(file,sep=sep):
         config[i[0]]=i[1]
     return config
+
+
+
+
+
+
+
+
+
+
+
+
+
+def parser_factory(**dict):
+    ''' This Function Parse the Argument '''
+    group=argparse.ArgumentParser( **dict)
+    group.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
+    group.add_argument('-i','--input',dest='input',default='stdin',type=str,help="input file Default: %(default)s")
+    group.add_argument('-o','--output',dest='output',default='stdout',type=str,help="output file Default: %(default)s")
+    return group
+
+    
+if __name__=="__main__":
+    global matplotlib_found
+    try: 
+        matplotlib_info=imp.find_module('matplotlib')
+        matplotlib_found=True
+    except ImportError:
+        matplotlib_found=False
+    Main()
+
+
+
+
+
+
+
 

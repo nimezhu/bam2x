@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 22:36:39 EST
+# Last-modified: 02-25-2014, 15:01:23 EST
 VERSION="0.0.4"
 import os,sys,argparse
 from bam2x.Annotation import BED6 as Bed
@@ -90,11 +90,16 @@ def toIDs(x):
 
 
 
-
+if __name__=="__main__":
+    from bam2x.IO import parser_factory
+    p=parser_factory(description=help())
+    set_parser(p)
+    if len(sys.argv)==1:
+        print(p.print_help())
+        exit(0)
+    run(p.parse_args())
 
     
-if __name__=="__main__":
-    run()
 
 
 

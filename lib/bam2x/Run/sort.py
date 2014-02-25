@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-15-2014, 18:08:41 EST
+# Last-modified: 02-25-2014, 15:02:46 EST
 import os,sys,argparse
 from bam2x import TableIO,Tools
 from bam2x import IO
@@ -29,9 +29,15 @@ def run(args):
     for i in l:
         print >>out,i
     logging.info("completed")
+
 if __name__=="__main__":
-    run()
+    from bam2x.IO import parser_factory
+    p=parser_factory(description=help())
+    set_parser(p)
+    if len(sys.argv)==1:
+        print(p.print_help())
+        exit(0)
+    run(p.parse_args())
 
-
-
+ 
 
