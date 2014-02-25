@@ -2,37 +2,14 @@
 from __future__ import print_function
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-25-2014, 15:24:00 EST
+# Last-modified: 02-25-2014, 15:39:14 EST
 import os,sys,argparse
 from bam2x import TableIO,Tools
 from bam2x import IO
 import sqlite3
 import string
-'''
-table schema template
-'''
-schema_template= string.Template("""create table if not exists $table_name (
-    id      integer primary key autoincrement not null,
-    chr     varchar(20),
-    start   integer,
-    stop    integer,
-    name    varchar(200),
-    score   float,
-    strand  character(1),
-    cds_start   integer,
-    cds_stop    integer,
-    itemRgb     varchar(20),
-    blockCount  integer,
-    blockSizes  varchar,
-    blockStarts varchar
-)
-""")
-
-SQL_template=string.Template("""insert into $table (chr,start,stop,name,score,strand,cds_start,cds_stop,itemRgb,blockCount,blockSizes,blockStarts)
-                            values (?,?,?,?,?,?,?,?,?,?,?,?)
-                            """)
-   
-
+from bam2x.DBI.Templates import bed12_schema_template as schema_template
+from bam2x.DBI.Templates import bed12_insert_template as SQL_template
 def set_parser(p):
     ''' This Function Parse the Argument '''
     p.add_argument("-D","--database",dest="db",type=str,help="database file name",default="guess")
@@ -44,7 +21,7 @@ def run(args):
     db_filename=args.db
     out=IO.fopen(args.output,"w")
     if db_filename=="guess":
-        db_filename=args.input+".db"
+        db_filename=args.input.strip(".gz")+".db"
     db_is_new = not os.path.exists(db_filename)
     print("Database file : %s"%db_filename,file=out)
     with sqlite3.connect(db_filename) as conn:
@@ -56,7 +33,7 @@ def run(args):
             print ("_______________________________",file=out)
             cursor.execute(S)
         fin=IO.fopen(args.input,"r")
-        S1=SQL_template.substitute({"table":args.table_name})
+        S1=SQL_template.substitute({"table_name":args.table_name})
         print(S1,file=out)
         s=TableIO.parse(args.input,"simple")
         cursor.executemany(S1,s)
