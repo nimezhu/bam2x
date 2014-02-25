@@ -20,7 +20,7 @@ bed12_insert_template=string.Template("""insert into $table_name (chr,start,stop
                             values (?,?,?,?,?,?,?,?,?,?,?,?)
                             """)
  
-
+bed12_select_template=string.Template("""select * from $table_name where name==$name""")
 
 
 
