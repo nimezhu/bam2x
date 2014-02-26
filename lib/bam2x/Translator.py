@@ -1,21 +1,29 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-12-2014, 00:21:15 EST
+# Last-modified: 02-26-2014, 15:40:26 EST
 import types
 import pysam
 from bam2x.Annotation import BED12 as Bed12
 from bam2x.Annotation import Fragment
 from bam2x import Tools
 
-def BamToBed12(handle,**kwargs):
+def BamToBed12(handle,uniq=False,**kwargs):
     '''
     handle is an bam iterator
     need references hash if handle is not filename.
+    score="NH" ,will report tag NH as score 
     '''
     if type(handle)==type("string"):
         handle=pysam.Samfile(handle,"rb");
     for i in handle:
         if i.tid<0: continue
+        if uniq:
+            nh=_get_tag_score(i,"NH")
+            if nh:
+                if nh > 1: 
+                    continue
+            else:
+                raise "no NH tag in your bam file"
         strand="+"
         if i.is_reverse:
             strand="-"
@@ -64,7 +72,11 @@ def BamToBed12(handle,**kwargs):
             strand=Tools.reverse_strand(strand)
         bed=Bed12(chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts)
         yield bed
-
+def _get_tag_score(read,tag):
+    for itag,iscore in read.tags:
+        if tag==itag:
+            return iscore
+    return None
 
 
 def BamToFragmentIterator(handle,**kwargs):
@@ -141,3 +153,5 @@ def strip_mate_id(read_name):
     if read_name.endswith("/1") or read_name.endswith("/2") or read_name.endswith("#1") or read_name.endswith("#2"):
         read_name = read_name[0:-3]
     return read_name
+
+

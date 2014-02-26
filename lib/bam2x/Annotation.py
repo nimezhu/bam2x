@@ -270,10 +270,10 @@ class Fragment:
         for i,x in enumerate(self.reads):
             s+="READ"+str(i)+"\t"+str(x)+"\n"
         return s
-    def toBed12(self,chr="unknown_chr",strand="read2"):
+    def toBed12(self,chr="unknown_chr",strand="read2",**dict):
         from bam2x import TableIO
         x=list()
-        for i in TableIO.parse(self.reads,"bam2bed12",references=chr,strand=strand):
+        for i in TableIO.parse(self.reads,"bam2bed12",references=chr,strand=strand,**dict):
             x.append(i)
         return x
   
