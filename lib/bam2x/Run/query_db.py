@@ -2,7 +2,7 @@
 from __future__ import print_function
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-25-2014, 16:29:20 EST
+# Last-modified: 02-26-2014, 17:27:36 EST
 import os,sys,argparse
 from bam2x import TableIO,Tools
 from bam2x import IO
@@ -28,18 +28,18 @@ def run(args):
     else:
         fin=(args.input,)
     if not os.path.exists(db_filename):
-        print("can't find database %s"%db_filename)
+        print("can't find database %s"%db_filename,file=sys.stderr)
         exit(1)
-    print("Database file : %s"%db_filename,file=out)
+    print("# Database file : %s"%db_filename,file=out)
     with sqlite3.connect(db_filename) as conn:
         conn.row_factory=factory
         cursor=conn.cursor()
         for i in fin:
             i=i.strip()
             i=i.strip(" ")
-            print("query %s"%i,file=out)
+            print("# query %s"%i,file=out)
             s=template.substitute({"table_name":args.table_name,"name":i})
-            print(s,file=out)
+            print("# "+s,file=out)
             cursor.execute(s)
             r=None
             try:
