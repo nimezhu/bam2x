@@ -4,6 +4,7 @@ import logging
 import argparse
 from bam2x import TableIO,IO,DBI
 from bam2x.Tools import seq_wrapper,compatible,overlap,_translate_to_meta,translate,compatible_with_transcript
+
 def help():
     return "query RNA Seq bam file , and report RPKM ( or unique RPKM ) only compatible reads are counted. \n input file is a Bed12 format."
 def set_parser(parser):
@@ -18,11 +19,18 @@ def run(args):
     out=IO.fopen(args.output,"w")
     for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
         print >>out,i.id,"\t",
-        s=0
+        s=0.0
         l=i.cdna_length()
-        for j in dbi.query(i,method="bam1",strand=args.strand,uniq=args.uniq):
-            if compatible_with_transcript(j,i):
-                s+=1
+        if args.uniq:
+            for j in dbi.query(i,method="bam1",strand=args.strand,uniq=args.uniq):
+                if compatible_with_transcript(j,i):
+                    s+=1.0
+        else:
+            for j in dbi.query(i,method="bam1",strand=args.strand,uniq=args.uniq):
+                if compatible_with_transcript(j,i):
+                    (nh,_,_)=j.itemRgb.split(",")
+                    nh=int(nh)
+                    s+=1.0/nh
         rpkm=float(s)*(1000000.0/mapped)*(1000.0/float(l))
         print >>out,rpkm
 

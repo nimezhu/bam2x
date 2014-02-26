@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-26-2014, 15:40:26 EST
+# Last-modified: 02-26-2014, 16:51:28 EST
 import types
 import pysam
 from bam2x.Annotation import BED12 as Bed12
@@ -55,6 +55,16 @@ def BamToBed12(handle,uniq=False,**kwargs):
         cds_start=start
         cds_end=start
         itemRgb="0,0,0"
+        if not uniq:
+            '''
+            try to put NH score in itemRgb
+            '''
+            try:
+                nh=_get_tag_score(i,"NH")
+                if nh:
+                    itemRgb=str(nh)+",0,0"
+            except:
+                pass
         '''
         debug
         import sys
