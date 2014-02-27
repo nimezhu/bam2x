@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-20-2014, 15:59:04 EST
+# Last-modified: 02-27-2014, 15:45:43 EST
 from __future__ import print_function
 from distutils.core import setup
 from setuptools import setup, find_packages
@@ -49,7 +49,7 @@ metadata = {
                    "bin/bam2x"
                    ],
           'package_data':{"":["README.md"]},
-          'install_requires':['numpy>=1.6.0','pysam>=0.7.0','twobitreader>=2.9','bx-python>=0.7.0','bitarray>=0.8.0'],
+          'install_requires':['numpy>=1.6.0','pysam>=0.7.6','twobitreader>=2.9','bx-python>=0.7.0','bitarray>=0.8.0'],
 }
 
 def main():
