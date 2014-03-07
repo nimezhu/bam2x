@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-25-2014, 15:25:33 EST
+# Last-modified: 03-07-2014, 14:46:51 EST
 from bam2x import __version__ as VERSION
 import pysam
 import sys
@@ -97,6 +97,14 @@ def parser_factory(**dict):
     group.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
     group.add_argument('-i','--input',dest='input',default='stdin',type=str,help="input file Default: %(default)s")
     group.add_argument('-o','--output',dest='output',default='stdout',type=str,help="output file Default: %(default)s")
+    return group
+def mparser_factory(**dict):
+    ''' This Function Parse the Argument '''
+    group=argparse.ArgumentParser( **dict)
+    group.add_argument('-v','--version',action='version',version='%(prog)s '+VERSION)
+    group.add_argument('-i','--input',dest='input',default='stdin',type=str,help="input file Default: %(default)s")
+    group.add_argument('-o','--output',dest='output',default='stdout',type=str,help="output file Default: %(default)s")
+    group.add_argument('-n','--num_cpus',dest='num_cpus',default=4,type=int,help="number of cpus, Default: %(default)i")
     return group
 
     
