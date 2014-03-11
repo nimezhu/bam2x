@@ -115,7 +115,7 @@ def count_flank(beds,bp,strand,upstream=True):
     for bed in beds:
         if upstream:
             flank=bed.upstream(bp)
-            offset=bp-len(flank)  # in case upstream is less than bp 
+            offset=bp-flank.cdna_length()  # in case upstream is less than bp 
         else:
             flank=bed.downstream(bp)
             offset=0
