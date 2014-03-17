@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03-07-2014, 14:46:51 EST
+# Last-modified: 03-17-2014, 15:44:56 EDT
 from bam2x import __version__ as VERSION
 import pysam
 import sys
@@ -72,6 +72,16 @@ def fopen(file,mode="r",**kwargs):
         return open_input(file)
     return None
     
+def get_col_num(filehandle,sep="\t"):
+    try:
+        filehandle.seek(0)
+        for i in filehandle:
+            if i[0]=="#": continue
+            l=i.split(sep)
+            filehandle.seek(0)
+            return len(l)
+    except:
+        raise
 
 def read_config(file,sep=":"):
     config={}

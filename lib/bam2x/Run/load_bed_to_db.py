@@ -2,22 +2,26 @@
 from __future__ import print_function
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-25-2014, 15:39:14 EST
+# Last-modified: 03-17-2014, 15:59:20 EDT
 import os,sys,argparse
 from bam2x import TableIO,Tools
 from bam2x import IO
 import sqlite3
 import string
-from bam2x.DBI.Templates import bed12_schema_template as schema_template
-from bam2x.DBI.Templates import bed12_insert_template as SQL_template
+from bam2x.DBI.Templates import schema_templates
+from bam2x.DBI.Templates import insert_templates
+
 def set_parser(p):
     ''' This Function Parse the Argument '''
     p.add_argument("-D","--database",dest="db",type=str,help="database file name",default="guess")
-    p.add_argument("-t","--table_name",dest="table_name",type=str,help="table name",default="test")
+    p.add_argument("-I","--input_format",dest="input_format",choices=schema_templates.keys(),type=str,help="input format , default: %(default)s",default="bed12")
+    p.add_argument("-t","--table_name",dest="table_name",type=str,help="table name, default: %(default)s",default="test")
 def help():
     return "read bed12 file into a sqlite3 db. if sqlite3 db is not exists , it will generate one"
     
 def run(args):
+    schema_template=schema_templates[args.input_format]
+    SQL_template=insert_templates[args.input_format]
     db_filename=args.db
     out=IO.fopen(args.output,"w")
     if db_filename=="guess":

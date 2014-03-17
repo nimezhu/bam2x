@@ -2,24 +2,26 @@
 from __future__ import print_function
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-26-2014, 17:27:36 EST
+# Last-modified: 03-17-2014, 18:05:04 EDT
 import os,sys,argparse
 from bam2x import TableIO,Tools
 from bam2x import IO
 from bam2x.Annotation import BED12 as Bed12
 import sqlite3
 import string
-
-template=string.Template("""select * from $table_name where name=\"$name\"""")
+from bam2x.DBI.Templates import select_template as template
+from bam2x.DBI.Templates import factories
+#template=string.Template("""select * from $table_name where name=\"$name\"""")
 
 def set_parser(p):
     ''' This Function Parse the Argument '''
-    p.add_argument("-D","--database",dest="db",type=str,help="database file name",default="guess")
+    p.add_argument("-d","--database",dest="db",type=str,help="database file name",default="guess")
+    p.add_argument("-D","--database_format",dest="db_format",type=str,choices=factories.keys(),help="database entry format",default="bed12")
     p.add_argument("-t","--table_name",dest="table_name",type=str,help="table name",default="test")
 def help():
     return "query sqlite3 database to get a transcipt, and then do further analysis. this is a demo program."
-def factory(cursor,r):
-    return Bed12._make(Bed12._types(r[1:]))
+#def factory(cursor,r):
+#    return Bed12._make(Bed12._types(r[1:]))
 def run(args):
     db_filename=args.db
     out=IO.fopen(args.output,"w")
@@ -32,7 +34,7 @@ def run(args):
         exit(1)
     print("# Database file : %s"%db_filename,file=out)
     with sqlite3.connect(db_filename) as conn:
-        conn.row_factory=factory
+        conn.row_factory=factories[args.db_format]
         cursor=conn.cursor()
         for i in fin:
             i=i.strip()
