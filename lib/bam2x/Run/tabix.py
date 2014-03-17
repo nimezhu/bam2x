@@ -26,7 +26,7 @@ def run(args):
         l = [ i for i in TableIO.parse(fin,args.format) ]
         l.sort()
         name=splitext(args.input)
-        outfile = "{name[0]}.sorted{name[1]}".format(name=name)
+        outfile = "{name[0]}.sorted.{name[1]}".format(name=name)
         out = IO.fopen(outfile,"w")
         for i in l:
             print(i,file=out)

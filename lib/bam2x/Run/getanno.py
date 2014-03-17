@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import logging
@@ -15,50 +16,50 @@ def run(args):
     if args.annotation=="exon":
         for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
             for j in i.Exons():
-                print >>out,j
+                print(j,file=out)
     elif args.annotation=="intron":
         for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
             for j in i.Introns():
-                print >>out,j
+                print(j,file=out)
     elif args.annotation=="cds":
         for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
             j=i.cds()
             if j is not None and j.cdna_length() > 0:
-                print >>out,j
+                print(j,file=out)
 
     elif args.annotation=="cds":
         for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
             j=i.cds()
             if j is not None and j.cdna_length() > 0:
-                print >>out,j
+                print(j,file=out)
 
     elif args.annotation=="utr5":
         for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
             j=i.utr5()
             if j is not None and j.cdna_length() > 0:
-                print >>out,j
+                print(j,file=out)
 
     elif args.annotation=="utr3":
         for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
             j=i.utr3()
             if j is not None and j.cdna_length() > 0:
-                print >>out,j
+                print(j,file=out)
     elif args.annotation=="utr":
         for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
             j=i.utr5()
             if j is not None and j.cdna_length() > 0:
-                print >>out,j
+                print(j,file=out)
             j=i.utr3()
             if j is not None and j.cdna_length() > 0:
-                print >>out,j
+                print(j,file=out)
     elif args.annotation=="upstream":
         for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
             j=i.upstream(args.bp)
-            print >>out,j
+            print(j,file=out)
     elif args.annotation=="downstream":
         for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
             j=i.downstream(args.bp)
-            print >>out,j
+            print(j,file=out)
 
 
 

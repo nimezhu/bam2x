@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import logging
@@ -16,13 +17,13 @@ def run(args):
     dbi=DBI.init(args.bam,"bam")
     out=IO.fopen(args.output,"w")
     for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
-        print >>out,"QR\t",i
+        print ("QR\t",i,file=out)
         for j in dbi.query(i,method="bam1",strand=args.strand):
             if compatible_with_transcript(j,i):
-                print >>out,"HT\t",_translate_to_meta(i,j)
+                print ("HT\t",_translate_to_meta(i,j),file=out)
             elif not args.hit:
-                print >>out,"OP\t",j
-        print >>out,""
+                print ("OP\t",j,file=out)
+        print ("",file=out)
 
 if __name__=="__main__":
     from bam2x.IO import parser_factory

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import logging
@@ -16,10 +17,10 @@ def run(args):
     dbi=DBI.init(args.bam,"bam")
     out=IO.fopen(args.output,"w")
     for i in TableIO.parse(IO.fopen(args.input,"r"),bedformat):
-        print >>out,"QR",i
+        print("QR",i,file=out)
         for j in dbi.query(i,method=args.method):
-            print >>out,"HT",j
-        print >>out,""
+            print("HT",j,file=out)
+        print("",file=out)
 
 if __name__=="__main__":
     from bam2x.IO import parser_factory

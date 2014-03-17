@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-25-2014, 15:03:04 EST
+# Last-modified: 03-17-2014, 15:14:48 EDT
+from __future__ import print_function
 import os,sys,argparse
 from bam2x import TableIO,Tools
 from bam2x import IO
@@ -18,7 +19,7 @@ def run(args):
         args.format=IO.guess_format(args.input)
     s=TableIO.parse(args.input,args.format)
     for i in s:
-        print >>out,i
+        print(i,file=out)
 
 
 if __name__=="__main__":

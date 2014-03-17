@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import logging
@@ -18,7 +19,7 @@ def run(args):
     mapped=dbi.mapped
     out=IO.fopen(args.output,"w")
     for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
-        print >>out,i.id,"\t",
+        print(i.id,"\t",file=out)
         s=0.0
         l=i.cdna_length()
         if args.uniq:
@@ -32,7 +33,7 @@ def run(args):
                     nh=int(nh)
                     s+=1.0/nh
         rpkm=float(s)*(1000000.0/mapped)*(1000.0/float(l))
-        print >>out,rpkm
+        print(rpkm,file=out)
 
 if __name__=="__main__":
     from bam2x.IO import parser_factory

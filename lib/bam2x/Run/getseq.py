@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import logging
@@ -16,8 +17,8 @@ def run(args):
     dbi=DBI.init(args.genome,"genome")
     out=IO.fopen(args.output,"w")
     for i in TableIO.parse(IO.fopen(args.input,"r"),bedformat):
-        print >>out,">",i.id+"_"+args.method
-        print >>out,seq_wrapper(dbi.query(i,method=args.method))
+        print (">",i.id+"_"+args.method,file=out)
+        print (seq_wrapper(dbi.query(i,method=args.method)),file=out)
 
 
 if __name__=="__main__":

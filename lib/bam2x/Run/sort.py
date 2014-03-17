@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-25-2014, 15:02:46 EST
+# Last-modified: 03-17-2014, 15:15:32 EDT
+from __future__ import print_function
 import os,sys,argparse
 from bam2x import TableIO,Tools
 from bam2x import IO
@@ -27,7 +28,7 @@ def run(args):
     l.sort()
     logging.info("sorting done")
     for i in l:
-        print >>out,i
+        print(i,file=out)
     logging.info("completed")
 
 if __name__=="__main__":
