@@ -9,7 +9,7 @@ def help():
 def set_parser(parser):
     parser.add_argument("-m",type=str,choices=("fetch","pileup"),dest="method",default="fetch")
     parser.add_argument("-b","--bam",type=str,dest="bam",help="bam file")
-    parser.add_argument("-c","--bed_column_number",type=int,choices={3,6,12},dest="bed_column_number",default=12) 
+    parser.add_argument("-c","--bed_column_number",type=int,choices=[3,6,12],dest="bed_column_number",default=12) 
     
 def run(args):
     bedformat="bed"+str(args.bed_column_number)

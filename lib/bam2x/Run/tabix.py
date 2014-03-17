@@ -12,7 +12,7 @@ def help():
     return "tabix index a bed or vcf file"
 def set_parser(parser):
     parser.add_argument("-S","--sorted",dest="sorted",action="store_true",help="if file is sorted")
-    parser.add_argument("-I","--format",dest="format",type=str,choices={"bed12","bed6","bed3","vcf"},default="bed12")
+    parser.add_argument("-I","--format",dest="format",type=str,choices=["bed12","bed6","bed3","vcf"],default="bed12")
     #parser.add_argument("-s","--seq",type=int,dest="seq",default=None)
     #parser.add_argument("-b","--begin",type=int,dest="begin",default=None)
     #parser.add_argument("-e","--end",type=int,dest="end",default=None)
