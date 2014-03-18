@@ -31,15 +31,15 @@ class METABED(object):
             a=[]
             if self.strand=="-":
                 step=-1
-                j=self.blockCount
+                j=self.blockCount-1
             else:
                 step=1
                 j=0
             for i in range(self.blockCount):
                 exon_start=self.start+self.blockStarts[i]
                 exon_end=self.start+self.blockStarts[i]+self.blockSizes[i]
-                j+=step
                 exon_id=self.id+"_Exon_"+str(j+1)
+                j+=step
                 t=(self.chr,exon_start,exon_end,exon_id,0.0,self.strand)
                 a.append(BED6(*t))
             if self.strand=="-":
@@ -58,15 +58,15 @@ class METABED(object):
         if hasattr(self,"blockCount"):
             if self.strand=="-":
                 step=-1
-                j=self.blockCount-1
+                j=self.blockCount-2
             else:
                 step=1
                 j=0
             for i in range(self.blockCount-1):
                 intron_start=self.start+self.blockStarts[i]+self.blockSizes[i]
                 intron_end=self.start+self.blockStarts[i+1]
-                j+=step
                 intron_id=self.id+"_Intron_"+str(j+1)
+                j+=step
                 t=(self.chr,intron_start,intron_end,intron_id,0.0,self.strand)
                 a.append(BED6(*t))
             if self.strand=="-":
