@@ -3,7 +3,7 @@ bam2x
 bam2x provide command line programs to analyze the NGS data.
 
 - [bam2x wikipedia](http://bam2xwiki.appspot.com/)
-- [bam2x for dummies](https://www.dropbox.com/s/c6jwx7adiy9ux6c/bam2x_for_dummies_volume_one.pdf）
+- [bam2x for dummies](https://www.dropbox.com/s/c6jwx7adiy9ux6c/bam2x_for_dummies_volume_one.pdf)
 
 
 Library Dependency:
