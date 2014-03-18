@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-26-2014, 16:17:35 EST
+# Last-modified: 03-18-2014, 15:11:40 EDT
 
 import os,sys
 from bam2x.Annotation import *
@@ -359,6 +359,10 @@ class BamlistI(MetaDBI):
                for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
                    s+=1
             yield s
+        elif method=="seq_and_qual":
+            for bamfile in self.bamfiles:
+                for read in bamfile.fetch(chrom,start,end):
+                    yield (read.seq,read.qual)
         
 
 class BamI(BamlistI):
