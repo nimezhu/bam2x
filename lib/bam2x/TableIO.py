@@ -20,6 +20,8 @@ def parse(handle,convert_cls=None,**dict):
         return parse_tuples(handle,hclass[convert_cls],**dict)
     elif htranslate.has_key(convert_cls):
         return htranslate[convert_cls](handle,**dict)
+    elif convert_cls is not None:
+        return parse_tuples(handle,convert_cls,**dict)
     else:
         return parse_simple(handle,**dict)
 

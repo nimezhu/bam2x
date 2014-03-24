@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 02-24-2014, 12:36:21 EST
+# Last-modified: 03-24-2014, 13:37:31 EDT
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -30,6 +30,30 @@ suffixToFormat={
 
 }
 
+def get_flank_region(bed,up,down,chr_lengths=None):
+    down_bp=down
+    up_bp=up
+    if bed.strand=="-":
+        start=bed.start-down
+        stop=bed.stop+up
+        if start < 0:
+            start=0
+            down_bp=bed.start
+        if chr_lengths is not None and chr_lengths.has_key(bed.chr):
+            if stop > chr_lengths[bed.chr]:
+                stop=chr_lengths[bed.chr]
+                up_bp=stop-bed.stop
+    elif bed.strand=="+" or bed.strand==".":
+        start=bed.start-up
+        stop=bed.stop+down
+        if start < 0:
+            start=0
+            up_bp=bed.start
+        if chr_lengths is not None and chr_lengths.has_key(bed.chr):
+            if stop > chr_lengths[bed.chr]:
+                stop=chr_lengths[bed.chr]
+                down_bp=stop-bed.stop
+    return bed._replace(id="{id}_up{up}_down{down}".format(id=bed.id,up=up_bp,down=down_bp),start=start,stop=stop)
     
 def rc(seq):
    comps = {'A':"T", 'C':"G", 'G':"C", 'T':"A",
