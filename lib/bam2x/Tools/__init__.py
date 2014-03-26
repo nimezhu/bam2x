@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 03-24-2014, 13:37:31 EDT
+# Last-modified: 03-26-2014, 11:15:01 EDT
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -480,6 +480,45 @@ def parse_string_to_bed(string):
     start=int(y[0])-1
     end=int(y[1])
     return BED3(chr,start,end)
+
+def gini_coefficient(iterator):
+    '''
+    Gini coefficient
+    reference:
+        http://en.wikipedia.org/wiki/Gini_coefficient
+    '''
+    l=[i for i in iterator]
+    l.sort()
+    s1=0.0
+    s2=0.0
+    y=[]
+    n=len(l)
+    for i,x in enumerate(l):
+        s1+=(i+1)*x
+        s2+=x
+    G=2*s1/(n*s2)-float(n+1)/n
+    return G
+
+
+def dis2entropy(iterator):
+    s=0
+    h={}
+    for i in iterator:
+        if h.has_key(i):
+            h[i]+=1
+        else:
+            h[i]=1
+        s+=1
+    e=0.0
+    for i in h.values():
+        f=float(i)/s
+        if f!=0.0:
+            e-=f*math.log(f)
+    return e
+
+
+
+
 
 
 def test():

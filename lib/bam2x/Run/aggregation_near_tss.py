@@ -4,11 +4,11 @@ import sys
 import logging
 import argparse
 from bam2x import TableIO,IO,DBI
-from bam2x.Tools import compatible_with_transcript,_translate,get_flank_region,translate_coordinates
+from bam2x.Tools import compatible_with_transcript,_translate,get_flank_region,translate_coordinates,gini_coefficient
 import math
 import logging
 def help():
-    return "aggregation plot near tss, input is bed file and bam file, output the aggregation plot number ( and the entropy )"
+    return "aggregation plot near tss, input is bed file and bam file, output the aggregation plot number ( and the gini coefficient , if the gini coefficient is near to 1 , it indicates that most aggregation are contributed by very few tss)"
 def set_parser(parser):
     parser.add_argument("-b","--bam",type=str,dest="bam")
     parser.add_argument('-I','--input_format',dest="format",choices=("bed3","bed6","bed12"),default="bed12",type=str,help="input file format default=%(default)s")
@@ -47,29 +47,14 @@ def run(args):
             bin_sum[i]+=bed_bin[i]
             bin_dis[i].append(bed_bin[i])
     for i in xrange(bp_num):
-        bin_e[i]=dis2entropy(bin_dis[i])
-    print("pos_to_tss\taggregation\tentropy",file=out)
+        bin_e[i]=gini_coefficient(bin_dis[i])
+    print("pos_to_tss\taggregation\tgine_coefficient",file=out)
     for i in xrange(bp_num):
         print("{bin}\t{aggregation}\t{E}".format(bin=i+offset,aggregation=bin_sum[i],E=bin_e[i]),file=out)
 
 
 
 
-def dis2entropy(iterator):
-    s=0
-    h={}
-    for i in iterator:
-        if h.has_key(i):
-            h[i]+=1
-        else:
-            h[i]=1
-        s+=1
-    e=0.0
-    for i in h.values():
-        f=float(i)/s
-        if f!=0.0:
-            e-=f*math.log(f)
-    return e
 
 
 if __name__=="__main__":
