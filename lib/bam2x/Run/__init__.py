@@ -1,4 +1,4 @@
-__all__=["getseq","query_bam","read","sort","cmpgene","getanno","query_RNASeq","load_bed_to_db","query_db","query_RNA_RPKM","tabix","aggregation_near_tss"]
+__all__=["getseq","query_bam","read","sort","cmpgene","getanno","query_RNASeq","load_bed_to_db","query_db","query_RNA_RPKM","tabix","aggregation_near_tss","aggregation_near_tts","translator"]
 from . import *
 
 '''
@@ -17,6 +17,8 @@ commands= {
     "query_db":query_db,
     "tabix":tabix,
     "aggregation_near_tss":aggregation_near_tss,
+    "aggregation_near_tts":aggregation_near_tts,
+    "translator":translator,
 }
 
 
