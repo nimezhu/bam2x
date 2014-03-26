@@ -46,11 +46,12 @@ def run(args):
         for  i in xrange(bp_num):
             bin_sum[i]+=bed_bin[i]
             bin_dis[i].append(bed_bin[i])
+    bed_num=i0+1
     for i in xrange(bp_num):
         bin_e[i]=gini_coefficient(bin_dis[i])
-    print("pos_to_tss\taggregation\tgine_coefficient",file=out)
+    print("pos_to_tss\taggregation_mean\tgini_coefficient",file=out)
     for i in xrange(bp_num):
-        print("{bin}\t{aggregation}\t{E}".format(bin=i+offset,aggregation=bin_sum[i],E=bin_e[i]),file=out)
+        print("{bin}\t{aggregation}\t{E}".format(bin=i+offset,aggregation=float(bin_sum[i])/bed_num,E=bin_e[i]),file=out)
 
 
 
