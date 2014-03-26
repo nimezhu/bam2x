@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 03-26-2014, 11:15:01 EDT
+# Last-modified: 03-26-2014, 17:21:49 EDT
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -496,6 +496,7 @@ def gini_coefficient(iterator):
     for i,x in enumerate(l):
         s1+=(i+1)*x
         s2+=x
+    if s2==0: return 0.0
     G=2*s1/(n*s2)-float(n+1)/n
     return G
 
