@@ -7,8 +7,9 @@ from bam2x import TableIO,IO,DBI
 from bam2x.Tools import compatible_with_transcript,_translate,get_flank_region,translate_coordinates,gini_coefficient
 import math
 import logging
+
 def help():
-    return "aggregation plot near tts, input is bed file and bam file, output the aggregation plot number ( and the gini coefficient , if the gini coefficient is near to 1 , it indicates that most aggregation are contributed by very few tts)"
+    return "aggregation plot figure near tts"
 def set_parser(parser):
     parser.add_argument("-b","--bam",type=str,dest="bam")
     parser.add_argument('-I','--input_format',dest="format",choices=("bed3","bed6","bed12"),default="bed12",type=str,help="input file format default=%(default)s")
@@ -52,6 +53,25 @@ def run(args):
     print("pos_to_tts\taggregation_mean\tgini_coefficient",file=out)
     for i in xrange(bp_num):
         print("{bin}\t{aggregation}\t{E}".format(bin=i+offset,aggregation=float(bin_sum[i])/bed_num,E=bin_e[i]),file=out)
+    
+    try:
+        import matplotlib.pyplot as plt
+        ax1=plt.subplot(2,1,1)
+        plt.ylabel('gini coeffecient')
+        plt.plot(range(-up,down),bin_e)
+        ax1.set_ylim(0,1)
+        ax1.axes.get_xaxis().set_visible(False)
+        plt.axvline(x=0,linewidth=1, color='y')
+        ax2=plt.subplot(2,1,2)
+        plt.plot(range(-up,down),[float(i)/bed_num for i in bin_sum])
+        plt.ylabel('mean coverage')
+        plt.xlabel('pos to tts (bp)')
+        plt.axvline(x=0,linewidth=1, color='y')
+        plt.savefig(args.output+".png")
+    except:
+        pass
+
+
 
 
 
