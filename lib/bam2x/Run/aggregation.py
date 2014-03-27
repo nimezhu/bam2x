@@ -67,11 +67,13 @@ def run(args):
         matplotlib.rcParams.update({'font.size':9})
         ax1=plt.subplot2grid((7,1),(6,0))
         plt.ylabel('gini coeffecient')
-        plt.plot(range(-up,down),bin_e)
+        plt.fill_between(range(-up,down),bin_e,color="r",alpha=0.2,y2=0)
         ax1.set_ylim(0,1)
+        ax1.set_xlim(-up,down)
         ax1.axes.get_xaxis().set_visible(False)
         plt.axvline(x=0,linewidth=1, color='y')
         ax2=plt.subplot2grid((7,1),(0,0),rowspan=5)
+        ax2.set_xlim(-up,down)
         plt.plot(range(-up,down),[float(i)/bed_num for i in bin_sum])
         plt.ylabel('mean coverage')
         if args.tts:
@@ -79,9 +81,9 @@ def run(args):
         else:
             plt.xlabel('pos to tss (bp)')
         plt.axvline(x=0,linewidth=1, color='y')
+        plt.grid(True)
         plt.savefig(args.output+".png")
     except:
-        raise
         pass
 
 
