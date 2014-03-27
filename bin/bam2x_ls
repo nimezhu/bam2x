@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+# Programmer : zhuxp
+# Date: 
+# Last-modified: 03-27-2014, 16:52:55 EDT
+from __future__ import print_function
+from bam2x import __version__ as VERSION
+import os,sys,argparse
+from bam2x.Run import commands
+from bam2x.MRun import commands as mcmd
+import imp
+
+def Main():
+    for i in commands:
+        print(i)
+    for i in mcmd:
+        print(i)
+
+    if matplotlib_found:
+        from bam2x.Run.Plot import commands as plot_commands
+        for i in plot_commands:
+            print(i)
+    
+if __name__=="__main__":
+    global matplotlib_found
+    try: 
+        matplotlib_info=imp.find_module('matplotlib')
+        matplotlib_found=True
+    except ImportError:
+        matplotlib_found=False
+    Main()
+
+
+
+
+
+
+
+

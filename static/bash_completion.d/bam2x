@@ -1,9 +1,13 @@
+
 _bam2x()
 {
      local cur=${COMP_WORDS[COMP_CWORD]}
      local prev=${COMP_WORDS[COMP_CWORD-1]}
      case "$prev" in 
-     bam2x)   COMPREPLY=( $(compgen -W "getseq getanno sort read aggregation_near_tts aggregation_near_tss cmpgene query_db query_bam query_RNASeq load_bed_to_db translator bam2peak isoforms bam2fig" -- $cur) ) ;;
+     bam2x)
+            local running=$(for x in `bam2x_ls`; do echo ${x} ; done )
+            COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
+            return 0;;
      -I) COMPREPLY=($(compgen -W "bed3 bed6 bed12 vcf" -- $cur) );;
      *) COMPREPLY=($(compgen -f ${cur}) );;
      esac
