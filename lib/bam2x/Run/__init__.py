@@ -16,8 +16,7 @@ commands= {
     "load_bed_to_db":load_bed_to_db,
     "query_db":query_db,
     "tabix":tabix,
-    "aggregation_near_tss":aggregation_near_tss,
-    "aggregation_near_tts":aggregation_near_tts,
+    "aggregation":aggregation,
     "translator":translator,
 }
 
