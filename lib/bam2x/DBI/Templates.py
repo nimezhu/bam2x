@@ -1,5 +1,45 @@
 import string
 from bam2x.Annotation import BED12,BED6,BED3
+import itertools
+
+hTypesToSqlite3 = {
+    "int":"INTEGER",
+    "long":"INTEGER",
+    "float":"REAL",
+    "double":"REAL",
+    "text":"TEXT",
+    "blob":"NONE",
+    "boolean":"NUMERIC",
+    "date":"NUMERIC"
+}
+def translate_to_sqlite3_format(f):
+    if hTypesToSqlite3.has_key(f):
+        return hTypesToSqlite3[f]
+    else:
+        return "TEXT"
+
+
+def sqlite3_template_factory(ids,formats):
+    schema="create table if not exists $table_name (\n"
+    id_str=""
+    v=""
+    for i,f in itertools.izip(ids,formats):
+        schema+="{id} {format},\n".format(id=i,format=translate_to_sqlite3_format(f.__name__))
+        if i=="id" or i=="name":
+            schema=schema.strip("\n")
+            schema=schema.strip(",")
+            schema+=" primary key,\n"
+        id_str+=i+","
+        v+="?,"
+    id_str=id_str.strip(",")
+    v=v.strip(",")
+    schema=schema.strip("\n")
+    schema=schema.strip(",")
+    schema+=")"
+    insert="insert into $table_name ({id_str}) values ({v})".format(id_str=id_str,v=v)
+    return string.Template(schema),string.Template(insert)
+
+
 bed12_schema_template= string.Template("""create table if not exists $table_name (
     id      integer primary key autoincrement not null,
     chr     varchar(20),
@@ -71,5 +111,7 @@ factories = {
 }
 
 
-
 select_template=string.Template("""select * from $table_name where name=\"$name\"""")
+
+
+
