@@ -1,4 +1,4 @@
-__all__=["getseq","query_bam","read","sort","cmpgene","getanno","query_RNASeq","load_bed_to_db","query_db","query_RNA_RPKM","tabix","aggregation","translator"]
+__all__=["getseq","query_bam","read","sort","cmpgene","getanno","query_RNASeq","load_bed_to_db","query_db","query_RNA_RPKM","tabix","aggregation","translator","count_compatible_reads","pileup_compatible_reads"]
 from . import *
 
 '''
@@ -18,6 +18,8 @@ commands= {
     "tabix":tabix,
     "aggregation":aggregation,
     "translator":translator,
+    "count_compatible_reads":count_compatible_reads,
+    "pileup_compatible_reads":pileup_compatible_reads,
 }
 
 
