@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 04-23-2014, 14:56:51 EDT
+# Last-modified: 04-23-2014, 15:03:49 EDT
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -278,7 +278,7 @@ def _translate_to_meta(meta,bed):
         pass
     
     if meta.strand=="." or meta.strand=="+":
-        return BED12(meta.id,blockStarts[0],blockStarts[-1]+blockSizes[-1],bed.id,bed.score,bed.strand,cds_start,cds_stop,itemRgb,blockCount,tuple(blockSizes),tuple([blockStart-blockStarts[0] for blockStart in blockStarts])
+        return BED12(meta.id,blockStarts[0],blockStarts[-1]+blockSizes[-1],bed.id,bed.score,bed.strand,cds_start,cds_stop,itemRgb,blockCount,tuple(blockSizes),tuple([blockStart-blockStarts[0] for blockStart in blockStarts]))
     else:
         len_meta=meta.cdna_length()
         strand=reverse_strand(bed.strand)
