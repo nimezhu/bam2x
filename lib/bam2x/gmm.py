@@ -14,7 +14,14 @@ def model_str(p):
     return "mu_1:{u1:.3f},sig_1:{s1:.3f},pi_1:{p1:.3f}\tmu_2:{u2:.3f},sig_2:{s2:.3f},pi_2:{p2:.3f}".format(u1=p[0],s1=p[1],p1=p[4],u2=p[2],s2=p[3],p2=1-p[4])
 def pdf_model(x, p):
     mu1, sig1, mu2, sig2, pi_1 = p
-    return pi_1*normpdf(x, mu1, sig1) + (1-pi_1)*normpdf(x, mu2, sig2)
+    return pi_1*normpdf(x, mu1, sig1) + (1.0-pi_1)*normpdf(x, mu2, sig2)
+def bayes_p1(x,p): # bayes prob on modle 1 ,  
+    mu1, sig1, mu2, sig2, pi_1 = p
+    p1=pi_1*normpdf(x,mu1,sig1)
+    p2=(1.0-pi_1)*normpdf(x,mu2,sig2)
+    return p1/(p1+p2)
+def bayes_p2(x,p):
+    return 1.0-bayes_p1(x,p)
 def log_likelihood_two_1d_gauss(p, sample):
     return -log(pdf_model(sample, p)).sum()
 def sim_two_gauss_mix(p, N=1000): 
@@ -64,9 +71,13 @@ def fit_two_peaks_EM(sample, sigma=None, weights=False, p0=array([0.2,0.2,0.7,0.
 if __name__=="__main__":
     import logging
     logging.basicConfig(level=logging.WARNING)
-    p=[0.2,0.1,0.8,0.1,0.3]
+    p=[0.2,0.3,0.7,0.2,0.3]
     s = sim_two_gauss_mix(N=1000, p=p)
     print "data:",model_str(p)
     model=fit_two_peaks_EM(s)
     print "em  :",model_str(model)
+    r=normal(p[0],p[1],size=10)
+    print r,"\n",pdf_model(r,model)
+    print bayes_p1(r,model)
+    print bayes_p2(r,model)
 
