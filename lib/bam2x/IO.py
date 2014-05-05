@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03-17-2014, 15:44:56 EDT
+# Last-modified: 04-21-2014, 13:40:43 EDT
 from bam2x import __version__ as VERSION
 import pysam
 import sys
 import gzip
 import argparse
+import os.path
+import logging
 suffixToFormat={
     'fa':'fasta',
     'fq':'fastq',
@@ -39,6 +41,17 @@ def open_output(output):
         out=sys.stdout
     else:
         try:
+            if os.path.isfile(output):
+                i=1;
+                newname=None
+                while(True):
+                    name,ext=os.path.splitext(output)
+                    newname=name+"("+str(i)+")"+ext
+                    if not os.path.isfile(newname):
+                        break
+                    i+=1
+                output=newname
+                logging.warn("output file exists, automatically rename the output file to"+output)
             out=open(output,"w")
         except IOError:
             print >>sys.stderr,"can't open file ",output,"to write. Using stdout instead"

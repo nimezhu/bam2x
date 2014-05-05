@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03-18-2014, 15:11:40 EDT
+# Last-modified: 04-17-2014, 14:33:00 EDT
 
 import os,sys
 from bam2x.Annotation import *
@@ -275,95 +275,98 @@ class BamlistI(MetaDBI):
         return s
 
     def query(self,x=None,method='fetch',**dict):
-        if x is None:
-            try:
-                x=BED3(dict["chr"],dict["start"],dict["stop"])
-            except:
-                print "UNKNOWN QUERY"
-                raise 
-        if type(x)==type("str"):
-            x=parse_region_str(x)
-        chrom=x.chr
-        start=x.start
-        end=x.stop
-        
-        uniq=False
-        if dict.has_key("uniq"):
-            uniq=dict["uniq"]
-        if method=='fetch' or method=="bam2bed12" or method=="fetch12":
-            '''
-            test version
-            still test Tools.cigar_to_coordinates
-            '''
-            for bamfile in self.bamfiles:
-                for bed in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2bed12",references=chrom,uniq=uniq):
-                    yield bed
-        elif method=="bam1": 
-        # fetch read from paired end with strand information  
-            for bamfile in self.bamfiles:
-                strand="read2"
-                if dict.has_key("strand"):   # TODO: if bamfiles have different read1 or read2 ?
-                    strand=dict["strand"]
-                for bed in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2bed12",references=chrom,strand=strand,uniq=uniq):
-                    yield bed
-        elif method=="bam2": # yield bed12
-            for bamfile in self.bamfiles:
-                for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
-                    if dict.has_key("strand"):
-                        frag=fragment.toBed12(chr=chrom,strand=dict["strand"],uniq=uniq)
-                        if frag: yield frag
-                    else:
-                        frag=fragment.toBed12(chr=chrom,uniq=uniq)
-                        if frag: yield frag
-        elif method=="bam2fast": # yield bed12 , don't report mate not in this iterator, 
-            for bamfile in self.bamfiles:
-                for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment"):
-                    if dict.has_key("strand"):
-                        frag=fragment.toBed12(chr=chrom,strand=dict["strand"],uniq=uniq)
-                        if frag: yield frag
-                    else:
-                        frag=fragment.toBed12(chr=chrom,uniq=uniq)
-                        if frag: yield frag
-        elif method=='pileup':
-            s=[[0,0,0,0] for row in range(end-start)]
-            for bamfile in self.bamfiles:
+        try:
+            if x is None:
                 try:
-                    A=bamfile.pileup(chrom,start,end)
+                    x=BED3(dict["chr"],dict["start"],dict["stop"])
                 except:
-                    print >>sys.stderr,"Can't pile up",chrom,start,end
-                    raise StopIteration 
-                for pileupcolumn in A:
-                    j=pileupcolumn.pos-start
-                    if j<0: continue
-                    if j>end-start: break
-                    for pileupread in pileupcolumn.pileups:
-                        try:
-                            if pileupread.is_del: continue
-                            if pileupread.indel!=0: continue
-                            nt=pileupread.alignment.seq[pileupread.qpos]
-                            if BamI.hNtToNum.has_key(nt):
-                                k=BamI.hNtToNum[nt]
-                                s[j][k]+=1
-                        except:
-                            pass
-            for i in s:
-                yield i
-        elif method=='count':
-            s=0
-            for bamfile in self.bamfiles:
-                s+=bamfile.count(chrom,start,end)
-            yield s
-        elif method=='count_fragment':
-            s=0
-            for bamfile in self.bamfiles:
-               for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
-                   s+=1
-            yield s
-        elif method=="seq_and_qual":
-            for bamfile in self.bamfiles:
-                for read in bamfile.fetch(chrom,start,end):
-                    yield (read.seq,read.qual)
-        
+                    print "UNKNOWN QUERY"
+                    raise 
+            if type(x)==type("str"):
+                x=parse_region_str(x)
+            chrom=x.chr
+            start=x.start
+            end=x.stop
+            
+            uniq=False
+            if dict.has_key("uniq"):
+                uniq=dict["uniq"]
+            if method=='fetch' or method=="bam2bed12" or method=="fetch12":
+                '''
+                test version
+                still test Tools.cigar_to_coordinates
+                '''
+                for bamfile in self.bamfiles:
+                    for bed in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2bed12",references=chrom,uniq=uniq):
+                        yield bed
+            elif method=="bam1": 
+            # fetch read from paired end with strand information  
+                for bamfile in self.bamfiles:
+                    strand="read2"
+                    if dict.has_key("strand"):   # TODO: if bamfiles have different read1 or read2 ?
+                        strand=dict["strand"]
+                    for bed in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2bed12",references=chrom,strand=strand,uniq=uniq):
+                        yield bed
+            elif method=="bam2": # yield bed12
+                for bamfile in self.bamfiles:
+                    for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
+                        if dict.has_key("strand"):
+                            frag=fragment.toBed12(chr=chrom,strand=dict["strand"],uniq=uniq)
+                            if frag: yield frag
+                        else:
+                            frag=fragment.toBed12(chr=chrom,uniq=uniq)
+                            if frag: yield frag
+            elif method=="bam2fast": # yield bed12 , don't report mate not in this iterator, 
+                for bamfile in self.bamfiles:
+                    for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment"):
+                        if dict.has_key("strand"):
+                            frag=fragment.toBed12(chr=chrom,strand=dict["strand"],uniq=uniq)
+                            if frag: yield frag
+                        else:
+                            frag=fragment.toBed12(chr=chrom,uniq=uniq)
+                            if frag: yield frag
+            elif method=='pileup':
+                s=[[0,0,0,0] for row in range(end-start)]
+                for bamfile in self.bamfiles:
+                    try:
+                        A=bamfile.pileup(chrom,start,end)
+                    except:
+                        print >>sys.stderr,"Can't pile up",chrom,start,end
+                        raise StopIteration 
+                    for pileupcolumn in A:
+                        j=pileupcolumn.pos-start
+                        if j<0: continue
+                        if j>end-start: break
+                        for pileupread in pileupcolumn.pileups:
+                            try:
+                                if pileupread.is_del: continue
+                                if pileupread.indel!=0: continue
+                                nt=pileupread.alignment.seq[pileupread.qpos]
+                                if BamI.hNtToNum.has_key(nt):
+                                    k=BamI.hNtToNum[nt]
+                                    s[j][k]+=1
+                            except:
+                                pass
+                for i in s:
+                    yield i
+            elif method=='count':
+                s=0
+                for bamfile in self.bamfiles:
+                    s+=bamfile.count(chrom,start,end)
+                yield s
+            elif method=='count_fragment':
+                s=0
+                for bamfile in self.bamfiles:
+                   for fragment in TableIO.parse(bamfile.fetch(chrom,start,end),"bam2fragment",bam=bamfile):
+                       s+=1
+                yield s
+            elif method=="seq_and_qual":
+                for bamfile in self.bamfiles:
+                    for read in bamfile.fetch(chrom,start,end):
+                        yield (read.seq,read.qual)
+        except:
+            raise StopIteration
+            
 
 class BamI(BamlistI):
     '''

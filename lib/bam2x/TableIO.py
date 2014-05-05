@@ -33,6 +33,7 @@ def parse_simple(handle,**dict):
         try:
             handle=IO.fopen(handle,"r")
             for i in csv.reader(handle,delimiter=sep):
+                if len(i)==0:continue
                 if i[0].strip()[0]=="#": continue
                 yield tuple(i)
             handle.close()
@@ -41,6 +42,7 @@ def parse_simple(handle,**dict):
     else:
         try:    
             for i in csv.reader(handle,delimiter=sep):
+                if len(i)==0: continue
                 if i[0].strip()[0]=="#": continue
                 yield tuple(i)
         except:

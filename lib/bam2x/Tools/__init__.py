@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 03-26-2014, 17:21:49 EDT
+# Last-modified: 04-23-2014, 15:03:49 EDT
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -271,12 +271,18 @@ def _translate_to_meta(meta,bed):
                 switch=0
                 blockSizes.append(b_end-b_start)
     blockCount=len(blockSizes)
+    itemRgb="0,0,0"
+    try:
+        itemRgb=bed.itemRgb
+    except:
+        pass
+    
     if meta.strand=="." or meta.strand=="+":
-        return BED12(meta.id,blockStarts[0],blockStarts[-1]+blockSizes[-1],bed.id,0.0,bed.strand,cds_start,cds_stop,"0,0,0",blockCount,blockSizes,blockStarts)
+        return BED12(meta.id,blockStarts[0],blockStarts[-1]+blockSizes[-1],bed.id,bed.score,bed.strand,cds_start,cds_stop,itemRgb,blockCount,tuple(blockSizes),tuple([blockStart-blockStarts[0] for blockStart in blockStarts]))
     else:
         len_meta=meta.cdna_length()
         strand=reverse_strand(bed.strand)
-        return BED12(meta.id,len_meta-blockStarts[-1]-blockSizes[-1],len_meta-blockStarts[0],bed.id,0.0,strand,len_meta-cds_stop,len_meta-cds_start,"0,0,0",blockCount,blockSizes[::-1],[len_meta-i0-j0 for i0,j0 in itertools.izip(blockStarts[::-1],blockSizes[::-1])])
+        return BED12(meta.id,len_meta-blockStarts[-1]-blockSizes[-1],len_meta-blockStarts[0],bed.id,bed.score,strand,len_meta-cds_stop,len_meta-cds_start,itemRgb,blockCount,tuple(blockSizes[::-1]),tuple([len_meta-i0-j0-(len_meta-blockStarts[-1]-blockSizes[-1]) for i0,j0 in itertools.izip(blockStarts[::-1],blockSizes[::-1])]))
     
     
 _translate=_translate_to_meta
