@@ -183,6 +183,8 @@ class VCF(namedtuple("VCF",H_VCF),METABED):
 
 
 class BED12(namedtuple("BED12",H_BED12),METABED):
+    def __cmp__(self,other):
+        return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) or cmp(self.strand,other.strand) or cmp(self.blockCount,other.blockCount) or cmp(",".join([str(i) for i in self.blockSizes]),",".join([str(i) for i in other.blockSizes])) or cmp(",".join([str(i) for i in self.blockStarts]),",".join([str(i) for i in other.blockStarts]))
     def _slice(self,start,end,suffix="sliced"):
         chr=self.chr
         
@@ -207,6 +209,7 @@ class BED12(namedtuple("BED12",H_BED12),METABED):
                 sliceBlockStarts.append(slice_start-start)
                 sliceBlockSizes.append(slice_stop-slice_start)
         if blockCount==0:
+            logging.warn("wrong slice {start} to {end} for gene {g}".format(start=start,end=end,g=self))
             return None
         else:
             return BED12(chr,start,end,id,score,strand,cds_start,cds_stop,itemRgb,blockCount,tuple(sliceBlockSizes),tuple(sliceBlockStarts))

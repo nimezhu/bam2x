@@ -4,6 +4,7 @@ from numpy.random import normal
 from numpy import concatenate,array,zeros,r_,ones,log,sqrt,pi,exp,abs
 import sys
 import math
+import logging
 _norm_pdf_C = math.sqrt(2*pi)
 def normpdf(x, mu=0.0, sigma=1.0):
     u = (x-mu)/abs(sigma)

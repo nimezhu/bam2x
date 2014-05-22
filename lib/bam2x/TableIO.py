@@ -49,8 +49,12 @@ def parse_simple(handle,**dict):
             raise
     
 def parse_tuples(handle,cls,**dict):
-    for i in parse_simple(handle,**dict):
-        yield cls._make(cls._types(i))
+    if type(cls)==type("string"):
+        for i in parse_simple(handle,**dict):
+            yield i
+    else:    
+        for i in parse_simple(handle,**dict):
+            yield cls._make(cls._types(i))
 
 
 def Main():

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 04-21-2014, 13:40:43 EDT
+# Last-modified: 05-08-2014, 15:22:16 EDT
 from bam2x import __version__ as VERSION
 import pysam
 import sys
@@ -51,7 +51,7 @@ def open_output(output):
                         break
                     i+=1
                 output=newname
-                logging.warn("output file exists, automatically rename the output file to"+output)
+                logging.warn("output file exists, automatically rename the output file to "+output)
             out=open(output,"w")
         except IOError:
             print >>sys.stderr,"can't open file ",output,"to write. Using stdout instead"
