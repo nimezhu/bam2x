@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 04-23-2014, 15:03:49 EDT
+# Last-modified: 05-21-2014, 13:33:35 EDT
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -363,6 +363,45 @@ def find_nearest(bed,dbi,extends=50000,**dict):
     else:
         return (d,nearest,strand)
 
+def extend_slice(gene,start,end):
+    if gene.start > start:
+        gene=extend_start(gene,start)
+    if gene.end < end:
+        gene=extend_end(gene,end)
+    gene=gene._slice(start,end)
+    return gene
+
+def extend_start(bed12,start):
+    '''
+        extend the start for easy gene
+    '''
+    if bed12.strand=="+" : exon=bed12.Exons()[0]
+    if bed12.strand=="-" : exon=bed12.Exons()[bed12.blockCount-1]
+    if start < exon.stop: 
+        blockStarts=[]
+        offset=start-bed12.start
+        for i in bed12.blockStarts:
+            blockStarts.append(bed12.start+i-start)
+        blockStarts[0]=0
+        blockSizes=[ i for i in bed12.blockSizes]
+        blockSizes[0]=bed12.blockSizes[0] - offset
+        return bed12._replace(blockStarts=blockStarts,blockSizes=blockSizes,start=start)
+    else:
+        logging.WARN("start site might be in intron , don't extend the start",bed12)
+        return bed12
+def extend_end(bed12,stop):
+    '''
+        extend the end for easy gene
+    '''
+    if bed12.strand=="-" : exon=bed12.Exons()[0]
+    if bed12.strand=="+" : exon=bed12.Exons()[bed12.blockCount-1]
+    if stop > exon.start: 
+        blockSizes=[ i for i in bed12.blockSizes]
+        blockSizes[bed12.blockCount-1]=bed12.blockSizes[bed12.blockCount-1] - ( bed12.stop - stop)
+        return bed12._replace(blockSizes=blockSizes,stop=stop)
+    else:
+        logging.WARN("stop site might be in intron, don't fix the stop",bed12)
+        return bed12  
 
 
 
