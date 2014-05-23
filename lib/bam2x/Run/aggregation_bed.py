@@ -1,18 +1,21 @@
+#!/usr/bin/env python
 from __future__ import print_function
 import os
 import sys
 import logging
 import argparse
 from bam2x import TableIO,IO,DBI
-from bam2x.Tools import compatible_with_transcript,_translate,get_flank_region,translate_coordinates,gini_coefficient
+from bam2x.Tools import compatible_with_transcript,_translate,get_flank_region,translate_coordinate,gini_coefficient
 import math
 import logging
+from bam2x.Annotation import BED6,BED12
 
 def help():
     return "aggregation plot figure near tss or tts"
 def set_parser(parser):
-    parser.add_argument("-b","--bam",type=str,dest="bam")
-    parser.add_argument('-I','--input_format',dest="format",choices=("bed3","bed6","bed12"),default="bed12",type=str,help="input file format default=%(default)s")
+    parser.add_argument("-b","--bed_db",type=str,dest="bed_db")
+    parser.add_argument("-B","--bed_db_type",type=str,choices=["bed6","bed12"],default="bed6",dest="bed_db_type",help="bed db type ,default:%(default)s")
+    parser.add_argument('-I','--input_format',dest="format",choices=("bed6","bed12"),default="bed12",type=str,help="input file format default=%(default)s")
     parser.add_argument("--up",type=int,dest="up",default=500,help="upstream bp")
     parser.add_argument("--down",type=int,dest="down",default=500,help="downstream bp")
     parser.add_argument("--tts",dest="tts",action="store_true",default=False,help="if this option is chosen , aggregate the tts near region")
@@ -24,7 +27,7 @@ def run(args):
     down=args.down
     bp_num=up+down
     offset=-up
-    bam=DBI.init(args.bam,"bam")
+    bed_db=DBI.init(args.bed_db,"binindex",cls=args.bed_db_type)
     fin=IO.fopen(args.input,"r")
     out=IO.fopen(args.output,"w")
     bin_sum=[0 for i in xrange(bp_num)]
@@ -37,17 +40,16 @@ def run(args):
         else:
             pos=bed.tss()
         pos_flank=get_flank_region(pos,up,down)
-        for read in bam.query(pos_flank,"bam1",strand="read1"):
-            a=translate_coordinates(pos,read)
+        for read in bed_db.query(pos_flank):
+            rstart,rend,rstrand=translate_coordinate(pos,read)
             #print(a,file=out)
-            for e in a.Exons():
                 #print(e,file=out)
-                start=e.start-offset
-                end=e.stop-offset
-                if start < 0: start=0
-                if end > bp_num: end=bp_num
-                for j in xrange(start,end):
-                    bed_bin[j]+=1
+            start=rstart-offset
+            end=rend-offset
+            if start < 0: start=0
+            if end > bp_num: end=bp_num
+            for j in xrange(start,end):
+                bed_bin[j]+=1
         for  i in xrange(bp_num):
             bin_sum[i]+=bed_bin[i]
             bin_dis[i].append(bed_bin[i])
@@ -85,6 +87,7 @@ def run(args):
         plt.grid(True)
         plt.savefig(args.output+".png")
     except:
+        print("wrong in print png",file=sys.stderr)
         pass
 
 

@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 05-21-2014, 13:33:35 EDT
+# Last-modified: 05-22-2014, 16:20:01 EDT
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -376,7 +376,8 @@ def extend_start(bed12,start):
         extend the start for easy gene
     '''
     if bed12.strand=="+" : exon=bed12.Exons()[0]
-    if bed12.strand=="-" : exon=bed12.Exons()[bed12.blockCount-1]
+    elif bed12.strand=="-" : exon=bed12.Exons()[bed12.blockCount-1]
+    else: exon=bed12.Exons()[0]
     if start < exon.stop: 
         blockStarts=[]
         offset=start-bed12.start
@@ -394,7 +395,8 @@ def extend_end(bed12,stop):
         extend the end for easy gene
     '''
     if bed12.strand=="-" : exon=bed12.Exons()[0]
-    if bed12.strand=="+" : exon=bed12.Exons()[bed12.blockCount-1]
+    elif bed12.strand=="+" : exon=bed12.Exons()[bed12.blockCount-1]
+    else: exon=bed12.Exons()[0]
     if stop > exon.start: 
         blockSizes=[ i for i in bed12.blockSizes]
         blockSizes[bed12.blockCount-1]=bed12.blockSizes[bed12.blockCount-1] - ( bed12.stop - stop)
