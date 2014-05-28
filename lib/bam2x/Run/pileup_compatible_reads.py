@@ -29,7 +29,7 @@ def run(args):
 def rep(list):
     s=""
     last=list[0]
-    step=1
+    step=0
     offset=0
     for i in list:
         if i!=last:
