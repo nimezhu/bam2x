@@ -29,14 +29,14 @@ def run(args):
 def rep(list):
     s=""
     last=list[0]
-    step=0
+    step=1
     offset=0
     for i in list:
         if i!=last:
             s+="{offset},{value},{step}\n".format(offset=offset,value=last,step=step)
             last=i
             offset+=step
-            step=0
+            step=1
         else:
             step+=1
     s+="{offset},{value},{step}".format(offset=offset,value=last,step=step)
