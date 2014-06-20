@@ -36,7 +36,7 @@ def rep(list):
             s+="{offset},{value},{step}\n".format(offset=offset,value=last,step=step)
             last=i
             offset+=step
-            step=0
+            step=1
         else:
             step+=1
     s+="{offset},{value},{step}".format(offset=offset,value=last,step=step)
