@@ -128,7 +128,7 @@ def iter_cluster(beds):
     if len(cluster) > 0 : 
         retv["stop"]=last.stop
         retv["beds"]=cluster
-        yield cluster
+        yield retv 
 
 
 if __name__=="__main__":
