@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 04-17-2014, 14:33:00 EDT
+# Last-modified: 06-26-2014, 10:37:58 EDT
 
 import os,sys
 from bam2x.Annotation import *
@@ -273,6 +273,13 @@ class BamlistI(MetaDBI):
         for i in self.bamfiles:
             s+=i.mapped
         return s
+    @property
+    def unmapped(self):
+        s=0
+        for i in self.bamfiles:
+            s+=i.unmapped
+        return s
+    
 
     def query(self,x=None,method='fetch',**dict):
         try:

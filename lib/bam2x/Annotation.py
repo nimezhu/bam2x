@@ -77,7 +77,6 @@ class METABED(object):
         s=0
         for i in self.Exons():
             s=s+i.stop-i.start
-        logging.debug("s=%i",s)
         return s
         
     def upstream(self,bp=1000):
