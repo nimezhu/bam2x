@@ -77,7 +77,6 @@ class METABED(object):
         s=0
         for i in self.Exons():
             s=s+i.stop-i.start
-        logging.debug("s=%i",s)
         return s
         
     def upstream(self,bp=1000):
@@ -91,7 +90,9 @@ class METABED(object):
         else:
             start=self.stop
             stop=self.stop+bp
-        if (start<0):start=0
+        if (start<0):
+            start=0
+            id=self.id+"up"+str(self.start)
         x=[chr,start,stop,id,0,strand]
         return BED6(*x)
     def core_promoter(self,bp=1000,down=500):
@@ -119,6 +120,9 @@ class METABED(object):
         else:
             start=self.start-bp
             stop=self.start
+        if (start<0):
+            start=0
+            id=self.id+"down"+str(self.start)
         x=[chr,start,stop,id,0,strand]
         return BED6(*x)
     def tss(self):
