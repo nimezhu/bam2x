@@ -85,9 +85,9 @@ def up_down_coordinate(gene,up=1000,down=1000,chromSizes={}):
     new_start=gene.start-up
     if new_start<0: 
         new_start=0
-        if strand=="+" or strand==".":
+        if gene.strand=="+" or gene.strand==".":
             up=start
-        elif strand=="-":
+        elif gene.strand=="-":
             down=start
     new_stop=gene.stop+down
     if chromSizes.has_key(gene.chr):
