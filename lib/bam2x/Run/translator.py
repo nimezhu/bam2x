@@ -55,7 +55,7 @@ def run(args):
         cursor=conn.cursor()
         for i in TableIO.parse(IO.fopen(args.input,"r"),"bed"):
             s=template.substitute({"table_name":args.table_name,"name":i.chr.strip()})
-            print(s)
+            #print(s)
             cursor.execute(s)
             gene=None
             try:
