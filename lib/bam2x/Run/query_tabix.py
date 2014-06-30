@@ -18,7 +18,9 @@ def run(args):
     cls=None
     if hclass.has_key(args.type):
         cls=hclass[args.type]
-    dbi=DBI.init(args.db,"tabix",cls=cls)
+        dbi=DBI.init(args.db,"tabix",cls=cls)
+    else:
+        dbi=DBI.init(args.db,"tabix")
     for i in TableIO.parse(IO.fopen(args.input,"r"),args.format):
         print("QR",i,file=out)
         
