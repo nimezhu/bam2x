@@ -18,8 +18,9 @@ def run(args):
     dbi=DBI.init(args.bam,"bam")
     mapped=dbi.mapped
     out=IO.fopen(args.output,"w")
+    print("Gene\tRPKM",file=out);
     for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
-        print(i.id,"\t",file=out)
+        print(i.id,"\t",end="",file=out)
         s=0.0
         l=i.cdna_length()
         if args.uniq:
