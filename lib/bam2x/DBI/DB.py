@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-26-2014, 10:37:58 EDT
+# Last-modified: 06-30-2014, 14:36:39 EDT
 
 import os,sys
 from bam2x.Annotation import *
@@ -446,7 +446,7 @@ class BigWigI(MetaDBI):
         if type(x)==type("str"):
             x=parse_region_str(x)
  
-        if not dict.has_key("method"):
+        if not dict.has_key("method") or not (dict["method"]=="cDNA" or dict["method"]=="cdna"):
             results=self.data.get_as_array(x.chr,x.start,x.stop)
             if hasattr(x,"strand") and x.strand=="-":
                 return results[::-1]
