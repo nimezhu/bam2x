@@ -20,9 +20,9 @@ def run(args):
         print ("QR\t",i,file=out)
         for j in dbi.query(i,method="bam1",strand=args.strand):
             if compatible_with_transcript(j,i):
-                print ("HT\t",_translate_to_meta(i,j),file=out)
+                print ("HT\t{}".format(_translate_to_meta(i,j)),file=out)
             elif not args.hit:
-                print ("OP\t",j,file=out)
+                print ("OP\t{}".format(j),file=out)
         print ("",file=out)
 
 if __name__=="__main__":

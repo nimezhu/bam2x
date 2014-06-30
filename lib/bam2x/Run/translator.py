@@ -30,17 +30,16 @@ def _generate_db(filename,db_filename,table_name):
 
 template=string.Template("""select * from $table_name where name='$name'""")
 def run(args):
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     db_filename=args.translator
     t_name,t_ext=splitext(args.translator)
     '''
     test if it is db file
     generate db file if it doesn't exists.
     '''
-    if t_ext!="db":
+    if t_ext!=".db":
         #possible_db=args.translator.strip("\\.gz")+".db"
         possible_db=args.translator+".db"
-        print(possible_db)
         if os.path.exists(possible_db):
             db_filename=possible_db
         else:
