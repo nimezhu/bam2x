@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 06-30-2014, 14:36:39 EDT
+# Last-modified: 06-30-2014, 15:20:19 EDT
 
 import os,sys
 from bam2x.Annotation import *
@@ -140,7 +140,6 @@ class TabixI(MetaDBI):
 
         except Exception as e:
            print e
-           raise
            raise StopIteration
     def close(self):
         self.data.close()
