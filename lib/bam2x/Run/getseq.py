@@ -19,7 +19,7 @@ def run(args):
     for i in TableIO.parse(IO.fopen(args.input,"r"),bedformat):
         seq=dbi.query(i,method=args.method)
         if(len(seq)==0): continue
-        print (">",i.id+"_"+args.method,file=out)
+        print (">{}".format(i.id+"_"+args.method),file=out)
         print (seq_wrapper(seq),file=out,end="")
 
 
