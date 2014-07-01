@@ -20,7 +20,7 @@ def run(args):
         seq=dbi.query(i,method=args.method)
         if(len(seq)==0): continue
         print (">",i.id+"_"+args.method,file=out)
-        print (seq_wrapper(seq),file=out)
+        print (seq_wrapper(seq),file=out,end="")
 
 
 if __name__=="__main__":
