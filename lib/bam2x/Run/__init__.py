@@ -11,7 +11,7 @@ commands= {
     "query_bw":query_bw,
     "query_tabix":query_tabix,
     "query_RNASeq":query_RNASeq,
-    "query_RNASeq_bed":query_RNASeq,
+    "query_RNASeq_bed":query_RNASeq_bed,
     "query_RNA_RPKM":query_RNA_RPKM,
     "read":read,
     "sort":sort,
