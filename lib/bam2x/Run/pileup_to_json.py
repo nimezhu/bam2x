@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-02-2014, 15:15:18 EDT
+# Last-modified: 07-02-2014, 15:35:20 EDT
 from __future__ import print_function
 VERSION="0.1"
 import os,sys,argparse
@@ -44,7 +44,6 @@ def run(args):
              "type":"bedgraph",
              "values":r
          }
-
         ]
     }
     print(json.dumps(j,indent=4),file=out)
@@ -55,8 +54,5 @@ if __name__=="__main__":
     from bam2x.IO import parser_factory
     p=parser_factory(description=help())
     set_parser(p)
-    if len(sys.argv)==1:
-        print(p.print_help())
-        exit(0)
     run(p.parse_args())
 

@@ -29,3 +29,11 @@ commands= {
 }
 
 
+'''
+simple commands can have no parameters, only stdin and stdout
+'''
+simple_commands = {
+    "count_compatible_reads":count_compatible_reads,
+    "pileup_compatible_reads":pileup_compatible_reads,
+    "pileup_to_json":pileup_to_json,
+}
