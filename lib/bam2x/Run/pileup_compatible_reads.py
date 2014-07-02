@@ -11,7 +11,6 @@ def help():
     return "Processing Query RNASeq Result, and count the number of compatible reads and overlap&not compatible reads. normalized by number of mapping hits. Input is the output of query_RNASeq."
 def set_parser(parser):
     #parser.add_argument("-m",type=str,choices=("seq","cDNA","cdna","cds","utr5","utr3"),dest="method")
-    
     pass
 
 def run(args):
@@ -54,7 +53,6 @@ def iterate(fin):
     buf=fin.next();
     x=buf.split("\t")[1:]
     qr=BED12._make(BED12._types(x))
-    print(qr)
     hits=[]
     overlap=[]
     i=0
@@ -79,9 +77,6 @@ if __name__=="__main__":
     from bam2x.IO import parser_factory
     p=parser_factory(description=help())
     set_parser(p)
-    if len(sys.argv)==1:
-        print(p.print_help())
-        exit(0)
     run(p.parse_args())
 
 

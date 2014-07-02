@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-20-2014, 16:01:22 EST
+# Last-modified: 07-02-2014, 15:51:56 EDT
 from bam2x import __version__ as VERSION
 import os,sys,argparse
 import signal
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
 from bam2x.Run import commands
+from bam2x.Run import simple_commands
 from bam2x.MRun import commands as mcmd
 import imp
 
@@ -35,10 +36,11 @@ def ParseArg():
         for i in plot_commands.keys():
             pi=subs.add_parser(i,help=plot_commands[i].help(),parents=[group])
             plot_commands[i].set_parser(pi)
+    
     if len(sys.argv)==1:
         print >>sys.stderr,p.print_help()
         exit(0)
-    if len(sys.argv)==2:
+    if len(sys.argv)==2 and not simple_commands.has_key(sys.argv[1]):
         print >>sys.stderr,p.parse_args([sys.argv[1],'--help'])
         exit(0)
     return p.parse_args()
