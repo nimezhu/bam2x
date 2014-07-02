@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-02-2014, 15:07:24 EDT
+# Last-modified: 07-02-2014, 15:15:18 EDT
 from __future__ import print_function
 VERSION="0.1"
 import os,sys,argparse
@@ -11,7 +11,7 @@ def help():
     return "convert bam2x pileup_compatible_reads output file to json file"  
 def set_parser(parser):
     #parser.add_argument("-m",type=str,choices=("seq","cDNA","cdna","cds","utr5","utr3"),dest="method")
-    p.add_argument('-q','--query',dest="query",default="all",type=str,help="query RNA name")
+    parser.add_argument('-q','--query',dest="query",default="all",type=str,help="query RNA name")
     
 def run(args):
     fin=IO.fopen(args.input,"r")
