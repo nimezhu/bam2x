@@ -8,7 +8,7 @@ from  bam2x.Annotation import BED12
 import logging
 
 def help():
-    return "Processing Query RNASeq Result, and count the number of compatible reads and overlap&not compatible reads. normalized by number of hits. Input is the output of query_RNASeq."
+    return "Processing Query RNASeq Result, and count the number of compatible reads and overlap&not compatible reads. normalized by number of mapping hits. Input is the output of query_RNASeq."
 def set_parser(parser):
     #parser.add_argument("-m",type=str,choices=("seq","cDNA","cdna","cds","utr5","utr3"),dest="method")
     

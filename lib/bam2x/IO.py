@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 05-08-2014, 15:22:16 EDT
+# Last-modified: 07-02-2014, 11:38:05 EDT
 from bam2x import __version__ as VERSION
 import pysam
 import sys
@@ -34,6 +34,13 @@ def guess_format(string):
         return suffixToFormat[suffix]
     else:
         return suffix
+
+def get_col_number(fn,sep="\t"):
+    f=fopen(fn,"r")
+    a=f.next().split(sep)
+    retv=len(a)
+    f.close()
+    return retv
 
 def open_output(output):
     out=None
