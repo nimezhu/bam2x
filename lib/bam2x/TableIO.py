@@ -34,8 +34,8 @@ def parse_simple(handle,**dict):
             handle=IO.fopen(handle,"r")
             for i in csv.reader(handle,delimiter=sep):
                 if len(i)==0: continue 
-                if len(i)==1 and i[0].strip()=="":continue
-                if i[0].strip()[0]=="#": continue
+                l=i[0].strip()
+                if len(l)>0 and l[0]=="#": continue
                 yield tuple(i)
             handle.close()
         except IOError as e:
@@ -44,8 +44,8 @@ def parse_simple(handle,**dict):
         try:    
             for i in csv.reader(handle,delimiter=sep):
                 if len(i)==0 :continue
-                if len(i)==1 and i[0].strip()=="":continue
-                if i[0].strip()[0]=="#": continue
+                l=i[0].strip()
+                if len(l)>0 and l[0]=="#": continue
                 yield tuple(i)
         except:
             raise
