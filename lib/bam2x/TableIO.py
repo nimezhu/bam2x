@@ -42,7 +42,7 @@ def parse_simple(handle,**dict):
     else:
         try:    
             for i in csv.reader(handle,delimiter=sep):
-                if len(i)==0: continue
+                if len(i)==0 or i[0]=="\n": continue
                 if i[0].strip()[0]=="#": continue
                 yield tuple(i)
         except:
