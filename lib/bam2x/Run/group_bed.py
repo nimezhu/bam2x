@@ -5,6 +5,7 @@ import logging
 import argparse
 from  bam2x import IO,TableIO,DBI
 from bam2x.Tools import compatible
+import re
 def help():
     return "group bed12 into clusters and groups."
 def set_parser(parser):
@@ -18,13 +19,32 @@ def run(args):
     beds=[i for i in TableIO.parse(fin,"bed12")]
     beds.sort()
     for i,x in enumerate(iter_cluster(beds)):
-        print("CL_"+str(i+1),file=out)
-        for j,y in enumerate(greedy_iter_compatible_group(x)):
+        id=find_prefix_consensus([i0.id for i0 in x[1]])
+        strand=find_consensus_strand([i0.strand for i0 in x[1]])
+        print("REGION\tCL_{index}\t{chr}\t{start}\t{end}\t{id}\t{score}\t{strand}".format(strand=strand,score=len(x[1]),chr=x[1][0].chr,start=x[1][0].start,end=x[0],index=str(i+1),id=id),file=out)
+        
+        for j,y in enumerate(greedy_iter_compatible_group(x[1])):
             print("\tGROUP{j}".format(j=j+1),file=out)
             for k,z in enumerate(sorted(y,key= lambda x0:x0.cdna_length(), reverse=True)):
                 print("\tCL.{i}_GP.{j}_TR.{k}\t{l}\t{z}".format(i=i+1,j=j+1,k=k+1,l=z.cdna_length(),z=z),file=out)
+def find_consensus_strand(l):
+    strand=l[0]
+    for i in l[1:]:
+        if i!=strand: return "."
+    return strand
 
 
+def find_prefix_consensus(l):
+    h={}
+    sep=re.compile("[_\.]")
+    for i in l:
+        x=sep.split(i)
+        if h.has_key(x[0]): 
+            h[x[0]]+=1
+        else:
+            h[x[0]]=1
+    a=sorted(h.keys())
+    return "_".join(a)
 def greedy_iter_compatible_group(beds):
     local_beds=[i for i in beds]
     compatible_groups=[[]]
@@ -66,10 +86,10 @@ def iter_cluster(beds):
             if i.stop > last.stop:
                 last = i
         else:
-            if len(cluster) > 0 : yield cluster
+            if len(cluster) > 0 : yield last.stop,cluster
             cluster=[i]
             last=i
-    if len(cluster) > 0 : yield cluster
+    if len(cluster) > 0 : yield last.stop,cluster
 
 
 if __name__=="__main__":
