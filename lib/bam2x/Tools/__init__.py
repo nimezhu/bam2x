@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 05-22-2014, 16:20:01 EDT
+# Last-modified: 07-08-2014, 12:59:22 EDT
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -416,8 +416,13 @@ def compatible(a,b,**kwargs):
     definition of compatible
        the overlap region should be same transcript structure.
     '''
-    if (not overlap(a,b)): return True; 
-    if (a.strand!=b.strand): return False;
+    if (not overlap(a,b)): return True;
+    
+    if (a.strand!=b.strand): 
+        if kwargs.has_key("unstranded") and kwargs["unstranded"]:
+            pass
+        else:    
+            return False;
     '''
     if two bed is not overlap, they are compatible.
     '''
@@ -581,5 +586,7 @@ def test():
     print "C and B in E",_translate_to_meta(e,merge_bed(c,b))
     print "C and B reverse translate to CHROMOSOME:",reverse_translate(e,_translate_to_meta(e,merge_bed(c,b)))
     print _translate_to_meta(e,e)
+    print compatible(e,e._replace(strand="-"))
+    print compatible(e,e._replace(strand="-"),unstranded=True)
 if __name__=="__main__":
     test()
