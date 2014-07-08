@@ -1,4 +1,4 @@
-__all__=["getseq","query_bam","read","sort","cmpgene","getanno","query_RNASeq","load_bed_to_db","query_db","query_RNA_RPKM","tabix","aggregation","translator","count_compatible_reads","pileup_compatible_reads","aggregation_bed","query_bw","query_tabix","query_RNASeq_bed","remove_small_introns","pileup_to_json","json_to_html","group_bed"]
+__all__=["getseq","query_bam","read","sort","cmpgene","getanno","query_RNASeq","load_bed_to_db","query_db","query_RNA_RPKM","tabix","aggregation","translator","count_compatible_reads","pileup_compatible_reads","aggregation_bed","query_bw","query_tabix","query_RNASeq_bed","remove_small_introns","pileup_to_json","json_to_html","group_bed","get_spliced_reads"]
 from . import *
 
 '''
@@ -7,6 +7,7 @@ command lines
 commands= {
     "getseq":getseq,
     "getanno":getanno,
+    "get_spliced_reads":get_spliced_reads,
     "query_bam":query_bam,
     "query_bw":query_bw,
     "query_tabix":query_tabix,
