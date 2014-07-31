@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-31-2014, 14:15:34 EDT
+# Last-modified: 07-31-2014, 14:26:35 EDT
 import types
 import pysam
 from bam2x.Annotation import BED12 as Bed12
@@ -28,6 +28,13 @@ def BamToBed12(handle,uniq=False,**kwargs):
         except:
             chr="chr"
  
+    if kwargs.has_key("strand"):
+        if kwargs["strand"]=="read1" or kwargs["strand"]=="firstMate":
+            read1=True
+        else:
+            read1=False
+    else:
+        read1=True   
     for i in handle:
         if i.tid<0: continue
         if uniq:
@@ -47,13 +54,6 @@ def BamToBed12(handle,uniq=False,**kwargs):
         '''
         test
         '''
-        if kwargs.has_key("strand"):
-            if kwargs["strand"]=="read1" or kwargs["strand"]=="firstMate":
-                read1=True
-            else:
-                read1=False
-        else:
-            read1=True   
         start=i.pos
         end=i.aend
         name=i.qname
