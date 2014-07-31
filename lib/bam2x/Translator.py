@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 02-26-2014, 16:51:28 EST
+# Last-modified: 07-31-2014, 14:00:49 EDT
 import types
 import pysam
 from bam2x.Annotation import BED12 as Bed12
@@ -11,10 +11,23 @@ def BamToBed12(handle,uniq=False,**kwargs):
     '''
     handle is an bam iterator
     need references hash if handle is not filename.
-    score="NH" ,will report tag NH as score 
     '''
     if type(handle)==type("string"):
         handle=pysam.Samfile(handle,"rb");
+    use_chrs=False
+    if kwargs.has_key("references"):
+        if isinstance(kwargs["references"],str):
+            chr=kwargs["references"]  
+        else:
+            use_chrs=True
+            chrs=kwargs["references"];
+    else:
+        try:
+            chrs=handle.references;
+            use_chrs=True
+        except:
+            chr="chr"
+ 
     for i in handle:
         if i.tid<0: continue
         if uniq:
@@ -24,6 +37,8 @@ def BamToBed12(handle,uniq=False,**kwargs):
                     continue
             else:
                 raise "no NH tag in your bam file"
+        if use_chrs:
+            chr=chrs[i.tid]
         strand="+"
         if i.is_reverse:
             strand="-"
@@ -32,16 +47,6 @@ def BamToBed12(handle,uniq=False,**kwargs):
         '''
         test
         '''
-        if kwargs.has_key("references"):
-            if isinstance(kwargs["references"],str):
-                chr=kwargs["references"]  
-            else:
-                chr=kwargs["references"][i.tid];
-        else:
-            try:
-                 chr=handle.references[i.tid];
-            except:
-                 chr="chr"
         if kwargs.has_key("strand"):
             if kwargs["strand"]=="read1" or kwargs["strand"]=="firstMate":
                 read1=True

@@ -71,9 +71,12 @@ def fit_two_peaks_EM(sample, sigma=None, weights=False, p0=array([0.2,0.2,0.7,0.
 
 if __name__=="__main__":
     import logging
+    from types import *
     logging.basicConfig(level=logging.WARNING)
     p=[0.2,0.3,0.7,0.2,0.3]
     s = sim_two_gauss_mix(N=1000, p=p)
+    print "sample:",s
+    print "sample:",type(s)
     print "data:",model_str(p)
     model=fit_two_peaks_EM(s)
     print "em  :",model_str(model)
