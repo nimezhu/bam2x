@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-31-2014, 14:00:49 EDT
+# Last-modified: 07-31-2014, 14:15:34 EDT
 import types
 import pysam
 from bam2x.Annotation import BED12 as Bed12
@@ -86,6 +86,8 @@ def BamToBed12(handle,uniq=False,**kwargs):
         elif i.is_read2 and read1:
             strand=Tools.reverse_strand(strand)
         bed=Bed12(chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts)
+        if nh:
+            setattr(bed,"nh",nh)
         yield bed
 def _get_tag_score(read,tag):
     for itag,iscore in read.tags:
