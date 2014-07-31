@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 07-31-2014, 14:37:11 EDT
+# Last-modified: 07-31-2014, 14:42:36 EDT
 import types
 import pysam
 from bam2x.Annotation import BED12 as Bed12
@@ -54,13 +54,11 @@ def BamToBed12(handle,uniq=False,**kwargs):
         '''
         test
         '''
-        '''
         start=i.pos
         end=i.aend
         name=i.qname
         cds_start=start
         cds_end=start
-        '''
         itemRgb="0,0,0"
         if not uniq:
             '''
@@ -87,8 +85,8 @@ def BamToBed12(handle,uniq=False,**kwargs):
             strand=Tools.reverse_strand(strand)
         elif i.is_read2 and read1:
             strand=Tools.reverse_strand(strand)
-        #bed=Bed12(chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts)
-        bed=Bed12(chr,i.pos,i.aend,i.qname,score,strand,i.pos,i.pos,itemRgb,len(block_sizes),block_sizes,block_starts)
+        bed=Bed12(chr,start,end,name,score,strand,cds_start,cds_end,itemRgb,len(block_sizes),block_sizes,block_starts)
+        #bed=Bed12(chr,i.pos,i.aend,i.qname,score,strand,i.pos,i.pos,itemRgb,len(block_sizes),block_sizes,block_starts)
         if nh:
             setattr(bed,"nh",nh)
         yield bed
