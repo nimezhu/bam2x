@@ -2,7 +2,7 @@
 from __future__ import print_function
 # Programmer : zhuxp
 # Date: 
-# Last-modified: 03-17-2014, 15:59:20 EDT
+# Last-modified: 09-09-2014, 13:48:35 EDT
 import os,sys,argparse
 from bam2x import TableIO,Tools
 from bam2x import IO
@@ -36,6 +36,10 @@ def run(args):
             print (S,file=out)
             print ("_______________________________",file=out)
             cursor.execute(S)
+        else:
+            S=schema_template.substitute({"table_name":args.table_name})
+            cursor.execute(S)
+
         fin=IO.fopen(args.input,"r")
         S1=SQL_template.substitute({"table_name":args.table_name})
         print(S1,file=out)
