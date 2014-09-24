@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 07-08-2014, 12:59:22 EDT
+# Last-modified: 09-24-2014, 17:04:47 EDT
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -164,6 +164,20 @@ def merge_bed(bedA,bedB,id="noname"):
         l.append(i)
     return _merge_bed6(l,id=id)
     #TODO 
+
+def merge_beds(beds,id="noname"):
+    '''
+    merge a bed list
+    '''
+    l=[]
+    chr=beds[0].chr
+    for bed in beds:
+        if bed.chr!=chr: return None
+        for e in bed.Exons():
+            l.append(e)
+    return _merge_bed6(l,id=id)
+
+
 def _merge_bed6(beds,id="noname"):
     '''
     a simple turing state change
@@ -216,12 +230,27 @@ def _translate_to_meta(meta,bed):
     '''
     '''
     l=[]
+    '''
     for i in meta.Exons():
         l.append((i.start,-1,1))
         l.append((i.stop,1,1))
+    '''
+    
+    for start,size in itertools.izip(meta.blockStarts,meta.blockSizes):
+        l.append((meta.start+start,-1,1))
+        l.append((meta.start+start+size,1,1))
+    '''
     for i in bed.Exons():
         l.append((i.start,-1,2))
         l.append((i.stop,1,2))
+    '''
+    if hasattr(bed,"blockStarts"):
+        for start,size in itertools.izip(bed.blockStarts,bed.blockSizes):
+            l.append((bed.start+start,-1,2))
+            l.append((bed.start+start+size,1,2))
+    else:
+        l.append((bed.start,-1,2))
+        l.append((bed.stop,1,2))
     if hasattr(bed,"cds_start"):
         l.append((bed.cds_start,0,3))
         l.append((bed.cds_stop,0,4))

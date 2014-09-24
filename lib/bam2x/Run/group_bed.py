@@ -4,7 +4,7 @@ import sys
 import logging
 import argparse
 from  bam2x import IO,TableIO,DBI
-from bam2x.Tools import compatible
+from bam2x.Tools import compatible,merge_beds
 import re
 def help():
     return "group bed12 into clusters and groups."
@@ -24,9 +24,9 @@ def run(args):
         print("REGION\tCL_{index}\t{chr}\t{start}\t{end}\t{id}\t{score}\t{strand}".format(strand=strand,score=len(x[1]),chr=x[1][0].chr,start=x[1][0].start,end=x[0],index=str(i+1),id=id),file=out)
         
         for j,y in enumerate(greedy_iter_compatible_group(x[1])):
-            print("\tGROUP{j}".format(j=j+1),file=out)
+            print("\tGROUP{j}\t{bed}".format(j=j+1,bed=merge_beds(y,id="CL.{i}_GP.{j}".format(i=i+1,j=j+1))),file=out)
             for k,z in enumerate(sorted(y,key= lambda x0:x0.cdna_length(), reverse=True)):
-                print("\tCL.{i}_GP.{j}_TR.{k}\t{l}\t{z}".format(i=i+1,j=j+1,k=k+1,l=z.cdna_length(),z=z),file=out)
+                print("\t\tCL.{i}_GP.{j}_TR.{k}\t{l}\t{z}".format(i=i+1,j=j+1,k=k+1,l=z.cdna_length(),z=z),file=out)
 def find_consensus_strand(l):
     strand=l[0]
     for i in l[1:]:
