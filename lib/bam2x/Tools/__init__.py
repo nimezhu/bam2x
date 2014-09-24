@@ -1,6 +1,6 @@
 # Programmer : zhuxp
 # Date:  Sep 2012
-# Last-modified: 09-24-2014, 17:04:47 EDT
+# Last-modified: 09-24-2014, 17:49:44 EDT
 from string import upper,lower
 from bam2x.Annotation import BED6 as Bed
 from bam2x.Annotation import BED12 as Bed12
@@ -466,6 +466,7 @@ def compatible(a,b,**kwargs):
     stop is the min stop of a.stop and b.stop
     find the overlap region from [start,stop)
     '''
+    '''
     sliced_a=a._slice(start,stop)
     sliced_b=b._slice(start,stop)
     if sliced_a is None: return False
@@ -479,6 +480,58 @@ def compatible(a,b,**kwargs):
             if sliced_a.blockSizes[i]!=sliced_b.blockSizes[i]:
                 return False
     return True
+    ''' 
+    l=[] 
+    for bstart,bsize in itertools.izip(a.blockStarts,a.blockSizes):
+        l.append((a.start+bstart,0))
+        l.append((a.start+bstart+bsize,1))
+    for bstart,bsize in itertools.izip(b.blockStarts,b.blockSizes):
+        l.append((b.start+bstart,2))
+        l.append((b.start+bstart+bsize,3))
+    l.append((a.start,5))
+    l.append((a.stop,6))
+    l.append((b.start,7))
+    l.append((b.stop,8))
+    l.sort()
+    last_pos=0
+    a_on=False
+    b_on=False
+    a_block_on=False
+    b_block_on=False
+    for i in l:
+        if i[0]!=last_pos:
+            if(a_on and b_on):
+                if(a_block_on != b_block_on):
+                    return False
+            last_pos=i[0]
+        if i[1]==0:
+            a_block_on=True
+        elif i[1]==1:
+            a_block_on=False
+        elif i[1]==2:
+            b_block_on=True
+        elif i[1]==3:
+            b_block_on=False
+        elif i[1]==5:
+            a_on=True
+        elif i[1]==6:
+            a_on=False
+            break
+        elif i[1]==7:
+            b_on=True
+        elif i[1]==8:
+            b_on=False
+            break
+    return True
+
+
+    
+
+
+    
+
+
+
 def reverse_strand(i):
     if i=="+": return "-"
     if i=="-": return "+"
