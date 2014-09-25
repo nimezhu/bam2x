@@ -186,6 +186,24 @@ class BED6(namedtuple("BED6",H_BED6),METABED):
     @classmethod
     def _types(cls,x):
         return types(x,F_BED6)
+    @property
+    def cds_start(self):
+        return self.start
+    @property
+    def cds_stop(self):
+        return self.stop
+    @property
+    def iterRgb(self):
+        return "0,0,0"
+    @property
+    def blockCount(self):
+        return 1
+    @property
+    def blockStarts(self):
+        return [0]
+    @property
+    def blockSizes(self):
+        return [self.stop-self.start]
 class VCF(namedtuple("VCF",H_VCF),METABED):
     @classmethod
     def _types(cls,x):
