@@ -7,6 +7,8 @@ H_VCF=("chr","pos","id","ref","alt","qual","filter","info")
 F_VCF=(str,int,str,str,str,int,str,str)
 H_BED3=("chr","start","stop")
 F_BED3=(str,int,int)
+H_BED4=("chr","start","stop","id")
+F_BED4=(str,int,int,str)
 H_BED6=("chr","start","stop","id","score","strand")
 F_BED6=(str,int,int,str,float,str)
 H_BED12=("chr","start","stop","id","score","strand","cds_start","cds_stop","itemRgb","blockCount","blockSizes","blockStarts")
@@ -170,10 +172,38 @@ class BED3(namedtuple("BED3",H_BED3),METABED):
     @property
     def score(self):
         return 0.0
+class BED4(namedtuple("BED4",H_BED4),METABED):
+    @classmethod
+    def _types(cls,x):
+        return types(x,F_BED4)
+    @property
+    def strand(self):
+        return "."
+    @property
+    def score(self):
+        return 0.0
 class BED6(namedtuple("BED6",H_BED6),METABED):
     @classmethod
     def _types(cls,x):
         return types(x,F_BED6)
+    @property
+    def cds_start(self):
+        return self.start
+    @property
+    def cds_stop(self):
+        return self.stop
+    @property
+    def iterRgb(self):
+        return "0,0,0"
+    @property
+    def blockCount(self):
+        return 1
+    @property
+    def blockStarts(self):
+        return [0]
+    @property
+    def blockSizes(self):
+        return [self.stop-self.start]
 class VCF(namedtuple("VCF",H_VCF),METABED):
     @classmethod
     def _types(cls,x):
