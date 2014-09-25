@@ -212,7 +212,7 @@ class BED6(namedtuple("BED6",H_BED6),METABED):
         strand=self.strand
         id=self.id+"_"+suffix
         score=self.score
-        return BED6(chr,start,end,id,score,strand,cds_start,cds_stop)
+        return BED6(chr,start,end,id,score,strand)
 class VCF(namedtuple("VCF",H_VCF),METABED):
     @classmethod
     def _types(cls,x):
