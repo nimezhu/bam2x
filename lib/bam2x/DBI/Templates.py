@@ -25,7 +25,7 @@ def sqlite3_template_factory(ids,formats):
     v=""
     for i,f in itertools.izip(ids,formats):
         schema+="{id} {format},\n".format(id=i,format=translate_to_sqlite3_format(f.__name__))
-        if i=="id" or i=="name":
+        if i.lower()=="id" or i.lower()=="name" or i.lower()=="gene":
             schema=schema.strip("\n")
             schema=schema.strip(",")
             schema+=" primary key,\n"
