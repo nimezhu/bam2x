@@ -8,7 +8,7 @@ from bam2x.Tools import seq_wrapper
 def help():
     return "get [utr, cds, exon,intron,upstream or downstream] annotations from bed12 file"
 def set_parser(parser):
-    parser.add_argument("-a","--anno",type=str,choices=("cds","utr5","utr3","exon","intron","utr","upstream","downstream"),dest="annotation",default="cdna")
+    parser.add_argument("-a","--anno",type=str,choices=("cds","utr5","utr3","exon","intron","utr","upstream","downstream","core_promoter"),dest="annotation",default="cdna")
     parser.add_argument("--bp",type=int,dest="bp",default=1000,help="upstream or downstream bp number")
     
 def run(args):
@@ -59,6 +59,10 @@ def run(args):
     elif args.annotation=="downstream":
         for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
             j=i.downstream(args.bp)
+            print(j,file=out)
+    elif args.annotation=="core_promoter":
+        for i in TableIO.parse(IO.fopen(args.input,"r"),"bed12"):
+            j=i.core_promoter()
             print(j,file=out)
 
 
