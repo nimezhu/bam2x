@@ -153,7 +153,7 @@ class METABED(object):
         if self.strand=="+":
             return BED6(self.chr,self.stop-bp,self.stop,self.id+"_tail"+str(bp)+"bp",0,self.strand)
         if self.strand=="-":
-            return BED6(self.chr,self.start,self.start+2,self.id+"_tail"+str(bp)+"bp",0,self.strand)
+            return BED6(self.chr,self.start,self.start+bp,self.id+"_tail"+str(bp)+"bp",0,self.strand)
 def types(x,TYPES):
     b=[]
     for v,t in itertools.izip(x,TYPES):
