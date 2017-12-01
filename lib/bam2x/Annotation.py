@@ -80,7 +80,7 @@ class METABED(object):
         for i in self.Exons():
             s=s+i.stop-i.start
         return s
-        
+
     def upstream(self,bp=1000):
         '''return the $bp bp upstream Bed Class Object'''
         chr=self.chr
@@ -140,7 +140,7 @@ class METABED(object):
         if self.strand=="+":
             pos= self.stop-1
         else:
-            pos=self.start 
+            pos=self.start
         return BED6(self.chr,pos,pos+1,self.id+"_tts",0,self.strand)
     def head(self,bp=2):
         '''return the head 2(default) bp of simple bed'''
@@ -221,7 +221,7 @@ class BED12(namedtuple("BED12",H_BED12),METABED):
         return cmp(self.chr,other.chr) or cmp(self.start,other.start) or cmp(self.stop,other.stop) or cmp(self.strand,other.strand) or cmp(self.blockCount,other.blockCount) or cmp(",".join([str(i) for i in self.blockSizes]),",".join([str(i) for i in other.blockSizes])) or cmp(",".join([str(i) for i in self.blockStarts]),",".join([str(i) for i in other.blockStarts]))
     def _slice(self,start,end,suffix="sliced"):
         chr=self.chr
-        
+
         if start < self.start: start=self.start
         if end > self.stop: end=self.stop
         strand=self.strand
@@ -233,15 +233,30 @@ class BED12(namedtuple("BED12",H_BED12),METABED):
         blockCount=0
         sliceBlockStarts=[]
         sliceBlockSizes=[]
+
+        sliceStart = end
+        sliceEnd = start
         for blockStart,blockSize in itertools.izip(self.blockStarts,self.blockSizes):
             exon_start=blockStart+self.start
             exon_stop=blockStart+blockSize+self.start
             slice_start=max(start,exon_start)
             slice_stop=min(end,exon_stop)
             if slice_start < slice_stop:
+                if sliceStart > slice_start:
+                    sliceStart = slice_start
+                if sliceEnd < slice_stop:
+                    sliceEnd = slice_stop
                 blockCount+=1
                 sliceBlockStarts.append(slice_start-start)
                 sliceBlockSizes.append(slice_stop-slice_start)
+        if start < sliceStart:
+            offset = sliceStart - start
+            start = sliceStart
+            for i,v in enumerate(sliceBlockStarts):
+                sliceBlockStarts[i] -= offset
+        if end > sliceEnd:
+            offset = end - sliceEnd
+            end = sliceEnd
         if blockCount==0:
             #logging.warn("wrong slice {start} to {end} for gene {g}".format(start=start,end=end,g=self))
             return None
@@ -283,8 +298,8 @@ class BED12(namedtuple("BED12",H_BED12),METABED):
     @property
     def exon_stops(self):
         return [int(i+j+self.start) for i,j in itertools.izip(self.blockStarts,self.blockSizes)]
-        
-    
+
+
 class Fragment:
     '''
     Paired End Raw Data
@@ -313,7 +328,7 @@ class Fragment:
         for i in TableIO.parse(self.reads,"bam2bed12",references=chr,strand=strand,**dict):
             x.append(i)
         return x
-  
+
 
 if __name__=="__main__":
     from bam2x.Tools import translate
